@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum WorkspaceRole {
+  DIRECTOR
+  ACCOUNTANT
+  EMPLOYEE
+}
+
+enum PersonType {
+  DIRECTOR
+  ACCOUNTANT
+  EMPLOYEE
+  CONTRACTOR
+  CLIENT_CONTACT
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+enum GstTreatment {
+  GST_INCLUDED
+  GST_FREE
+  NO_GST_OVERSEAS
+  MANUAL_OVERRIDE
+}
+
+enum BasTreatment {
+  GST_COLLECTED
+  GST_PAID
+  PAYROLL
+  NONE
+}
+
+enum BasFrequency {
+  QUARTERLY
+  MONTHLY
+}
+
+model Workspace {
+  id                      String       @id @default(cuid())
+  name                    String
+  legalName               String?
+  abn                     String?
+  address                 String?
+  contactEmail            String?
+  gstRegistered           Boolean?
+  basFrequency            BasFrequency?
+  financialYearStartMonth Int?
+  invoicePrefix           String?
+  createdAt               DateTime     @default(now())
+  updatedAt               DateTime     @updatedAt
+
+  bankAccounts BankAccount[]
+  categories   Category[]
+  people       Person[]
+  expenses     Expense[]
+}
+
+model BankAccount {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  bank        String
+  label       String
+  ownerLabel  String?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  expenses    Expense[]
+
+  @@index([workspaceId])
+}
+
+model Category {
+  id                  String       @id @default(cuid())
+  workspaceId         String
+  name                String
+  type                CategoryType
+  defaultGstTreatment GstTreatment
+  basTreatment        BasTreatment
+  active              Boolean      @default(true)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  workspace           Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  expenses            Expense[]
+
+  @@index([workspaceId])
+}
+
+model Person {
+  id             String        @id @default(cuid())
+  workspaceId    String
+  name           String
+  email          String?
+  personType     PersonType
+  workspaceRole  WorkspaceRole
+  payrollEnabled Boolean       @default(false)
+  active         Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  workspace      Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model Expense {
+  id                  String       @id @default(cuid())
+  workspaceId         String
+  date                DateTime
+  supplier            String?
+  categoryId          String
+  bankAccountId       String
+  grossCents          Int
+  gstTreatment        GstTreatment
+  userEnteredGstCents Int?
+  receiptUrl          String?
+  notes               String?
+  overrideReason      String?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  bankAccount BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Restrict)
+
+  @@index([workspaceId])
+  @@index([categoryId])
+  @@index([bankAccountId])
+  @@index([date])
+}
