@@ -1,4 +1,10 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+async function expectExpenseSummary(page: Page, total: string, gst: string) {
+  const summary = page.getByTestId("expense-summary");
+  await expect(summary.locator(".card", { hasText: "Total expenses" }).locator(".card-value")).toHaveText(total);
+  await expect(summary.locator(".card", { hasText: "GST paid" }).locator(".card-value")).toHaveText(gst);
+}
 
 test("KAN-3 saves a valid expense and keeps missing receipts as warnings", async ({ page }) => {
   const suffix = Date.now().toString();
@@ -108,4 +114,70 @@ test("KAN-3 edits an expense and persists receipt evidence", async ({ page }) =>
 
   await page.reload();
   await expect(page.getByRole("row", { name: new RegExp(supplier) }).getByRole("link", { name: "Receipt" })).toHaveAttribute("href", receiptUrl);
+});
+
+test("KAN-17 filters Q4 expenses by bank account and category with matching summaries", async ({ page }) => {
+  const suffix = Date.now().toString();
+  const bankName = `QA Filter Bank ${suffix}`;
+  const categoryName = `QA Filter Category ${suffix}`;
+  const targetSupplier = `QA Filter Target ${suffix}`;
+  const sameBankSupplier = `QA Filter Same Bank ${suffix}`;
+  const sameCategorySupplier = `QA Filter Same Category ${suffix}`;
+
+  await page.goto("/admin/setup");
+
+  const bankSection = page.getByTestId("setup-bank-accounts");
+  await bankSection.locator('input[name="name"]').fill(bankName);
+  await bankSection.locator('input[name="bank"]').fill("QA Bank");
+  await bankSection.locator('input[name="label"]').fill("Filter testing");
+  await bankSection.locator('input[name="ownerLabel"]').fill("QA");
+  await bankSection.getByRole("button", { name: "Add bank account" }).click();
+  await expect(bankSection).toContainText(bankName);
+
+  const categorySection = page.getByTestId("setup-categories");
+  await categorySection.locator('input[name="name"]').fill(categoryName);
+  await categorySection.locator('select[name="type"]').selectOption("EXPENSE");
+  await categorySection.locator('select[name="defaultGstTreatment"]').selectOption("GST_INCLUDED");
+  await categorySection.locator('select[name="basTreatment"]').selectOption("GST_PAID");
+  await categorySection.getByRole("button", { name: "Add category" }).click();
+  await expect(categorySection).toContainText(categoryName);
+
+  async function addExpense(supplier: string, grossAmount: string, bankLabel: string, categoryLabel: string) {
+    await page.goto("/expenses");
+    const form = page.getByTestId("expense-add-form");
+    await form.locator('input[name="date"]').fill("2026-06-07");
+    await form.locator('input[name="supplier"]').fill(supplier);
+    await form.locator('select[name="bankAccountId"]').selectOption({ label: bankLabel });
+    await form.locator('select[name="categoryId"]').selectOption({ label: categoryLabel });
+    await form.locator('input[name="grossAmount"]').fill(grossAmount);
+    await form.locator('select[name="gstTreatment"]').selectOption("GST_INCLUDED");
+    await form.getByRole("button", { name: "Save expense" }).click();
+    await expect(page.getByTestId("expense-saved")).toContainText("Expense saved");
+  }
+
+  await addExpense(targetSupplier, "110.00", `${bankName} (QA)`, `${categoryName} - default GST included`);
+  await addExpense(sameBankSupplier, "55.00", `${bankName} (QA)`, "Software - default GST included");
+  await addExpense(sameCategorySupplier, "220.00", "Main Business (Company)", `${categoryName} - default GST included`);
+
+  await page.goto("/expenses");
+  await page.getByLabel("Bank account filter").selectOption({ label: `${bankName} (QA)` });
+  await page.getByRole("button", { name: "Apply filters" }).click();
+
+  await expect(page.getByTestId("expense-list")).toContainText("2 shown");
+  await expect(page.getByRole("row", { name: new RegExp(targetSupplier) })).toBeVisible();
+  await expect(page.getByRole("row", { name: new RegExp(sameBankSupplier) })).toBeVisible();
+  await expect(page.getByRole("row", { name: new RegExp(sameCategorySupplier) })).toHaveCount(0);
+  await expectExpenseSummary(page, "$165.00", "$15.00");
+
+  await page.getByLabel("Category filter").selectOption({ label: categoryName });
+  await page.getByRole("button", { name: "Apply filters" }).click();
+
+  await expect(page.getByTestId("expense-list")).toContainText("1 shown");
+  const filteredRow = page.getByRole("row", { name: new RegExp(targetSupplier) });
+  await expect(filteredRow).toBeVisible();
+  await expect(filteredRow).toContainText(bankName);
+  await expect(filteredRow).toContainText(categoryName);
+  await expect(page.getByRole("row", { name: new RegExp(sameBankSupplier) })).toHaveCount(0);
+  await expect(page.getByRole("row", { name: new RegExp(sameCategorySupplier) })).toHaveCount(0);
+  await expectExpenseSummary(page, "$110.00", "$10.00");
 });
