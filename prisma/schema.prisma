@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 enum WorkspaceRole {
@@ -45,8 +46,17 @@ enum BasFrequency {
   MONTHLY
 }
 
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
 model Workspace {
-  id                      String       @id @default(cuid())
+  id                      String        @id @default(cuid())
   name                    String
   legalName               String?
   abn                     String?
@@ -56,13 +66,15 @@ model Workspace {
   basFrequency            BasFrequency?
   financialYearStartMonth Int?
   invoicePrefix           String?
-  createdAt               DateTime     @default(now())
-  updatedAt               DateTime     @updatedAt
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
 
   bankAccounts BankAccount[]
   categories   Category[]
   people       Person[]
   expenses     Expense[]
+  clients      Client[]
+  invoices     Invoice[]
 }
 
 model BankAccount {
@@ -109,8 +121,57 @@ model Person {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   workspace      Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invoices       Invoice[]
 
   @@index([workspaceId])
+}
+
+model Client {
+  id             String   @id @default(cuid())
+  workspaceId    String
+  name           String
+  email          String?
+  abn            String?
+  billingAddress String?
+  notes          String?
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invoices  Invoice[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+}
+
+model Invoice {
+  id                  String        @id @default(cuid())
+  workspaceId         String
+  clientId            String
+  personId            String?
+  invoiceNumber       String
+  issueDate           DateTime
+  dueDate             DateTime?
+  status              InvoiceStatus @default(DRAFT)
+  grossCents          Int
+  gstTreatment        GstTreatment
+  userEnteredGstCents Int?
+  paymentDate         DateTime?
+  evidenceUrl         String?
+  notes               String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  client    Client    @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  person    Person?   @relation(fields: [personId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, invoiceNumber])
+  @@index([workspaceId])
+  @@index([clientId])
+  @@index([personId])
+  @@index([issueDate])
 }
 
 model Expense {
