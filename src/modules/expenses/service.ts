@@ -27,6 +27,9 @@ export type ExpenseWorkspace = {
   workspaceName: string;
   bankAccounts: BankAccount[];
   categories: Category[];
+  activeFilter: ExpenseFilter;
+  activeBankAccountId?: string;
+  activeCategoryId?: string;
   expenses: ExpenseRow[];
   summary: ExpenseSummary;
   visibleIssues: ValidationIssue[];
@@ -47,6 +50,12 @@ export type ExpenseInput = {
 };
 
 export type ExpenseFilter = "all" | "missing-receipts" | "manual-overrides" | "blockers";
+
+export type ExpenseWorkspaceFilters = {
+  filter?: ExpenseFilter;
+  bankAccountId?: string;
+  categoryId?: string;
+};
 
 export const currentExpenseQuarter = {
   label: "Q4 FY2025-26",
@@ -145,20 +154,31 @@ function mapExpense(record: ExpenseRecord): ExpenseRow {
   };
 }
 
-function filterExpenses(expenses: ExpenseRow[], filter: ExpenseFilter): ExpenseRow[] {
+export function filterExpenses(expenses: ExpenseRow[], filters: ExpenseWorkspaceFilters = {}): ExpenseRow[] {
+  const filter = filters.filter ?? "all";
+
   if (filter === "missing-receipts") {
-    return expenses.filter((expense) =>
+    expenses = expenses.filter((expense) =>
       expense.issues.some((issue) => issue.code === "missing-receipt")
     );
   }
   if (filter === "manual-overrides") {
-    return expenses.filter((expense) => expense.gstTreatment === "manual-override");
+    expenses = expenses.filter((expense) => expense.gstTreatment === "manual-override");
   }
   if (filter === "blockers") {
-    return expenses.filter((expense) =>
+    expenses = expenses.filter((expense) =>
       expense.issues.some((issue) => issue.severity === "blocker")
     );
   }
+
+  if (filters.bankAccountId) {
+    expenses = expenses.filter((expense) => expense.bankAccountId === filters.bankAccountId);
+  }
+
+  if (filters.categoryId) {
+    expenses = expenses.filter((expense) => expense.categoryId === filters.categoryId);
+  }
+
   return expenses;
 }
 
@@ -325,7 +345,7 @@ async function getCurrentWorkspaceId(): Promise<string> {
   return workspace.id;
 }
 
-export async function getExpenseWorkspace(filter: ExpenseFilter = "all"): Promise<ExpenseWorkspace> {
+export async function getExpenseWorkspace(filters: ExpenseWorkspaceFilters = {}): Promise<ExpenseWorkspace> {
   const currentWorkspaceId = await getCurrentWorkspaceId();
   const quarterRange = currentQuarterDateRange();
   const workspace = await prisma.workspace.findFirst({
@@ -352,16 +372,32 @@ export async function getExpenseWorkspace(filter: ExpenseFilter = "all"): Promis
   }
 
   const expenses = workspace.expenses.map(mapExpense);
-  const visibleExpenses = filterExpenses(expenses, filter);
+  const bankAccounts = workspace.bankAccounts.filter((account) => account.active);
+  const categories = workspace.categories.filter((category) => category.active && category.type === "EXPENSE");
+  const activeBankAccountId = bankAccounts.some((account) => account.id === filters.bankAccountId)
+    ? filters.bankAccountId
+    : undefined;
+  const activeCategoryId = categories.some((category) => category.id === filters.categoryId)
+    ? filters.categoryId
+    : undefined;
+  const activeFilter = filters.filter ?? "all";
+  const visibleExpenses = filterExpenses(expenses, {
+    filter: activeFilter,
+    bankAccountId: activeBankAccountId,
+    categoryId: activeCategoryId
+  });
   const visibleIssues = visibleExpenses.flatMap((expense) => expense.issues);
 
   return {
     workspaceId: workspace.id,
     workspaceName: workspace.name,
-    bankAccounts: workspace.bankAccounts.filter((account) => account.active),
-    categories: workspace.categories.filter((category) => category.active && category.type === "EXPENSE"),
+    bankAccounts,
+    categories,
+    activeFilter,
+    activeBankAccountId,
+    activeCategoryId,
     expenses: visibleExpenses,
-    summary: summarizeExpenses(expenses),
+    summary: summarizeExpenses(visibleExpenses),
     visibleIssues
   };
 }
