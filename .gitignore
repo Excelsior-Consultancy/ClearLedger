@@ -13,3 +13,5 @@ npm-debug.log*
 .vercel
 next-env.d.ts
 .worktrees/
+.env.production
+scripts/setup-production-workspace.ts
