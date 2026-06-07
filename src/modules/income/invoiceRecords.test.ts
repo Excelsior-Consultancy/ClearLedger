@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { dollars } from "@/modules/shared/money";
+import type { ValidationIssue } from "@/modules/shared/types";
 
 const mockPrisma = vi.hoisted(() => ({
   workspace: {
@@ -209,16 +210,38 @@ function row(input: Partial<ReturnType<typeof prismaRecord>> & {
     lifecycleState: input.paymentState === "paid" ? "paid" : input.paymentState === "partial" ? "partially_paid" : "issued",
     evidenceUrl: undefined,
     notes: undefined,
-    issues: []
+    issues: [] as ValidationIssue[]
   } as const;
 }
 
 function client(id: string, name: string) {
-  return { id, workspaceId: "workspace-a", name };
+  return {
+    id,
+    workspaceId: "workspace-a",
+    name,
+    abn: null,
+    createdAt: new Date("2026-04-08T00:00:00.000Z"),
+    updatedAt: new Date("2026-04-08T00:00:00.000Z"),
+    active: true,
+    email: null,
+    notes: null,
+    billingAddress: null
+  } as any;
 }
 
 function person(id: string, name: string) {
-  return { id, workspaceId: "workspace-a", name };
+  return {
+    id,
+    workspaceId: "workspace-a",
+    name,
+    email: null,
+    personType: "DIRECTOR",
+    workspaceRole: "DIRECTOR",
+    payrollEnabled: false,
+    active: true,
+    createdAt: new Date("2026-04-08T00:00:00.000Z"),
+    updatedAt: new Date("2026-04-08T00:00:00.000Z")
+  } as any;
 }
 
 function prismaRecord(input: {
