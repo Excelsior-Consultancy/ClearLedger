@@ -51,13 +51,35 @@ function defaultGstLabel(value: string) {
   return labels[value] ?? value;
 }
 
+function buildExpensesHref(filters: {
+  filter?: ExpenseFilter;
+  bankAccountId?: string;
+  categoryId?: string;
+}) {
+  const params = new URLSearchParams();
+  if (filters.filter && filters.filter !== "all") {
+    params.set("filter", filters.filter);
+  }
+  if (filters.bankAccountId) {
+    params.set("bankAccountId", filters.bankAccountId);
+  }
+  if (filters.categoryId) {
+    params.set("categoryId", filters.categoryId);
+  }
+
+  const query = params.toString();
+  return query ? `/expenses?${query}` : "/expenses";
+}
+
 export default async function ExpensesPage({ searchParams }: { searchParams?: SearchParams }) {
   const params = (await searchParams) ?? {};
   const filterParam = single(params.filter);
   const activeFilter: ExpenseFilter = isExpenseFilter(filterParam) ? filterParam : "all";
+  const bankAccountId = single(params.bankAccountId);
+  const categoryId = single(params.categoryId);
   const error = single(params.error);
   const saved = single(params.saved);
-  const model = await getExpenseWorkspace(activeFilter);
+  const model = await getExpenseWorkspace({ filter: activeFilter, bankAccountId, categoryId });
   const defaultCategory = model.categories[0];
   const defaultBankAccount = model.bankAccounts[0];
   const selectedExpense = model.expenses[0];
@@ -141,11 +163,46 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                   <h2>Source expenses</h2>
                   <span className="chip info">{model.expenses.length} shown</span>
                 </div>
+                <form className="chip-row" aria-label="Expense dimension filters" method="get">
+                  {model.activeFilter !== "all" ? <input type="hidden" name="filter" value={model.activeFilter} /> : null}
+                  <select
+                    className="selector"
+                    aria-label="Bank account filter"
+                    defaultValue={model.activeBankAccountId ?? ""}
+                    name="bankAccountId"
+                  >
+                    <option value="">All bank accounts</option>
+                    {model.bankAccounts.map((account) => (
+                      <option key={account.id} value={account.id}>
+                        {account.name} ({account.ownerLabel ?? "Company"})
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    className="selector"
+                    aria-label="Category filter"
+                    defaultValue={model.activeCategoryId ?? ""}
+                    name="categoryId"
+                  >
+                    <option value="">All categories</option>
+                    {model.categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button className="button secondary" type="submit">Apply filters</button>
+                  <Link className="button secondary" href={buildExpensesHref({ filter: model.activeFilter })}>Clear dimensions</Link>
+                </form>
                 <div className="chip-row" aria-label="Expense filters">
                   {filters.map((filter) => (
                     <Link
-                      className={`chip ${activeFilter === filter.value ? "final" : "info"}`}
-                      href={filter.value === "all" ? "/expenses" : `/expenses?filter=${filter.value}`}
+                      className={`chip ${model.activeFilter === filter.value ? "final" : "info"}`}
+                      href={buildExpensesHref({
+                        filter: filter.value,
+                        bankAccountId: model.activeBankAccountId,
+                        categoryId: model.activeCategoryId
+                      })}
                       key={filter.value}
                     >
                       {filter.label}
