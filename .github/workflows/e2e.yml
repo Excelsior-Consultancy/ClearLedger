@@ -29,7 +29,6 @@ jobs:
     env:
       POSTGRES_PRISMA_URL: postgresql://clearledger:clearledger@localhost:54329/clearledger?schema=public
       POSTGRES_URL_NON_POOLING: postgresql://clearledger:clearledger@localhost:54329/clearledger?schema=public
-      SEED_ON_DEPLOY: "false"
 
     steps:
       - uses: actions/checkout@v4
