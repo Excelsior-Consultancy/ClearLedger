@@ -46,6 +46,12 @@ CREATE INDEX "Client_workspaceId_idx" ON "Client"("workspaceId");
 CREATE UNIQUE INDEX "Client_workspaceId_name_key" ON "Client"("workspaceId", "name");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Client_id_workspaceId_key" ON "Client"("id", "workspaceId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Person_id_workspaceId_key" ON "Person"("id", "workspaceId");
+
+-- CreateIndex
 CREATE INDEX "Invoice_workspaceId_idx" ON "Invoice"("workspaceId");
 
 -- CreateIndex
@@ -67,7 +73,7 @@ ALTER TABLE "Client" ADD CONSTRAINT "Client_workspaceId_fkey" FOREIGN KEY ("work
 ALTER TABLE "Invoice" ADD CONSTRAINT "Invoice_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Invoice" ADD CONSTRAINT "Invoice_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Invoice" ADD CONSTRAINT "Invoice_clientId_workspaceId_fkey" FOREIGN KEY ("clientId", "workspaceId") REFERENCES "Client"("id", "workspaceId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Invoice" ADD CONSTRAINT "Invoice_personId_fkey" FOREIGN KEY ("personId") REFERENCES "Person"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Invoice" ADD CONSTRAINT "Invoice_personId_workspaceId_fkey" FOREIGN KEY ("personId", "workspaceId") REFERENCES "Person"("id", "workspaceId") ON DELETE RESTRICT ON UPDATE CASCADE;

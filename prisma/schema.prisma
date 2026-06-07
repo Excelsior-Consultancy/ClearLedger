@@ -123,6 +123,7 @@ model Person {
   workspace      Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   invoices       Invoice[]
 
+  @@unique([id, workspaceId])
   @@index([workspaceId])
 }
 
@@ -141,6 +142,7 @@ model Client {
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   invoices  Invoice[]
 
+  @@unique([id, workspaceId])
   @@unique([workspaceId, name])
   @@index([workspaceId])
 }
@@ -164,8 +166,8 @@ model Invoice {
   updatedAt           DateTime      @updatedAt
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  client    Client    @relation(fields: [clientId], references: [id], onDelete: Restrict)
-  person    Person?   @relation(fields: [personId], references: [id], onDelete: SetNull)
+  client    Client    @relation(fields: [clientId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
+  person    Person?   @relation(fields: [personId, workspaceId], references: [id, workspaceId], onDelete: Restrict)
 
   @@unique([workspaceId, invoiceNumber])
   @@index([workspaceId])
