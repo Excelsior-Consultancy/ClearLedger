@@ -172,5 +172,3 @@ BAS treatments: `GST_COLLECTED` · `GST_PAID` · `PAYROLL` · `NONE`
 ## Related
 
 - Jira project: `KAN` at `https://charchit26.atlassian.net`
-- AI-company operating repo: `/Users/goooogle/workspace/ai-company`
-- MVP scope doc: `/Users/goooogle/workspace/ai-company/docs/product/mvp-scope.md`

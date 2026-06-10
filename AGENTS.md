@@ -2,8 +2,6 @@
 
 ## Purpose
 
-This is the scratch application repository for ClearLedger. The AI-company/team-process repo lives at `/Users/goooogle/workspace/ai-company`.
-
 ClearLedger is an Australian small-business finance and compliance cockpit. The MVP focuses on company setup, income/invoices, expenses/GST validation, Payroll Lite, BAS calculation, dashboard exceptions, and Excel CA Pack export.
 
 ## Current State
@@ -13,8 +11,6 @@ This repo is intentionally empty until the Technical Lead confirms the initial s
 ## Product Sources
 
 - Jira project: `KAN` in `https://charchit26.atlassian.net`
-- AI-company operating repo: `/Users/goooogle/workspace/ai-company`
-- MVP scope doc: `/Users/goooogle/workspace/ai-company/docs/product/mvp-scope.md`
 
 ## MVP Boundaries
 
