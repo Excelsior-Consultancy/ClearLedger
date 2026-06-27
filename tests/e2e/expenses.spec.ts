@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
+import { loginAsOwner } from "./auth";
 
 test("KAN-3 saves a valid expense and keeps missing receipts as warnings", async ({ page }) => {
+  await loginAsOwner(page);
   const suffix = Date.now().toString();
   const supplier = `QA Expense ${suffix}`;
 
@@ -20,7 +22,7 @@ test("KAN-3 saves a valid expense and keeps missing receipts as warnings", async
   await expect(row).toContainText("$11.00");
   await expect(row).toContainText("Missing");
   await expect(row).toContainText("Warning");
-  await expect(page.getByTestId("expense-source-detail")).toContainText("BAS GST paid contribution");
+  await expect(page.getByTestId("expense-source-detail")).toContainText("BAS GST paid:");
   await expect(page.getByTestId("expense-source-detail")).toContainText("CA Pack evidence");
 
   await page.goto("/expenses?filter=missing-receipts");
@@ -31,6 +33,7 @@ test("KAN-3 saves a valid expense and keeps missing receipts as warnings", async
 });
 
 test("KAN-3 applies GST-free category defaults and excludes out-of-quarter expenses", async ({ page }) => {
+  await loginAsOwner(page);
   const suffix = Date.now().toString();
   const bankFeeSupplier = `Bank Fee ${suffix}`;
   const oldSupplier = `Old Quarter ${suffix}`;
@@ -59,6 +62,7 @@ test("KAN-3 applies GST-free category defaults and excludes out-of-quarter expen
 });
 
 test("KAN-3 blocks impossible manual GST values before save", async ({ page }) => {
+  await loginAsOwner(page);
   const supplier = `Invalid GST ${Date.now()}`;
 
   await page.goto("/expenses");
@@ -75,6 +79,7 @@ test("KAN-3 blocks impossible manual GST values before save", async ({ page }) =
 });
 
 test("KAN-3 blocks unsafe receipt evidence links", async ({ page }) => {
+  await loginAsOwner(page);
   await page.goto("/expenses");
   const form = page.getByTestId("expense-add-form");
   await form.locator('input[name="supplier"]').fill(`Unsafe Receipt ${Date.now()}`);
@@ -86,6 +91,7 @@ test("KAN-3 blocks unsafe receipt evidence links", async ({ page }) => {
 });
 
 test("KAN-3 edits an expense and persists receipt evidence", async ({ page }) => {
+  await loginAsOwner(page);
   const suffix = Date.now().toString();
   const supplier = `Receipt Edit ${suffix}`;
   const receiptUrl = `https://drive.google.com/receipt-${suffix}`;

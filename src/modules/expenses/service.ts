@@ -5,6 +5,9 @@ import type {
   GstTreatment as PrismaGstTreatment
 } from "@prisma/client";
 import { prisma } from "@/modules/db/prisma";
+import { getWorkspaceAccess } from "@/modules/auth/service";
+import { currentReportingQuarter, withQuarterLock, type ReportingQuarter } from "@/modules/shared/quarter";
+import { assertQuarterEditable, getWorkspaceQuarterState } from "@/modules/shared/quarterGuard";
 import { enrichExpense, summarizeExpenses } from "@/modules/expenses/summary";
 import type { ExpenseSummary, ExpenseWithValidation } from "@/modules/expenses/summary";
 import type { Cents } from "@/modules/shared/money";
@@ -25,6 +28,7 @@ export type ExpenseRow = ExpenseWithValidation & {
 export type ExpenseWorkspace = {
   workspaceId: string;
   workspaceName: string;
+  quarter: ReportingQuarter;
   bankAccounts: BankAccount[];
   categories: Category[];
   expenses: ExpenseRow[];
@@ -48,11 +52,7 @@ export type ExpenseInput = {
 
 export type ExpenseFilter = "all" | "missing-receipts" | "manual-overrides" | "blockers";
 
-export const currentExpenseQuarter = {
-  label: "Q4 FY2025-26",
-  startDate: "2026-04-01",
-  endDate: "2026-06-30"
-};
+export const currentExpenseQuarter = currentReportingQuarter;
 
 const prismaGstTreatments = ["GST_INCLUDED", "GST_FREE", "NO_GST_OVERSEAS", "MANUAL_OVERRIDE"] as const;
 
@@ -315,22 +315,15 @@ export function normalizeExpenseGstTreatment(input: ExpenseInput, options: {
 }
 
 async function getCurrentWorkspaceId(): Promise<string> {
-  const workspace = await prisma.workspace.findFirst({
-    orderBy: { createdAt: "asc" },
-    select: { id: true }
-  });
-  if (!workspace) {
-    throw new Error("Complete company setup before recording expenses.");
-  }
-  return workspace.id;
+  const access = await getWorkspaceAccess();
+  return access.workspaceId;
 }
 
 export async function getExpenseWorkspace(filter: ExpenseFilter = "all"): Promise<ExpenseWorkspace> {
   const currentWorkspaceId = await getCurrentWorkspaceId();
   const quarterRange = currentQuarterDateRange();
-  const workspace = await prisma.workspace.findFirst({
+  const workspace = await prisma.workspace.findUnique({
     where: { id: currentWorkspaceId },
-    orderBy: { createdAt: "asc" },
     include: {
       bankAccounts: { orderBy: { createdAt: "asc" } },
       categories: { orderBy: { createdAt: "asc" } },
@@ -358,6 +351,7 @@ export async function getExpenseWorkspace(filter: ExpenseFilter = "all"): Promis
   return {
     workspaceId: workspace.id,
     workspaceName: workspace.name,
+    quarter: await getWorkspaceQuarterState(workspace.id),
     bankAccounts: workspace.bankAccounts.filter((account) => account.active),
     categories: workspace.categories.filter((category) => category.active && category.type === "EXPENSE"),
     expenses: visibleExpenses,
@@ -391,6 +385,7 @@ export async function getExpenseForEdit(id: string) {
     rawGstTreatment: record.gstTreatment,
     workspaceId: record.workspaceId,
     workspaceName: record.workspace.name,
+    quarter: withQuarterLock(record.workspace.quarterLocked),
     bankAccounts: record.workspace.bankAccounts.filter((account) => account.active || account.id === record.bankAccountId),
     categories: record.workspace.categories.filter(
       (category) => (category.active && category.type === "EXPENSE") || category.id === record.categoryId
@@ -400,6 +395,7 @@ export async function getExpenseForEdit(id: string) {
 
 export async function createExpense(input: ExpenseInput) {
   const currentWorkspaceId = await getCurrentWorkspaceId();
+  await assertQuarterEditable(currentWorkspaceId);
   const currentInput = { ...input, workspaceId: currentWorkspaceId };
   const referenceResult = await validateExpenseReferences(currentInput);
   const normalizedInput = normalizeExpenseGstTreatment(currentInput, {
@@ -433,6 +429,7 @@ export async function createExpense(input: ExpenseInput) {
 
 export async function updateExpense(id: string, input: ExpenseInput) {
   const currentWorkspaceId = await getCurrentWorkspaceId();
+  await assertQuarterEditable(currentWorkspaceId);
   const currentInput = { ...input, workspaceId: currentWorkspaceId };
   const existing = await prisma.expense.findFirst({ where: { id, workspaceId: currentWorkspaceId } });
   if (!existing) {

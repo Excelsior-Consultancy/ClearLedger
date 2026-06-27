@@ -7,7 +7,7 @@ export function validateWorkspace(workspace: Workspace): ValidationIssue[] {
   if (!workspace.name.trim()) {
     issues.push({ severity: "blocker", code: "company-name", message: "Company name is required." });
   }
-  if (workspace.gstRegistered === undefined) {
+  if (workspace.gstRegistered == null) {
     issues.push({ severity: "blocker", code: "gst-setting", message: "GST registration setting is required." });
   }
   if (!workspace.basFrequency) {

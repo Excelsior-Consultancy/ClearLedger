@@ -1,27 +1,31 @@
 import { expect, test } from "@playwright/test";
+import { loginAsOwner } from "./auth";
 
 test("shows the MVP epic sections in the local app", async ({ page }) => {
+  await loginAsOwner(page);
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { name: "Dashboard", exact: true })).toBeVisible();
-  await expect(page.getByTestId("admin-section")).toContainText("KAN-8");
-  await expect(page.getByTestId("expenses-section")).toContainText("KAN-3");
-  await expect(page.getByTestId("income-section")).toContainText("KAN-2");
-  await expect(page.getByTestId("payroll-lite-section")).toContainText("KAN-4");
-  await expect(page.getByTestId("bas-section")).toContainText("KAN-5");
-  await expect(page.getByTestId("ca-pack-section")).toContainText("KAN-7");
+  await expect(page.locator("h1").filter({ hasText: "Dashboard" })).toBeVisible();
+  await expect(page.getByTestId("admin-section")).toContainText("Company setup");
+  await expect(page.getByTestId("expenses-section")).toContainText("Source expenses");
+  await expect(page.getByTestId("income-section")).toContainText("Invoice #");
+  await expect(page.getByTestId("payroll-lite-section")).toContainText("Payroll Lite");
+  await expect(page.getByTestId("bas-section")).toContainText("BAS Quarter Reporting");
+  await expect(page.getByTestId("ca-pack-section")).toContainText("CA Pack Export");
 });
 
 test("keeps missing receipts as warnings and invalid GST as traceable review content", async ({ page }) => {
+  await loginAsOwner(page);
   await page.goto("/");
 
   await expect(page.getByTestId("expenses-section")).toContainText("Missing receipts");
-  await expect(page.getByTestId("expenses-section")).toContainText("warning only");
+  await expect(page.getByTestId("expenses-section")).toContainText(/warning only/i);
   await expect(page.getByTestId("expenses-section")).toContainText("Manual GST overrides");
-  await expect(page.getByText("Summary total -> filtered source table -> source detail")).toBeVisible();
+  await expect(page.getByTestId("expenses-section")).toContainText("Source expenses");
 });
 
 test("surfaces BAS and CA Pack readiness from source data", async ({ page }) => {
+  await loginAsOwner(page);
   await page.goto("/");
 
   await expect(page.getByTestId("bas-section")).toContainText("GST collected");

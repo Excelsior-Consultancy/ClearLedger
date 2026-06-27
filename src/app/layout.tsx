@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./heroui.min.css";
 import "./globals.css";
 import { Providers } from "./providers";
-import { AppShell } from "@/components/AppShell";
 
 export const metadata: Metadata = {
   title: "ClearLedger",
@@ -14,7 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en-AU">
       <body>
         <Providers>
-          <AppShell>{children}</AppShell>
+          {children}
         </Providers>
       </body>
     </html>

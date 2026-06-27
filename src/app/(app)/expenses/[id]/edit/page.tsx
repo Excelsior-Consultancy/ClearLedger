@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MembershipRole } from "@prisma/client";
 import { editExpense } from "../../actions";
 import { getExpenseForEdit, mapPrismaGstTreatment } from "@/modules/expenses/service";
+import { canEditCompany, getRoleLabel, getWorkspaceAccess } from "@/modules/auth/service";
 import { formatMoney } from "@/modules/shared/money";
 
 export const dynamic = "force-dynamic";
@@ -39,10 +41,14 @@ export default async function EditExpensePage({
 }) {
   const { id } = await params;
   const error = single((await searchParams)?.error);
+  const access = await getWorkspaceAccess();
+  const canEdit = canEditCompany(access.role);
   const model = await getExpenseForEdit(id);
   if (!model) {
     notFound();
   }
+  const quarterLocked = model.quarter.locked;
+  const canMutateExpense = canEdit && !quarterLocked;
 
   return (
     <div className="app-shell">
@@ -61,7 +67,7 @@ export default async function EditExpensePage({
             <option value={model.workspaceId}>{model.workspaceName}</option>
           </select>
           <input className="search" aria-label="Search" placeholder="Search expenses" />
-          <span className="chip info">Director</span>
+          <span className="chip info">{getRoleLabel(access.role ?? MembershipRole.VIEWER)}</span>
         </header>
 
         <div className="content">
@@ -73,6 +79,13 @@ export default async function EditExpensePage({
             <Link className="button secondary" href="/expenses">Back to expenses</Link>
           </div>
 
+          {quarterLocked ? (
+            <section className="banner blocker" role="status">
+              <strong>Quarter locked.</strong>
+              <p>This expense is read-only until an admin unlocks the quarter.</p>
+            </section>
+          ) : null}
+
           {error ? (
             <section className="banner blocker" role="alert" data-testid="expense-edit-error">
               <strong>Expense was not updated.</strong>
@@ -81,7 +94,8 @@ export default async function EditExpensePage({
           ) : null}
 
           <section className="panel" data-testid="expense-edit-form">
-            <form action={editExpense} className="form-grid">
+            {canMutateExpense ? (
+              <form action={editExpense} className="form-grid">
               <input type="hidden" name="expenseId" value={model.expense.id} />
               <input type="hidden" name="workspaceId" value={model.workspaceId} />
               <div className="field">
@@ -137,10 +151,16 @@ export default async function EditExpensePage({
                 <label htmlFor="notes">Notes</label>
                 <textarea id="notes" name="notes" rows={2} defaultValue={model.expense.notes ?? ""} />
               </div>
-              <div className="field full">
-                <button className="button" type="submit">Update expense</button>
+                <div className="field full">
+                  <button className="button" type="submit">Update expense</button>
+                </div>
+              </form>
+            ) : (
+              <div className="banner info" role="status">
+                <strong>Read-only access.</strong>
+                <p>{quarterLocked ? "The quarter is locked, so this source record cannot be edited." : "Only admins and editors can modify expenses. You can still review the source record."}</p>
               </div>
-            </form>
+            )}
           </section>
         </div>
       </main>

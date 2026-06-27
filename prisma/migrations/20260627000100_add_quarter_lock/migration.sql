@@ -1,0 +1,2 @@
+ALTER TABLE "Workspace"
+ADD COLUMN "quarterLocked" BOOLEAN NOT NULL DEFAULT false;

@@ -11,6 +11,7 @@
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
     "db:migrate": "prisma migrate dev",
+    "db:import-workbook": "tsx scripts/import-company-expenses-workbook.ts",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "test": "vitest run",
@@ -28,7 +29,8 @@
     "framer-motion": "^12.40.0",
     "next": "^16.0.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",

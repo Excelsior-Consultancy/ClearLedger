@@ -1,4 +1,5 @@
 import type { Cents } from "./money";
+import type { ReportingQuarter } from "./quarter";
 
 export type StatusSeverity = "blocker" | "warning" | "info" | "final";
 
@@ -6,9 +7,10 @@ export type Workspace = {
   id: string;
   name: string;
   setupComplete: boolean;
-  gstRegistered: boolean;
-  basFrequency: "quarterly" | "monthly";
-  financialYearStartMonth: number;
+  gstRegistered: boolean | null;
+  basFrequency: string | null;
+  financialYearStartMonth: number | null;
+  quarterLocked: boolean;
   bankAccounts: BankAccount[];
   categories: Category[];
   people: Person[];
@@ -94,10 +96,6 @@ export type PayRun = {
   overrideReason?: string;
 };
 
-export type Quarter = {
-  id: string;
-  label: string;
-  startDate: string;
-  endDate: string;
-  locked: boolean;
+export type Quarter = ReportingQuarter & {
+  id?: string;
 };

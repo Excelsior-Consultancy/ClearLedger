@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
+import { loginAsOwner } from "./auth";
 
 test("KAN-8 setup page persists bank accounts, people, and categories", async ({ page }) => {
+  await loginAsOwner(page);
   const suffix = Date.now().toString();
 
   await page.goto("/admin/setup");

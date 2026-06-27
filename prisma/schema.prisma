@@ -55,6 +55,13 @@ enum InvoiceStatus {
   CANCELLED
 }
 
+enum MembershipRole {
+  ADMIN
+  EDITOR
+  ACCOUNTANT
+  VIEWER
+}
+
 model Workspace {
   id                      String        @id @default(cuid())
   name                    String
@@ -66,6 +73,7 @@ model Workspace {
   basFrequency            BasFrequency?
   financialYearStartMonth Int?
   invoicePrefix           String?
+  quarterLocked           Boolean       @default(false)
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
 
@@ -75,6 +83,92 @@ model Workspace {
   expenses     Expense[]
   clients      Client[]
   invoices     Invoice[]
+  payRuns      PayRun[]
+  memberships  Membership[]
+  invitations  Invitation[]
+  comments     Comment[]
+}
+
+model User {
+  id           String       @id @default(cuid())
+  name         String
+  email        String       @unique
+  passwordHash String
+  passwordSalt String
+  active       Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  memberships  Membership[]
+  sessions     Session[]
+  invitations  Invitation[] @relation("InvitationCreatedBy")
+  comments     Comment[]
+}
+
+model Membership {
+  id          String         @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        MembershipRole @default(EDITOR)
+  active      Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+  @@index([userId])
+}
+
+model Invitation {
+  id              String         @id @default(cuid())
+  workspaceId     String
+  email           String
+  role            MembershipRole @default(EDITOR)
+  tokenHash       String         @unique
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  createdAt       DateTime       @default(now())
+  createdByUserId String?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy User?     @relation("InvitationCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, email])
+  @@index([createdByUserId])
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  lastUsedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  workspaceId String
+  authorUserId String
+  targetType  String
+  targetId    String?
+  body        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([authorUserId])
+  @@index([targetType, targetId])
 }
 
 model BankAccount {
@@ -198,4 +292,28 @@ model Expense {
   @@index([categoryId])
   @@index([bankAccountId])
   @@index([date])
+}
+
+model PayRun {
+  id                String   @id @default(cuid())
+  workspaceId       String
+  employeeName      String
+  periodStart       DateTime
+  periodEnd         DateTime
+  payDate           DateTime
+  grossCents        Int
+  reimbursementsCents Int    @default(0)
+  paygCents         Int
+  superCents        Int
+  finalized         Boolean  @default(true)
+  overrideReason    String?
+  notes             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([periodStart])
+  @@index([payDate])
 }

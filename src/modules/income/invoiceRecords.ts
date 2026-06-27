@@ -5,6 +5,8 @@ import type {
   Person
 } from "@prisma/client";
 import { prisma } from "@/modules/db/prisma";
+import { getWorkspaceAccess } from "@/modules/auth/service";
+import { currentReportingQuarter, withQuarterLock } from "@/modules/shared/quarter";
 import { calculateGst } from "@/modules/validation/gst";
 import type { Cents } from "@/modules/shared/money";
 import { sumMoney } from "@/modules/shared/money";
@@ -17,6 +19,7 @@ export type InvoiceRecordQuarter = {
   label: string;
   startDate: string;
   endDate: string;
+  locked: boolean;
 };
 
 export type InvoiceRecordInput = {
@@ -83,9 +86,8 @@ export type InvoiceRecordSummary = {
 };
 
 const defaultQuarter: InvoiceRecordQuarter = {
-  label: "Q4 FY2025-26",
-  startDate: "2026-04-01",
-  endDate: "2026-06-30"
+  ...currentReportingQuarter,
+  locked: false
 };
 
 const prismaInvoiceStatuses = [
@@ -218,9 +220,8 @@ export async function getInvoiceWorkspace(filters: InvoiceRecordWorkspaceFilters
   const quarter = filters.quarter ?? defaultQuarter;
   const dateRange = resolveDateRange(quarter, filters.month);
 
-  const workspace = await prisma.workspace.findFirst({
+  const workspace = await prisma.workspace.findUnique({
     where: { id: currentWorkspaceId },
-    orderBy: { createdAt: "asc" },
     include: {
       invoices: {
         where: {
@@ -258,7 +259,7 @@ export async function getInvoiceWorkspace(filters: InvoiceRecordWorkspaceFilters
   return {
     workspaceId: workspace.id,
     workspaceName: workspace.name,
-    quarter,
+    quarter: withQuarterLock(workspace.quarterLocked),
     invoices: visibleInvoices,
     activeClientId,
     activePersonId,
@@ -269,14 +270,8 @@ export async function getInvoiceWorkspace(filters: InvoiceRecordWorkspaceFilters
 }
 
 async function getCurrentWorkspaceId(): Promise<string> {
-  const workspace = await prisma.workspace.findFirst({
-    orderBy: { createdAt: "asc" },
-    select: { id: true }
-  });
-  if (!workspace) {
-    throw new Error("Complete company setup before recording invoices.");
-  }
-  return workspace.id;
+  const access = await getWorkspaceAccess();
+  return access.workspaceId;
 }
 
 function resolveDateRange(quarter: InvoiceRecordQuarter, month?: string) {

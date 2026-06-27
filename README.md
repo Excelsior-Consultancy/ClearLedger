@@ -86,6 +86,30 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
+## Deployments
+
+ClearLedger uses branch-based Vercel deployments and GitHub Actions checks:
+
+| Branch | Target | Database | Seed |
+|---|---|---|---|
+| `develop` and `feature/*` | Vercel Preview / non-prod | Dev Supabase | Yes |
+| `main` | Vercel Production | Prod Supabase | No |
+
+GitHub Actions handles validation:
+
+- `CI` runs lint, typecheck, unit tests, and build.
+- `E2E` runs Playwright against a seeded Postgres service container.
+- Pushes to `develop` and `main` also run Prisma migrations in CI so schema changes are applied before the app is served.
+
+The deploy build itself is configured in [`vercel.json`](./vercel.json):
+
+1. Generate Prisma Client
+2. Run `prisma migrate deploy`
+3. Seed only when `SEED_ON_DEPLOY=true`
+4. Run the Next.js build
+
+---
+
 ## Scripts
 
 ```bash

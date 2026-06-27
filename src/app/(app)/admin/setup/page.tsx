@@ -6,10 +6,13 @@ import {
   setBankAccountActive,
   setCategoryActive,
   setPersonActive,
+  toggleQuarterLock,
   updateCompanySetup,
 } from "./actions";
 import { getPrimaryWorkspaceSetup } from "@/modules/setup/service";
+import { canManageCompany, getRoleLabel, getWorkspaceAccess } from "@/modules/auth/service";
 import { Button, Card, CardContent, Chip } from "@heroui/react";
+import { currentExpenseQuarter } from "@/modules/shared/quarter";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +35,26 @@ const labelCls = "text-xs text-zinc-500 mb-1 block";
 const fieldCls = "flex flex-col";
 
 export default async function SetupPage() {
+  const access = await getWorkspaceAccess();
   const { workspace, readiness } = await getPrimaryWorkspaceSetup();
+  const canManage = canManageCompany(access.role);
+
+  if (!canManage) {
+    return (
+      <div className="p-8 max-w-4xl mx-auto">
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.18em] text-zinc-400">Access denied</p>
+              <h1 className="text-2xl font-semibold text-zinc-900 mt-1">Company setup</h1>
+              <p className="text-sm text-zinc-500 mt-1">Only admins can edit company setup.</p>
+            </div>
+            <Link href="/"><Button variant="outline" size="sm">Back to dashboard</Button></Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -42,14 +64,14 @@ export default async function SetupPage() {
           <option value={workspace.id}>{workspace.name || "New workspace"}</option>
         </select>
         <select className="text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-700" aria-label="Quarter">
-          <option value="q4">Q4 FY2025-26</option>
+          <option value={currentExpenseQuarter.label}>{currentExpenseQuarter.label}</option>
         </select>
         <input
           className="ml-auto text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 w-56"
           placeholder="Search setup records"
           aria-label="Search"
         />
-        <Chip color="accent" variant="soft" size="sm">Director</Chip>
+        <Chip color="accent" variant="soft" size="sm">{getRoleLabel(access.role)}</Chip>
       </header>
 
       <div className="p-6 space-y-6">
@@ -66,6 +88,29 @@ export default async function SetupPage() {
 
         <div className="grid grid-cols-[1fr_300px] gap-4">
           <div className="space-y-6">
+            <Card>
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-sm font-semibold text-zinc-700">Quarter lock</h2>
+                    <p className="text-xs text-zinc-500 mt-1">{currentExpenseQuarter.label} for this company</p>
+                  </div>
+                  <Chip color={workspace.quarterLocked ? "success" : "warning"} variant="soft" size="sm">
+                    {workspace.quarterLocked ? "Locked" : "Draft"}
+                  </Chip>
+                </div>
+                <p className="text-sm text-zinc-600 mb-4">
+                  When locked, expense and setup edits are blocked for this company until an admin unlocks the quarter.
+                </p>
+                <form action={toggleQuarterLock} className="flex items-center gap-3">
+                  <input type="hidden" name="quarterLocked" value={String(!workspace.quarterLocked)} />
+                  <Button type="submit" variant={workspace.quarterLocked ? "outline" : "primary"} size="sm">
+                    {workspace.quarterLocked ? "Unlock quarter" : "Lock quarter"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
             {/* Company profile */}
             <Card data-testid="setup-profile">
               <CardContent className="p-5">

@@ -16,6 +16,7 @@ export const workspace: Workspace = {
   gstRegistered: true,
   basFrequency: "quarterly",
   financialYearStartMonth: 7,
+  quarterLocked: false,
   bankAccounts: [
     { id: "main", name: "Main Business", bank: "NAB", label: "Operating", active: true },
     { id: "raja", name: "Raja Expenses", bank: "Westpac", label: "Expense account", active: true },

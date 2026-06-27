@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { addExpense } from "./actions";
+import { MembershipRole } from "@prisma/client";
+import { canEditCompany, getRoleLabel, getWorkspaceAccess } from "@/modules/auth/service";
 import {
-  currentExpenseQuarter,
   expenseStatus,
   getExpenseWorkspace,
   mapPrismaGstTreatment,
@@ -57,7 +58,11 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
   const activeFilter: ExpenseFilter = isExpenseFilter(filterParam) ? filterParam : "all";
   const error = single(params.error);
   const saved = single(params.saved);
+  const access = await getWorkspaceAccess();
+  const canEdit = canEditCompany(access.role);
   const model = await getExpenseWorkspace(activeFilter);
+  const quarterLocked = model.quarter.locked;
+  const canMutateExpenses = canEdit && !quarterLocked;
   const defaultCategory = model.categories[0];
   const defaultBankAccount = model.bankAccounts[0];
   const selectedExpense = model.expenses[0];
@@ -70,14 +75,14 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
           <option value={model.workspaceId}>{model.workspaceName}</option>
         </select>
         <select className="text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-700" aria-label="Quarter">
-          <option value="q4">{currentExpenseQuarter.label}</option>
+          <option value={model.quarter.label}>{model.quarter.label}</option>
         </select>
         <input
           className="ml-auto text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 w-56"
           placeholder="Search expenses"
           aria-label="Search"
         />
-        <Chip color="accent" variant="soft" size="sm">Director</Chip>
+        <Chip color="accent" variant="soft" size="sm">{getRoleLabel(access.role ?? MembershipRole.VIEWER)}</Chip>
       </header>
 
       <div className="p-6 space-y-6">
@@ -103,6 +108,11 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
         {saved && (
           <div className="rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800" data-testid="expense-saved">
             <strong>Expense saved.</strong> Dashboard, BAS, and CA Pack totals can now use this source record.
+          </div>
+        )}
+        {quarterLocked && (
+          <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800" role="status">
+            <strong>Quarter locked.</strong> Expense edits are read-only until an admin unlocks this quarter.
           </div>
         )}
 
@@ -166,9 +176,13 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                         return (
                           <tr key={expense.id} className="hover:bg-zinc-50">
                             <td className="px-3 py-2.5">
-                              <Link href={`/expenses/${expense.id}/edit`}>
-                                <Button variant="outline" size="sm">Edit</Button>
-                              </Link>
+                              {canMutateExpenses ? (
+                                <Link href={`/expenses/${expense.id}/edit`}>
+                                  <Button variant="outline" size="sm">Edit</Button>
+                                </Link>
+                              ) : (
+                                <span className="text-xs text-zinc-400">{quarterLocked ? "Locked" : "View only"}</span>
+                              )}
                             </td>
                             <td className="px-3 py-2.5 text-zinc-600">{expense.date}</td>
                             <td className="px-3 py-2.5 text-zinc-800">{expense.supplier ?? "Not supplied"}</td>
@@ -208,7 +222,8 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                   <h2 className="text-sm font-medium text-zinc-700">Add expense</h2>
                   <Chip color="accent" variant="soft" size="sm">KAN-3</Chip>
                 </div>
-                <form action={addExpense} className="grid grid-cols-2 gap-3">
+                {canMutateExpenses ? (
+                  <form action={addExpense} className="grid grid-cols-2 gap-3">
                   <input type="hidden" name="workspaceId" value={model.workspaceId} />
 
                   <div className="flex flex-col gap-1">
@@ -227,7 +242,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                       className="border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-800 bg-white">
                       {model.categories.map((c) => (
                         <option key={c.id} value={c.id}>
-                          {c.name} — default {defaultGstLabel(mapPrismaGstTreatment(c.defaultGstTreatment))}
+                          {c.name} - default {defaultGstLabel(mapPrismaGstTreatment(c.defaultGstTreatment))}
                         </option>
                       ))}
                     </select>
@@ -280,7 +295,14 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                       Save expense
                     </button>
                   </div>
-                </form>
+                  </form>
+                ) : (
+                  <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-600">
+                    {quarterLocked
+                      ? "This quarter is locked, so expenses cannot be added or edited right now."
+                      : "You can view expenses in this company, but only editors and admins can add or edit them."}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

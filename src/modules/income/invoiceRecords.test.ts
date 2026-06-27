@@ -4,8 +4,16 @@ import type { ValidationIssue } from "@/modules/shared/types";
 
 const mockPrisma = vi.hoisted(() => ({
   workspace: {
-    findFirst: vi.fn()
+    findUnique: vi.fn()
   }
+}));
+
+const mockAuth = vi.hoisted(() => ({
+  getWorkspaceAccess: vi.fn()
+}));
+
+vi.mock("@/modules/auth/service", () => ({
+  getWorkspaceAccess: mockAuth.getWorkspaceAccess
 }));
 
 vi.mock("@/modules/db/prisma", () => ({
@@ -22,7 +30,14 @@ import {
 
 describe("invoice records", () => {
   beforeEach(() => {
-    mockPrisma.workspace.findFirst.mockReset();
+    mockPrisma.workspace.findUnique.mockReset();
+    mockAuth.getWorkspaceAccess.mockReset();
+    mockAuth.getWorkspaceAccess.mockResolvedValue({
+      workspaceId: "workspace-a",
+      workspaceName: "Excelsior Consulting",
+      role: "ADMIN",
+      memberships: []
+    });
   });
 
   it("supports unpaid, partial, and paid invoice records with GST and evidence links", () => {
@@ -95,45 +110,43 @@ describe("invoice records", () => {
   });
 
   it("builds the invoice workspace view-model from the current quarter and filters", async () => {
-    mockPrisma.workspace.findFirst
-      .mockResolvedValueOnce({ id: "workspace-a" })
-      .mockResolvedValueOnce({
-        id: "workspace-a",
-        name: "Excelsior Consulting",
-        invoices: [
-          prismaRecord({
-            id: "inv-1",
-            invoiceNumber: "EXC-001",
-            client: client("client-a", "Northstar Labs"),
-            person: person("owner", "Owner"),
-            issueDate: "2026-04-08",
-            grossCents: dollars(1100),
-            gstTreatment: "GST_INCLUDED",
-            status: "ISSUED"
-          }),
-          prismaRecord({
-            id: "inv-2",
-            invoiceNumber: "EXC-002",
-            client: client("client-b", "Bluegum Systems"),
-            person: person("accountant", "Accountant"),
-            issueDate: "2026-05-12",
-            grossCents: dollars(2200),
-            gstTreatment: "GST_INCLUDED",
-            status: "PARTIALLY_PAID",
-            evidenceUrl: "https://drive.google.com/inv-2"
-          }),
-          prismaRecord({
-            id: "inv-3",
-            invoiceNumber: "EXC-003",
-            client: client("client-a", "Northstar Labs"),
-            person: person("owner", "Owner"),
-            issueDate: "2026-06-02",
-            grossCents: dollars(3300),
-            gstTreatment: "GST_INCLUDED",
-            status: "PAID"
-          })
-        ]
-      });
+    mockPrisma.workspace.findUnique.mockResolvedValue({
+      id: "workspace-a",
+      name: "Excelsior Consulting",
+      invoices: [
+        prismaRecord({
+          id: "inv-1",
+          invoiceNumber: "EXC-001",
+          client: client("client-a", "Northstar Labs"),
+          person: person("owner", "Owner"),
+          issueDate: "2026-04-08",
+          grossCents: dollars(1100),
+          gstTreatment: "GST_INCLUDED",
+          status: "ISSUED"
+        }),
+        prismaRecord({
+          id: "inv-2",
+          invoiceNumber: "EXC-002",
+          client: client("client-b", "Bluegum Systems"),
+          person: person("accountant", "Accountant"),
+          issueDate: "2026-05-12",
+          grossCents: dollars(2200),
+          gstTreatment: "GST_INCLUDED",
+          status: "PARTIALLY_PAID",
+          evidenceUrl: "https://drive.google.com/inv-2"
+        }),
+        prismaRecord({
+          id: "inv-3",
+          invoiceNumber: "EXC-003",
+          client: client("client-a", "Northstar Labs"),
+          person: person("owner", "Owner"),
+          issueDate: "2026-06-02",
+          grossCents: dollars(3300),
+          gstTreatment: "GST_INCLUDED",
+          status: "PAID"
+        })
+      ]
+    });
 
     const model = await getInvoiceWorkspace({
       month: "2026-06",
@@ -142,9 +155,10 @@ describe("invoice records", () => {
       paymentState: "paid"
     });
 
-    expect(mockPrisma.workspace.findFirst).toHaveBeenNthCalledWith(
-      2,
+    expect(mockAuth.getWorkspaceAccess).toHaveBeenCalledOnce();
+    expect(mockPrisma.workspace.findUnique).toHaveBeenCalledWith(
       expect.objectContaining({
+        where: { id: "workspace-a" },
         include: expect.objectContaining({
           invoices: expect.objectContaining({
             where: {

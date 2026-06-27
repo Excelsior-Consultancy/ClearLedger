@@ -1,9 +1,11 @@
-import { getAppModel } from "@/modules/appModel";
+import { addReviewCommentAction } from "@/app/auth/actions";
+import { canComment, getRoleLabel, getWorkspaceAccess, listReviewComments } from "@/modules/auth/service";
 import { buildBasReport } from "@/modules/bas/report";
 import { buildDashboardIssues } from "@/modules/dashboard/summary";
-import { currentExpenseQuarter, getExpenseWorkspace } from "@/modules/expenses/service";
+import { getExpenseWorkspace } from "@/modules/expenses/service";
 import { buildCaPackReadiness } from "@/modules/exports/caPack";
-import { enrichInvoice } from "@/modules/income/summary";
+import { getInvoiceWorkspace } from "@/modules/income/invoiceRecords";
+import { getPayrollWorkspace } from "@/modules/payroll/service";
 import { enrichPayRun } from "@/modules/payroll/summary";
 import { getPrimaryWorkspaceSetup } from "@/modules/setup/service";
 import { formatMoney } from "@/modules/shared/money";
@@ -37,32 +39,67 @@ function SectionHeader({ title }: { title: string }) {
 }
 
 export default async function Home() {
-  const model = getAppModel();
+  const access = await getWorkspaceAccess();
   const setup = await getPrimaryWorkspaceSetup();
   const expenseWorkspace = await getExpenseWorkspace();
-  const workspaceName = setup.workspace.name || model.workspace.name;
+  const invoiceWorkspace = await getInvoiceWorkspace();
+  const payrollWorkspace = await getPayrollWorkspace();
+  const comments = await listReviewComments(access.workspaceId, "quarter");
+  const workspaceName = setup.workspace.name || expenseWorkspace.workspaceName;
   const expenses = expenseWorkspace.expenses;
-  const invoices = model.invoices.map(enrichInvoice);
-  const payRuns = model.payRuns.map(enrichPayRun);
+  const invoiceRows = invoiceWorkspace.invoices;
+  const payRunsWithValidation = payrollWorkspace.payRuns.map(enrichPayRun);
+  const incomeSummary = {
+    grossIncomeCents: invoiceWorkspace.summary.grossIncomeCents,
+    gstCollectedCents: invoiceWorkspace.summary.gstCollectedCents,
+    paidInvoices: invoiceWorkspace.summary.paidInvoices,
+    unpaidInvoices: invoiceWorkspace.summary.unpaidInvoices,
+    draftInvoices: invoiceWorkspace.invoices.filter((invoice) => invoice.lifecycleState === "draft").length,
+    blockers: invoiceWorkspace.summary.blockers
+  };
+  const payrollSummary = {
+    wagesCents: payRunsWithValidation.reduce((total, payRun) => total + payRun.grossCents, 0),
+    reimbursementsCents: payRunsWithValidation.reduce((total, payRun) => total + payRun.reimbursementsCents, 0),
+    paygCents: payRunsWithValidation.reduce((total, payRun) => total + payRun.paygCents, 0),
+    superCents: payRunsWithValidation.reduce((total, payRun) => total + payRun.superCents, 0),
+    finalizedPayRuns: payRunsWithValidation.filter((payRun) => payRun.finalized).length,
+    draftPayRuns: payRunsWithValidation.filter((payRun) => !payRun.finalized).length,
+    warnings: payRunsWithValidation.filter((payRun) => payRun.issues.some((issue) => issue.severity === "warning")).length,
+    blockers: payRunsWithValidation.filter((payRun) => payRun.issues.some((issue) => issue.severity === "blocker")).length
+  };
   const expenseSummary = expenseWorkspace.summary;
   const basReport = buildBasReport({
-    quarter: { ...model.quarter, label: currentExpenseQuarter.label },
-    invoices: model.invoices,
+    quarter: expenseWorkspace.quarter,
+    invoices: invoiceWorkspace.invoices.map((invoice) => ({
+      id: invoice.id,
+      workspaceId: invoice.workspaceId,
+      invoiceNumber: invoice.invoiceNumber,
+      clientName: invoice.clientName,
+      issueDate: invoice.issueDate,
+      dueDate: invoice.issueDate,
+      grossCents: invoice.grossCents,
+      gstTreatment: invoice.gstTreatment,
+      paid: invoice.paymentState === "paid"
+    })),
     expenses,
-    payRuns: model.payRuns,
+    payRuns: payrollWorkspace.payRuns,
   });
   const caPack = buildCaPackReadiness({
     bas: basReport,
-    income: model.incomeSummary,
+    income: incomeSummary,
     expenses: expenseSummary,
-    payroll: model.payrollSummary,
+    payroll: payrollSummary,
   });
+  const dashboardWorkspace = {
+    ...setup.workspace,
+    setupComplete: setup.readiness.complete
+  } as any;
   const dashboardIssues = buildDashboardIssues({
-    workspace: model.workspace,
+    workspace: dashboardWorkspace,
     bas: basReport,
-    income: model.incomeSummary,
+    income: incomeSummary,
     expenses: expenseSummary,
-    payroll: model.payrollSummary,
+    payroll: payrollSummary,
   });
 
   return (
@@ -73,14 +110,14 @@ export default async function Home() {
           <option>{workspaceName}</option>
         </select>
         <select className="text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-700">
-          <option>{currentExpenseQuarter.label}</option>
+          <option>{expenseWorkspace.quarter.label}</option>
         </select>
         <input
           className="ml-auto text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 w-56"
           placeholder="Search source records"
           aria-label="Search"
         />
-        <Chip color="accent" variant="soft" size="sm">Director</Chip>
+        <Chip color="accent" variant="soft" size="sm">{getRoleLabel(access.role)}</Chip>
       </header>
 
       <div className="p-6 space-y-8">
@@ -98,14 +135,14 @@ export default async function Home() {
         </div>
 
         {/* KAN-6 Dashboard */}
-        <section id="dashboard">
-          <SectionHeader title="Dashboard" />
+        <section id="dashboard" data-testid="dashboard-section">
+          <SectionHeader title="Overview" />
           <div className="grid grid-cols-4 gap-3">
             <KpiCard title="BAS estimate" value={formatMoney(basReport.netGstCents)} />
             <KpiCard
               title="Quarter status"
-              value={model.quarter.locked ? "Locked" : "Draft"}
-              chip={<Chip color={model.quarter.locked ? "success" : "warning"} variant="soft" size="sm">{model.quarter.locked ? "final" : "draft"}</Chip>}
+              value={expenseWorkspace.quarter.locked ? "Locked" : "Draft"}
+              chip={<Chip color={expenseWorkspace.quarter.locked ? "success" : "warning"} variant="soft" size="sm">{expenseWorkspace.quarter.locked ? "final" : "draft"}</Chip>}
             />
             <KpiCard
               title="Ready for CA"
@@ -130,7 +167,7 @@ export default async function Home() {
         </section>
 
         {/* KAN-8 Admin */}
-        <section id="admin">
+        <section id="admin" data-testid="admin-section">
           <SectionHeader title="Admin / Company setup" />
           <div className="grid grid-cols-3 gap-4">
             <Card className="col-span-2">
@@ -142,7 +179,7 @@ export default async function Home() {
                   </Chip>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  {[["Company name", workspaceName], ["BAS frequency", model.workspace.basFrequency ?? "Quarterly"]].map(([label, value]) => (
+                  {[["Company name", workspaceName], ["BAS frequency", setup.workspace.basFrequency ?? "Quarterly"]].map(([label, value]) => (
                     <div key={label}>
                       <p className="text-xs text-zinc-400 mb-0.5">{label}</p>
                       <p className="text-sm text-zinc-800">{value}</p>
@@ -167,7 +204,7 @@ export default async function Home() {
         </section>
 
         {/* KAN-3 Expenses */}
-        <section id="expenses">
+        <section id="expenses" data-testid="expenses-section">
           <SectionHeader title="Expenses" />
           <div className="grid grid-cols-4 gap-3 mb-4">
             <KpiCard title="Total expenses" value={formatMoney(expenseSummary.totalExpensesCents)} />
@@ -220,13 +257,13 @@ export default async function Home() {
         </section>
 
         {/* KAN-2 Income */}
-        <section id="income">
+        <section id="income" data-testid="income-section">
           <SectionHeader title="Income" />
           <div className="grid grid-cols-4 gap-3 mb-4">
-            <KpiCard title="GST collected" value={formatMoney(model.incomeSummary.gstCollectedCents)} />
-            <KpiCard title="Paid invoices" value={String(model.incomeSummary.paidInvoices)} />
-            <KpiCard title="Unpaid invoices" value={String(model.incomeSummary.unpaidInvoices)} chip={<Chip color="warning" variant="soft" size="sm">Needs attention</Chip>} />
-            <KpiCard title="Draft invoices" value={String(model.incomeSummary.draftInvoices)} />
+            <KpiCard title="GST collected" value={formatMoney(incomeSummary.gstCollectedCents)} />
+            <KpiCard title="Paid invoices" value={String(incomeSummary.paidInvoices)} />
+            <KpiCard title="Unpaid invoices" value={String(incomeSummary.unpaidInvoices)} chip={<Chip color="warning" variant="soft" size="sm">Needs attention</Chip>} />
+            <KpiCard title="Draft invoices" value={String(incomeSummary.draftInvoices)} />
           </div>
           <Card>
             <CardContent className="p-0">
@@ -240,7 +277,7 @@ export default async function Home() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-50">
-                    {invoices.map((invoice) => (
+                    {invoiceRows.map((invoice) => (
                       <tr key={invoice.id} className="hover:bg-zinc-50">
                         <td className="px-4 py-3 font-mono text-xs text-zinc-600">{invoice.invoiceNumber}</td>
                         <td className="px-4 py-3 text-zinc-600">{invoice.issueDate}</td>
@@ -248,8 +285,8 @@ export default async function Home() {
                         <td className="px-4 py-3 text-zinc-800 font-medium">{formatMoney(invoice.grossCents)}</td>
                         <td className="px-4 py-3 text-zinc-600">{formatMoney(invoice.gstCents)}</td>
                         <td className="px-4 py-3">
-                          <Chip color={invoice.paid ? "success" : "warning"} variant="soft" size="sm">
-                            {invoice.paid ? "Paid" : "Unpaid"}
+                          <Chip color={invoice.paymentState === "paid" ? "success" : "warning"} variant="soft" size="sm">
+                            {invoice.paymentState === "paid" ? "Paid" : "Unpaid"}
                           </Chip>
                         </td>
                       </tr>
@@ -262,16 +299,16 @@ export default async function Home() {
         </section>
 
         {/* KAN-4 Payroll Lite */}
-        <section id="payroll-lite">
+        <section id="payroll-lite" data-testid="payroll-lite-section">
           <SectionHeader title="Payroll Lite" />
           <div className="rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800 mb-4">
             <strong>External lodgement note</strong> — STP lodgement and super clearing/payment remain external in MVP.
           </div>
           <div className="grid grid-cols-4 gap-3 mb-4">
-            <KpiCard title="Wages this quarter" value={formatMoney(model.payrollSummary.wagesCents)} />
-            <KpiCard title="PAYG withholding" value={formatMoney(model.payrollSummary.paygCents)} />
-            <KpiCard title="Super accrued" value={formatMoney(model.payrollSummary.superCents)} />
-            <KpiCard title="Draft pay runs" value={String(model.payrollSummary.draftPayRuns)} chip={<Chip color="warning" variant="soft" size="sm">Payroll due</Chip>} />
+            <KpiCard title="Wages this quarter" value={formatMoney(payrollSummary.wagesCents)} />
+            <KpiCard title="PAYG withholding" value={formatMoney(payrollSummary.paygCents)} />
+            <KpiCard title="Super accrued" value={formatMoney(payrollSummary.superCents)} />
+            <KpiCard title="Draft pay runs" value={String(payrollSummary.draftPayRuns)} chip={<Chip color="warning" variant="soft" size="sm">Payroll due</Chip>} />
           </div>
           <Card>
             <CardContent className="p-0">
@@ -285,7 +322,7 @@ export default async function Home() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-50">
-                    {payRuns.map((payRun) => (
+                    {payRunsWithValidation.map((payRun) => (
                       <tr key={payRun.id} className="hover:bg-zinc-50">
                         <td className="px-4 py-3 text-zinc-800">{payRun.employeeName}</td>
                         <td className="px-4 py-3 text-zinc-600">{payRun.payDate}</td>
@@ -307,7 +344,7 @@ export default async function Home() {
         </section>
 
         {/* KAN-5 BAS */}
-        <section id="bas">
+        <section id="bas" data-testid="bas-section">
           <SectionHeader title="BAS Quarter Reporting" />
           <div className="grid grid-cols-3 gap-3">
             <KpiCard title="GST collected" value={formatMoney(basReport.gstCollectedCents)} chip={<p className="text-xs text-zinc-400">Income source records</p>} />
@@ -320,14 +357,14 @@ export default async function Home() {
         </section>
 
         {/* KAN-7 CA Pack */}
-        <section id="ca-pack">
+        <section id="ca-pack" data-testid="ca-pack-section">
           <SectionHeader title="CA Pack Export" />
           <div className="grid grid-cols-3 gap-4">
             <Card className="col-span-2">
               <CardContent className="p-5">
                 <div className={`rounded-lg p-3 text-sm mb-4 ${caPack.state === "blocked" ? "bg-red-50 border border-red-200 text-red-800" : "bg-amber-50 border border-amber-200 text-amber-800"}`}>
                   <strong>{caPack.state === "blocked" ? "Export blocked" : "Draft export"}</strong>
-                  {" — "}{model.quarter.locked ? "Quarter is locked." : "Quarter is unlocked. Warnings included in CA Pack notes."}
+                  {" — "}{expenseWorkspace.quarter.locked ? "Quarter is locked." : "Quarter is unlocked. Warnings included in CA Pack notes."}
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   {caPack.sections.map((section) => (
@@ -357,6 +394,63 @@ export default async function Home() {
               </CardContent>
             </Card>
           </div>
+        </section>
+
+        {/* KAN-9 Comments */}
+        <section id="comments" data-testid="comments-section">
+          <SectionHeader title="Quarter review comments" />
+          <Card>
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div>
+                  <p className="text-sm font-medium text-zinc-700">Comments for {expenseWorkspace.quarter.label}</p>
+                  <p className="text-sm text-zinc-500">Accountants and editors can leave notes for quarter review.</p>
+                </div>
+                <Chip color={canComment(access.role) ? "success" : "default"} variant="soft" size="sm">
+                  {canComment(access.role) ? "Commenting enabled" : "View only"}
+                </Chip>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+                <div className="space-y-3">
+                  {comments.length === 0 ? (
+                    <p className="text-sm text-zinc-500">No comments yet.</p>
+                  ) : (
+                    comments.map((comment) => (
+                      <div key={comment.id} className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium text-zinc-900">{comment.author.name}</p>
+                          <p className="text-xs text-zinc-400">{comment.createdAt.toISOString().slice(0, 10)}</p>
+                        </div>
+                        <p className="mt-2 text-sm text-zinc-700 whitespace-pre-wrap">{comment.body}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="rounded-xl border border-zinc-200 bg-white p-4">
+                  <h3 className="text-sm font-semibold text-zinc-800 mb-3">Add comment</h3>
+                  {canComment(access.role) ? (
+                    <form action={addReviewCommentAction} className="space-y-3">
+                      <input type="hidden" name="targetType" value="quarter" />
+                      <input type="hidden" name="targetId" value={expenseWorkspace.quarter.label} />
+                      <textarea
+                        name="body"
+                        rows={5}
+                        placeholder="Leave a note for quarter review..."
+                        className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm resize-none"
+                      />
+                      <Button type="submit" variant="primary" size="sm" className="w-full">
+                        Post comment
+                      </Button>
+                    </form>
+                  ) : (
+                    <p className="text-sm text-zinc-500">You can view comments, but only accountants and editors can add them.</p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </section>
       </div>
     </>
