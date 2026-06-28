@@ -1,9 +1,10 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { MembershipRole } from "@prisma/client";
 import { selectWorkspaceAction, signOutAction } from "@/app/auth/actions";
+import { withQuarterQuery } from "@/modules/quarters/navigation";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard" },
@@ -30,7 +31,10 @@ function roleLabel(role: MembershipRole | null) {
 
 export function Sidebar({ currentRole, userName, memberships, selectedWorkspaceId }: SidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const quarterId = searchParams.get("quarterId");
   const [isPending, startTransition] = useTransition();
+  const withSelection = (href: string) => withQuarterQuery(href, quarterId);
 
   return (
     <aside className="w-56 min-h-screen bg-[#111827] text-[#e5e7eb] flex flex-col p-4 shrink-0">
@@ -71,7 +75,7 @@ export function Sidebar({ currentRole, userName, memberships, selectedWorkspaceI
           return (
             <Link
               key={href}
-              href={href}
+              href={withSelection(href)}
               className={`flex justify-between items-center px-3 py-2.5 rounded-md text-sm transition-colors ${
                 isActive
                   ? "bg-[#1f2937] text-white"

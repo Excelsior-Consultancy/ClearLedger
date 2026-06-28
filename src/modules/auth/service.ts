@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { MembershipRole } from "@prisma/client";
+import { MembershipRole, Prisma } from "@prisma/client";
 import { prisma } from "@/modules/db/prisma";
 
 const SESSION_COOKIE = "clearledger_session";
@@ -62,16 +62,6 @@ export function hashPassword(password: string, salt = crypto.randomBytes(16).toS
   return { salt, hash };
 }
 
-export function verifyPassword(password: string, salt: string, expectedHash: string) {
-  const actual = crypto.pbkdf2Sync(password, salt, PASSWORD_ITERATIONS, KEY_LENGTH, DIGEST).toString("hex");
-  const actualBuffer = Buffer.from(actual, "hex");
-  const expectedBuffer = Buffer.from(expectedHash, "hex");
-  if (actualBuffer.length !== expectedBuffer.length) {
-    return false;
-  }
-  return crypto.timingSafeEqual(actualBuffer, expectedBuffer);
-}
-
 function sessionCookieOptions(maxAgeDays = SESSION_DAYS) {
   return {
     httpOnly: true,
@@ -82,7 +72,12 @@ function sessionCookieOptions(maxAgeDays = SESSION_DAYS) {
   };
 }
 
-export async function createSession(userId: string) {
+type CookieStoreLike = {
+  set: (name: string, value: string, options: ReturnType<typeof sessionCookieOptions>) => void;
+  delete: (name: string) => void;
+};
+
+export async function createSession(userId: string, cookieStore?: CookieStoreLike) {
   const token = randomToken(32);
   const expiresAt = new Date(now().getTime() + SESSION_DAYS * 24 * 60 * 60 * 1000);
 
@@ -94,21 +89,23 @@ export async function createSession(userId: string) {
     }
   });
 
-  const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, token, sessionCookieOptions());
+  const store = cookieStore ?? (await cookies());
+  store.set(SESSION_COOKIE, token, sessionCookieOptions());
+  return token;
 }
 
-export async function destroySession() {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get(SESSION_COOKIE)?.value;
-  if (sessionToken) {
+export async function destroySession(sessionToken?: string, cookieStore?: CookieStoreLike) {
+  const readStore = await cookies();
+  const token = sessionToken ?? readStore.get(SESSION_COOKIE)?.value;
+  if (token) {
     await prisma.session.deleteMany({
-      where: { tokenHash: hashToken(sessionToken) }
+      where: { tokenHash: hashToken(token) }
     });
   }
 
-  cookieStore.delete(SESSION_COOKIE);
-  cookieStore.delete(WORKSPACE_COOKIE);
+  const store = cookieStore ?? readStore;
+  store.delete(SESSION_COOKIE);
+  store.delete(WORKSPACE_COOKIE);
 }
 
 async function getSessionRecord() {
@@ -215,93 +212,101 @@ export function getRoleLabel(role: MembershipRole) {
   }
 }
 
-export async function signIn(email: string, password: string) {
-  const user = await prisma.user.findUnique({
-    where: { email: normalizeEmail(email) },
+async function createWorkspaceWithMembership(tx: Prisma.TransactionClient, userId: string, companyName: string) {
+  const workspace = await tx.workspace.create({
+    data: {
+      name: companyName.trim(),
+      gstRegistered: null,
+      basFrequency: null,
+      financialYearStartMonth: 7,
+      quarterLocked: false
+    }
+  });
+
+  await tx.membership.create({
+    data: {
+      userId,
+      workspaceId: workspace.id,
+      role: MembershipRole.ADMIN
+    }
+  });
+
+  return workspace;
+}
+
+export async function createWorkspaceForUser(input: { userId: string; companyName: string }, cookieStore?: CookieStoreLike) {
+  const companyName = input.companyName.trim();
+  if (!companyName) {
+    throw new Error("Company name is required.");
+  }
+
+  const workspace = await prisma.$transaction(async (tx) => createWorkspaceWithMembership(tx, input.userId, companyName));
+  await selectWorkspace(workspace.id, cookieStore);
+  return workspace;
+}
+
+export async function findOrCreateGoogleUser(input: { email: string; name: string }) {
+  const email = normalizeEmail(input.email);
+  const name = input.name.trim() || email.split("@")[0] || "Google user";
+  const existing = await prisma.user.findUnique({
+    where: { email },
     select: {
       id: true,
       name: true,
       email: true,
       active: true,
-      passwordHash: true,
-      passwordSalt: true,
       memberships: {
         where: { active: true },
         orderBy: [{ createdAt: "asc" }],
         select: {
           id: true,
           role: true,
-          workspaceId: true
+          workspaceId: true,
+          workspace: {
+            select: {
+              id: true,
+              name: true
+            }
+          }
         }
       }
     }
   });
 
-  if (!user || !user.active || !verifyPassword(password, user.passwordSalt, user.passwordHash)) {
-    return null;
-  }
-
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    memberships: user.memberships
-  };
-}
-
-export async function registerFirstCompany(input: {
-  name: string;
-  email: string;
-  password: string;
-  companyName: string;
-}) {
-  const email = normalizeEmail(input.email);
-  const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
   if (existing) {
-    throw new Error("An account already exists for this email. Please log in instead.");
+    return existing;
   }
 
-  const { salt, hash } = hashPassword(input.password);
-  const companyName = input.companyName.trim();
-  if (!companyName) {
-    throw new Error("Company name is required.");
-  }
-
-  const result = await prisma.$transaction(async (tx) => {
-    const workspace = await tx.workspace.create({
-      data: {
-        name: companyName,
-        gstRegistered: null,
-        basFrequency: null,
-        financialYearStartMonth: 7,
-        quarterLocked: false
+  const { salt, hash } = hashPassword(randomToken(24));
+  return prisma.user.create({
+    data: {
+      name,
+      email,
+      passwordHash: hash,
+      passwordSalt: salt
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      active: true,
+      memberships: {
+        where: { active: true },
+        orderBy: [{ createdAt: "asc" }],
+        select: {
+          id: true,
+          role: true,
+          workspaceId: true,
+          workspace: {
+            select: {
+              id: true,
+              name: true
+            }
+          }
+        }
       }
-    });
-
-    const user = await tx.user.create({
-      data: {
-        name: input.name.trim(),
-        email,
-        passwordHash: hash,
-        passwordSalt: salt
-      }
-    });
-
-    await tx.membership.create({
-      data: {
-        userId: user.id,
-        workspaceId: workspace.id,
-        role: MembershipRole.ADMIN
-      }
-    });
-
-    return { user, workspace };
+    }
   });
-
-  await createSession(result.user.id);
-  await selectWorkspace(result.workspace.id);
-
-  return result;
 }
 
 export async function createInvitation(input: {
@@ -329,7 +334,7 @@ export async function createInvitation(input: {
   };
 }
 
-export async function acceptInvitation(token: string, userId: string) {
+export async function acceptInvitation(token: string, userId: string, cookieStore?: CookieStoreLike) {
   const tokenHash = hashToken(token);
   const invitation = await prisma.invitation.findUnique({
     where: { tokenHash }
@@ -377,13 +382,13 @@ export async function acceptInvitation(token: string, userId: string) {
     });
   });
 
-  await selectWorkspace(invitation.workspaceId);
+  await selectWorkspace(invitation.workspaceId, cookieStore);
   return invitation.workspaceId;
 }
 
-export async function selectWorkspace(workspaceId: string) {
-  const cookieStore = await cookies();
-  cookieStore.set(WORKSPACE_COOKIE, workspaceId, {
+export async function selectWorkspace(workspaceId: string, cookieStore?: CookieStoreLike) {
+  const store = cookieStore ?? (await cookies());
+  store.set(WORKSPACE_COOKIE, workspaceId, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -534,9 +539,13 @@ export async function createReviewComment(input: {
   });
 }
 
-export async function listReviewComments(workspaceId: string, targetType = "quarter") {
+export async function listReviewComments(workspaceId: string, targetType = "quarter", targetId?: string) {
   return prisma.comment.findMany({
-    where: { workspaceId, targetType },
+    where: {
+      workspaceId,
+      targetType,
+      targetId: targetId ?? undefined
+    },
     include: {
       author: {
         select: {

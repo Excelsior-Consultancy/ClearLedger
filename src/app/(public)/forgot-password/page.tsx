@@ -10,11 +10,11 @@ export default function ForgotPasswordPage() {
             <p className="text-xs uppercase tracking-[0.22em] text-zinc-500">ClearLedger</p>
             <h1 className="text-3xl font-semibold text-zinc-900 mt-2">Reset password</h1>
             <p className="text-sm text-zinc-500 mt-1">
-              Password reset is not wired to email delivery yet in this MVP build.
+              ClearLedger uses Google-only sign-in, so there is no password reset flow.
             </p>
           </div>
           <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
-            Ask an admin to invite you again or sign in with your current credentials.
+            Use the Google account tied to your company invitation or ask an admin to send a new invite.
           </div>
           <Link href="/login">
             <Button className="w-full" variant="primary">Back to login</Button>

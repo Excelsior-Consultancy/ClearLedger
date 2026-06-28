@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { signInAction } from "@/app/auth/actions";
+import { beginGoogleAuthAction } from "@/app/auth/actions";
 import { Button, Card, CardContent } from "@heroui/react";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -20,33 +20,25 @@ export default async function LoginPage({ searchParams }: { searchParams?: Searc
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-zinc-500">ClearLedger</p>
             <h1 className="text-3xl font-semibold text-zinc-900 mt-2">Log in</h1>
-            <p className="text-sm text-zinc-500 mt-1">Access the current company or switch between companies you belong to.</p>
+            <p className="text-sm text-zinc-500 mt-1">Sign in with Google to access your companies.</p>
           </div>
 
           {error && (
             <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
-              {error === "invalid" ? "Email or password is incorrect." : decodeURIComponent(error)}
+              {decodeURIComponent(error)}
             </div>
           )}
 
-          <form action={signInAction} className="space-y-4">
+          <form action={beginGoogleAuthAction} className="space-y-4">
             {invite && <input type="hidden" name="inviteToken" value={invite} />}
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1">Email</label>
-              <input name="email" type="email" required className="w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm" placeholder="you@example.com" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1">Password</label>
-              <input name="password" type="password" required className="w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm" placeholder="••••••••" />
-            </div>
             <Button type="submit" className="w-full" variant="primary">
-              Log in
+              Continue with Google
             </Button>
           </form>
 
           <div className="flex items-center justify-between text-sm">
-            <Link href="/signup" className="text-blue-700 hover:underline">Create account</Link>
-            <Link href="/forgot-password" className="text-zinc-500 hover:underline">Forgot password?</Link>
+            <Link href="/signup" className="text-blue-700 hover:underline">Create first company</Link>
+            <span className="text-zinc-500">Google only for now</span>
           </div>
         </CardContent>
       </Card>

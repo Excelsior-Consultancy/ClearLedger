@@ -6,12 +6,18 @@ import type {
 } from "@prisma/client";
 import { prisma } from "@/modules/db/prisma";
 import { getWorkspaceAccess } from "@/modules/auth/service";
-import { currentReportingQuarter, withQuarterLock, type ReportingQuarter } from "@/modules/shared/quarter";
+import {
+  currentReportingQuarter,
+  quarterDateRange,
+  withQuarterLock,
+  type ReportingQuarter
+} from "@/modules/shared/quarter";
 import { assertQuarterEditable, getWorkspaceQuarterState } from "@/modules/shared/quarterGuard";
 import { enrichExpense, summarizeExpenses } from "@/modules/expenses/summary";
 import type { ExpenseSummary, ExpenseWithValidation } from "@/modules/expenses/summary";
 import type { Cents } from "@/modules/shared/money";
 import type { Expense, GstTreatment, ValidationIssue } from "@/modules/shared/types";
+import { resolveWorkspaceQuarter } from "@/modules/quarters/service";
 import { validateExpense } from "@/modules/validation/records";
 
 type ExpenseRecord = PrismaExpense & {
@@ -79,25 +85,6 @@ function parseDateInput(value: string): Date | null {
     return null;
   }
   return date;
-}
-
-function addUtcDays(date: Date, days: number): Date {
-  const next = new Date(date);
-  next.setUTCDate(next.getUTCDate() + days);
-  return next;
-}
-
-function currentQuarterDateRange() {
-  const start = parseDateInput(currentExpenseQuarter.startDate);
-  const inclusiveEnd = parseDateInput(currentExpenseQuarter.endDate);
-  if (!start || !inclusiveEnd) {
-    throw new Error("Current expense quarter configuration is invalid.");
-  }
-
-  return {
-    start,
-    exclusiveEnd: addUtcDays(inclusiveEnd, 1)
-  };
 }
 
 function safeReceiptUrlIssue(receiptUrl: string | undefined): ValidationIssue | null {
@@ -319,9 +306,10 @@ async function getCurrentWorkspaceId(): Promise<string> {
   return access.workspaceId;
 }
 
-export async function getExpenseWorkspace(filter: ExpenseFilter = "all"): Promise<ExpenseWorkspace> {
+export async function getExpenseWorkspace(filter: ExpenseFilter = "all", quarterId?: string): Promise<ExpenseWorkspace> {
   const currentWorkspaceId = await getCurrentWorkspaceId();
-  const quarterRange = currentQuarterDateRange();
+  const { selectedQuarter } = await resolveWorkspaceQuarter(currentWorkspaceId, quarterId);
+  const quarterRange = quarterDateRange(selectedQuarter);
   const workspace = await prisma.workspace.findUnique({
     where: { id: currentWorkspaceId },
     include: {
@@ -351,7 +339,7 @@ export async function getExpenseWorkspace(filter: ExpenseFilter = "all"): Promis
   return {
     workspaceId: workspace.id,
     workspaceName: workspace.name,
-    quarter: await getWorkspaceQuarterState(workspace.id),
+    quarter: selectedQuarter,
     bankAccounts: workspace.bankAccounts.filter((account) => account.active),
     categories: workspace.categories.filter((category) => category.active && category.type === "EXPENSE"),
     expenses: visibleExpenses,

@@ -1,29 +1,53 @@
 -- CreateEnum
-DROP TYPE IF EXISTS WorkspaceRole;
-CREATE TYPE "WorkspaceRole" AS ENUM ('DIRECTOR', 'ACCOUNTANT', 'EMPLOYEE');
+DO $$
+BEGIN
+    CREATE TYPE "WorkspaceRole" AS ENUM ('DIRECTOR', 'ACCOUNTANT', 'EMPLOYEE');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-DROP TYPE IF EXISTS PersonType;
-CREATE TYPE "PersonType" AS ENUM ('DIRECTOR', 'ACCOUNTANT', 'EMPLOYEE', 'CONTRACTOR', 'CLIENT_CONTACT');
+DO $$
+BEGIN
+    CREATE TYPE "PersonType" AS ENUM ('DIRECTOR', 'ACCOUNTANT', 'EMPLOYEE', 'CONTRACTOR', 'CLIENT_CONTACT');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-DROP TYPE IF EXISTS CategoryType;
-CREATE TYPE "CategoryType" AS ENUM ('INCOME', 'EXPENSE');
+DO $$
+BEGIN
+    CREATE TYPE "CategoryType" AS ENUM ('INCOME', 'EXPENSE');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-DROP TYPE IF EXISTS GstTreatment;
-CREATE TYPE "GstTreatment" AS ENUM ('GST_INCLUDED', 'GST_FREE', 'NO_GST_OVERSEAS', 'MANUAL_OVERRIDE');
+DO $$
+BEGIN
+    CREATE TYPE "GstTreatment" AS ENUM ('GST_INCLUDED', 'GST_FREE', 'NO_GST_OVERSEAS', 'MANUAL_OVERRIDE');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-DROP TYPE IF EXISTS BasTreatment;
-CREATE TYPE "BasTreatment" AS ENUM ('GST_COLLECTED', 'GST_PAID', 'PAYROLL', 'NONE');
+DO $$
+BEGIN
+    CREATE TYPE "BasTreatment" AS ENUM ('GST_COLLECTED', 'GST_PAID', 'PAYROLL', 'NONE');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-DROP TYPE IF EXISTS BasFrequency;
-CREATE TYPE "BasFrequency" AS ENUM ('QUARTERLY', 'MONTHLY');
+DO $$
+BEGIN
+    CREATE TYPE "BasFrequency" AS ENUM ('QUARTERLY', 'MONTHLY');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateTable
-CREATE TABLE "Workspace" (
+CREATE TABLE IF NOT EXISTS "Workspace" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "legalName" TEXT,
@@ -41,7 +65,7 @@ CREATE TABLE "Workspace" (
 );
 
 -- CreateTable
-CREATE TABLE "BankAccount" (
+CREATE TABLE IF NOT EXISTS "BankAccount" (
     "id" TEXT NOT NULL,
     "workspaceId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -56,7 +80,7 @@ CREATE TABLE "BankAccount" (
 );
 
 -- CreateTable
-CREATE TABLE "Category" (
+CREATE TABLE IF NOT EXISTS "Category" (
     "id" TEXT NOT NULL,
     "workspaceId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -71,7 +95,7 @@ CREATE TABLE "Category" (
 );
 
 -- CreateTable
-CREATE TABLE "Person" (
+CREATE TABLE IF NOT EXISTS "Person" (
     "id" TEXT NOT NULL,
     "workspaceId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -87,19 +111,37 @@ CREATE TABLE "Person" (
 );
 
 -- CreateIndex
-CREATE INDEX "BankAccount_workspaceId_idx" ON "BankAccount"("workspaceId");
+CREATE INDEX IF NOT EXISTS "BankAccount_workspaceId_idx" ON "BankAccount"("workspaceId");
 
 -- CreateIndex
-CREATE INDEX "Category_workspaceId_idx" ON "Category"("workspaceId");
+CREATE INDEX IF NOT EXISTS "Category_workspaceId_idx" ON "Category"("workspaceId");
 
 -- CreateIndex
-CREATE INDEX "Person_workspaceId_idx" ON "Person"("workspaceId");
+CREATE INDEX IF NOT EXISTS "Person_workspaceId_idx" ON "Person"("workspaceId");
 
 -- AddForeignKey
-ALTER TABLE "BankAccount" ADD CONSTRAINT "BankAccount_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "BankAccount"
+    ADD CONSTRAINT "BankAccount_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Category" ADD CONSTRAINT "Category_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "Category"
+    ADD CONSTRAINT "Category_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Person" ADD CONSTRAINT "Person_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "Person"
+    ADD CONSTRAINT "Person_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;

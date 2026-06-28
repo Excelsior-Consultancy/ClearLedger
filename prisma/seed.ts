@@ -238,6 +238,17 @@ async function main() {
     data: [
       {
         workspaceId: excelsior.id,
+        date: new Date("2025-05-14T00:00:00.000Z"),
+        supplier: "Legacy AWS",
+        categoryId: software.id,
+        bankAccountId: raja.id,
+        grossCents: 27500,
+        gstTreatment: "GST_INCLUDED",
+        receiptUrl: "https://drive.google.com/example/legacy-aws",
+        notes: "Historical quarter sample"
+      },
+      {
+        workspaceId: excelsior.id,
         date: new Date("2026-04-12T00:00:00.000Z"),
         supplier: "AWS",
         categoryId: software.id,
@@ -276,6 +287,20 @@ async function main() {
         workspaceId: excelsior.id,
         clientId: northstar.id,
         personId: ownerPerson.id,
+        invoiceNumber: "EXC-000",
+        issueDate: new Date("2025-06-18T00:00:00.000Z"),
+        dueDate: new Date("2025-07-02T00:00:00.000Z"),
+        status: "PAID",
+        grossCents: 8800,
+        gstTreatment: "GST_INCLUDED",
+        paymentDate: new Date("2025-06-30T00:00:00.000Z"),
+        evidenceUrl: "https://drive.google.com/example/exc-000",
+        notes: "Legacy retainer"
+      },
+      {
+        workspaceId: excelsior.id,
+        clientId: northstar.id,
+        personId: ownerPerson.id,
         invoiceNumber: "EXC-001",
         issueDate: new Date("2026-04-08T00:00:00.000Z"),
         dueDate: new Date("2026-04-22T00:00:00.000Z"),
@@ -297,6 +322,48 @@ async function main() {
         grossCents: 6600,
         gstTreatment: "GST_INCLUDED",
         notes: "Implementation work"
+      }
+    ]
+  });
+
+  await prisma.payRun.createMany({
+    data: [
+      {
+        workspaceId: excelsior.id,
+        employeeName: "Sample Employee",
+        periodStart: new Date("2025-04-01T00:00:00.000Z"),
+        periodEnd: new Date("2025-04-14T00:00:00.000Z"),
+        payDate: new Date("2025-04-15T00:00:00.000Z"),
+        grossCents: 280000,
+        reimbursementsCents: 0,
+        paygCents: 54000,
+        superCents: 29400,
+        finalized: true
+      },
+      {
+        workspaceId: excelsior.id,
+        employeeName: "Sample Employee",
+        periodStart: new Date("2026-04-01T00:00:00.000Z"),
+        periodEnd: new Date("2026-04-14T00:00:00.000Z"),
+        payDate: new Date("2026-04-15T00:00:00.000Z"),
+        grossCents: 300000,
+        reimbursementsCents: 12000,
+        paygCents: 62000,
+        superCents: 34500,
+        finalized: true
+      },
+      {
+        workspaceId: excelsior.id,
+        employeeName: "Sample Employee",
+        periodStart: new Date("2026-04-15T00:00:00.000Z"),
+        periodEnd: new Date("2026-04-28T00:00:00.000Z"),
+        payDate: new Date("2026-04-29T00:00:00.000Z"),
+        grossCents: 300000,
+        reimbursementsCents: 0,
+        paygCents: 62000,
+        superCents: 34500,
+        finalized: false,
+        overrideReason: "Draft pay run pending review"
       }
     ]
   });

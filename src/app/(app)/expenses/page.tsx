@@ -10,6 +10,9 @@ import {
 } from "@/modules/expenses/service";
 import { formatMoney } from "@/modules/shared/money";
 import { Button, Card, CardContent, Chip } from "@heroui/react";
+import { getWorkspaceQuarterContext } from "@/modules/quarters/service";
+import { ReportingPeriodSwitcher } from "@/components/ReportingPeriodSwitcher";
+import { withQuarterQuery } from "@/modules/quarters/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -58,9 +61,12 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
   const activeFilter: ExpenseFilter = isExpenseFilter(filterParam) ? filterParam : "all";
   const error = single(params.error);
   const saved = single(params.saved);
+  const quarterId = single(params.quarterId);
   const access = await getWorkspaceAccess();
   const canEdit = canEditCompany(access.role);
-  const model = await getExpenseWorkspace(activeFilter);
+  const quarterContext = await getWorkspaceQuarterContext(access.workspaceId, quarterId);
+  const selectedQuarterId = quarterContext.selectedQuarterId;
+  const model = await getExpenseWorkspace(activeFilter, selectedQuarterId);
   const quarterLocked = model.quarter.locked;
   const canMutateExpenses = canEdit && !quarterLocked;
   const defaultCategory = model.categories[0];
@@ -74,9 +80,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
         <select className="text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-700" aria-label="Workspace">
           <option value={model.workspaceId}>{model.workspaceName}</option>
         </select>
-        <select className="text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-700" aria-label="Quarter">
-          <option value={model.quarter.label}>{model.quarter.label}</option>
-        </select>
+        <Chip color="warning" variant="soft" size="sm">{model.quarter.label}</Chip>
         <input
           className="ml-auto text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 w-56"
           placeholder="Search expenses"
@@ -86,6 +90,12 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
       </header>
 
       <div className="p-6 space-y-6">
+        <ReportingPeriodSwitcher
+          quarters={quarterContext.quarters}
+          selectedQuarterId={selectedQuarterId}
+          className="mb-2"
+        />
+
         {/* Page header */}
         <div className="flex items-start justify-between">
           <div>
@@ -94,7 +104,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
               Capture expenses by bank account, validate GST, and keep BAS evidence traceable.
             </p>
           </div>
-          <Link href="/admin/setup">
+          <Link href={withQuarterQuery("/admin/setup", selectedQuarterId)}>
             <Button variant="outline" size="sm">Manage setup</Button>
           </Link>
         </div>
@@ -149,7 +159,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                   {filters.map((filter) => (
                     <Link
                       key={filter.value}
-                      href={filter.value === "all" ? "/expenses" : `/expenses?filter=${filter.value}`}
+                      href={withQuarterQuery(filter.value === "all" ? "/expenses" : `/expenses?filter=${filter.value}`, selectedQuarterId)}
                     >
                       <Chip
                         color={activeFilter === filter.value ? "accent" : "default"}
@@ -177,7 +187,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                           <tr key={expense.id} className="hover:bg-zinc-50">
                             <td className="px-3 py-2.5">
                               {canMutateExpenses ? (
-                                <Link href={`/expenses/${expense.id}/edit`}>
+                                <Link href={withQuarterQuery(`/expenses/${expense.id}/edit`, selectedQuarterId)}>
                                   <Button variant="outline" size="sm">Edit</Button>
                                 </Link>
                               ) : (
@@ -228,7 +238,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
 
                   <div className="flex flex-col gap-1">
                     <label className="text-xs text-zinc-500" htmlFor="date">Date</label>
-                    <input id="date" name="date" type="date" defaultValue="2026-06-07" required
+                    <input id="date" name="date" type="date" defaultValue={model.quarter.startDate} required
                       className="border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-800 bg-white" />
                   </div>
                   <div className="flex flex-col gap-1">

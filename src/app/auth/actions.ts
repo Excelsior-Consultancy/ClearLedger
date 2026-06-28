@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import crypto from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { MembershipRole } from "@prisma/client";
@@ -13,14 +14,22 @@ import {
   destroySession,
   getAuthContext,
   getWorkspaceAccess,
-  registerFirstCompany,
+  createWorkspaceForUser,
   selectWorkspace,
-  signIn,
   updateMembershipRole,
   deactivateMembership,
   normalizeEmail
 } from "@/modules/auth/service";
 import { prisma } from "@/modules/db/prisma";
+import {
+  createGoogleAuthUrl,
+  createPkcePair,
+  GOOGLE_PENDING_COMPANY_COOKIE,
+  GOOGLE_PENDING_INVITE_COOKIE,
+  GOOGLE_PENDING_STATE_COOKIE,
+  GOOGLE_PENDING_VERIFIER_COOKIE,
+  pendingGoogleAuthCookieOptions
+} from "@/modules/auth/google";
 
 function text(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -43,48 +52,58 @@ async function getRequestOrigin() {
   return `${protocol}://${host}`;
 }
 
-export async function signInAction(formData: FormData) {
-  const email = text(formData, "email");
-  const password = text(formData, "password");
+export async function beginGoogleAuthAction(formData: FormData) {
   const inviteToken = text(formData, "inviteToken");
-  const user = await signIn(email, password);
-  if (!user) {
-    redirect("/login?error=invalid");
-  }
-
-  await createSession(user.id);
-  const cookieStore = await cookies();
-  const rememberedWorkspaceId = cookieStore.get("clearledger_workspace")?.value;
-  let selectedWorkspaceId =
-    user.memberships.find((membership) => membership.workspaceId === rememberedWorkspaceId)?.workspaceId ??
-    user.memberships[0]?.workspaceId;
-  if (inviteToken) {
-    selectedWorkspaceId = await acceptInvitation(inviteToken, user.id);
-  }
-  if (selectedWorkspaceId) {
-    await selectWorkspace(selectedWorkspaceId);
-  }
-
-  redirect("/");
-}
-
-export async function signUpAction(formData: FormData) {
-  const name = text(formData, "name");
-  const email = text(formData, "email");
-  const password = text(formData, "password");
   const companyName = text(formData, "companyName");
+  const shouldStoreCompanyName = companyName.length > 0;
 
-  if (!name || !email || !password || !companyName) {
-    redirect("/signup?error=missing");
-  }
+  const cookieStore = await cookies();
+  const { verifier, challenge } = createPkcePair();
+  const state = crypto.randomBytes(24).toString("base64url");
 
   try {
-    await registerFirstCompany({ name, email, password, companyName });
+    cookieStore.set(GOOGLE_PENDING_STATE_COOKIE, state, pendingGoogleAuthCookieOptions());
+    cookieStore.set(GOOGLE_PENDING_VERIFIER_COOKIE, verifier, pendingGoogleAuthCookieOptions());
+    if (inviteToken) {
+      cookieStore.set(GOOGLE_PENDING_INVITE_COOKIE, inviteToken, pendingGoogleAuthCookieOptions());
+    }
+    if (shouldStoreCompanyName) {
+      cookieStore.set(GOOGLE_PENDING_COMPANY_COOKIE, encodeURIComponent(companyName), pendingGoogleAuthCookieOptions());
+    }
+
+    const origin = await getRequestOrigin();
+    const authUrl = createGoogleAuthUrl({
+      origin,
+      state,
+      codeChallenge: challenge
+    });
+    redirect(authUrl);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unable to sign up.";
-    redirect(`/signup?error=${encodeURIComponent(message)}`);
+    const message = error instanceof Error ? error.message : "Google sign-in is not available right now.";
+    redirect(`/login?error=${encodeURIComponent(message)}`);
+  }
+}
+
+export async function createCompanyAction(formData: FormData) {
+  const context = await getAuthContext();
+  if (!context) {
+    redirect("/login");
+  }
+  if (context.currentMembership) {
+    redirect("/");
   }
 
+  const companyName = text(formData, "companyName");
+  if (!companyName) {
+    redirect("/signup?error=missing-company");
+  }
+
+  await createWorkspaceForUser({
+    userId: context!.user.id,
+    companyName
+  });
+
+  revalidatePath("/");
   redirect("/");
 }
 
@@ -145,7 +164,7 @@ export async function acceptInviteAction(formData: FormData) {
   const context = await getAuthContext();
   if (!context) {
     const token = text(formData, "token");
-    redirect(`/login?invite=${encodeURIComponent(token)}`);
+    redirect(`/signup?invite=${encodeURIComponent(token)}`);
   }
 
   const token = text(formData, "token");

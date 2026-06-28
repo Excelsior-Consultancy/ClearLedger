@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "PayRun" (
+CREATE TABLE IF NOT EXISTS "PayRun" (
     "id" TEXT NOT NULL,
     "workspaceId" TEXT NOT NULL,
     "employeeName" TEXT NOT NULL,
@@ -20,13 +20,19 @@ CREATE TABLE "PayRun" (
 );
 
 -- CreateIndex
-CREATE INDEX "PayRun_workspaceId_idx" ON "PayRun"("workspaceId");
+CREATE INDEX IF NOT EXISTS "PayRun_workspaceId_idx" ON "PayRun"("workspaceId");
 
 -- CreateIndex
-CREATE INDEX "PayRun_periodStart_idx" ON "PayRun"("periodStart");
+CREATE INDEX IF NOT EXISTS "PayRun_periodStart_idx" ON "PayRun"("periodStart");
 
 -- CreateIndex
-CREATE INDEX "PayRun_payDate_idx" ON "PayRun"("payDate");
+CREATE INDEX IF NOT EXISTS "PayRun_payDate_idx" ON "PayRun"("payDate");
 
 -- AddForeignKey
-ALTER TABLE "PayRun" ADD CONSTRAINT "PayRun_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "PayRun"
+    ADD CONSTRAINT "PayRun_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;

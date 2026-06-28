@@ -5,6 +5,7 @@ import { editExpense } from "../../actions";
 import { getExpenseForEdit, mapPrismaGstTreatment } from "@/modules/expenses/service";
 import { canEditCompany, getRoleLabel, getWorkspaceAccess } from "@/modules/auth/service";
 import { formatMoney } from "@/modules/shared/money";
+import { withQuarterQuery } from "@/modules/quarters/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +41,9 @@ export default async function EditExpensePage({
   searchParams?: SearchParams;
 }) {
   const { id } = await params;
-  const error = single((await searchParams)?.error);
+  const paramsQuery = (await searchParams) ?? {};
+  const error = single(paramsQuery.error);
+  const quarterId = single(paramsQuery.quarterId);
   const access = await getWorkspaceAccess();
   const canEdit = canEditCompany(access.role);
   const model = await getExpenseForEdit(id);
@@ -55,9 +58,9 @@ export default async function EditExpensePage({
       <aside className="side-nav">
         <p className="brand">ClearLedger</p>
         <nav className="nav-list" aria-label="Main navigation">
-          <Link className="nav-item" href="/">Dashboard</Link>
-          <Link className="nav-item active" href="/expenses">Expenses</Link>
-          <Link className="nav-item" href="/admin/setup">Admin</Link>
+          <Link className="nav-item" href={withQuarterQuery("/", quarterId)}>Dashboard</Link>
+          <Link className="nav-item active" href={withQuarterQuery("/expenses", quarterId)}>Expenses</Link>
+          <Link className="nav-item" href={withQuarterQuery("/admin/setup", quarterId)}>Admin</Link>
         </nav>
       </aside>
 
@@ -76,7 +79,7 @@ export default async function EditExpensePage({
               <h1>Edit expense</h1>
               <p className="muted">{model.expense.supplier ?? "Unnamed expense"} currently contributes {formatMoney(model.expense.gstCents)} GST paid.</p>
             </div>
-            <Link className="button secondary" href="/expenses">Back to expenses</Link>
+            <Link className="button secondary" href={withQuarterQuery("/expenses", quarterId)}>Back to expenses</Link>
           </div>
 
           {quarterLocked ? (

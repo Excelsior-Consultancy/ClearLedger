@@ -7,6 +7,9 @@ import { buildCaPackReadiness } from "@/modules/exports/caPack";
 import { getInvoiceWorkspace } from "@/modules/income/invoiceRecords";
 import { getPayrollWorkspace } from "@/modules/payroll/service";
 import { enrichPayRun } from "@/modules/payroll/summary";
+import { getWorkspaceQuarterContext } from "@/modules/quarters/service";
+import { ReportingPeriodSwitcher } from "@/components/ReportingPeriodSwitcher";
+import { withQuarterQuery } from "@/modules/quarters/navigation";
 import { getPrimaryWorkspaceSetup } from "@/modules/setup/service";
 import { formatMoney } from "@/modules/shared/money";
 import type { StatusSeverity } from "@/modules/shared/types";
@@ -14,6 +17,12 @@ import { Button, Card, CardContent, Chip } from "@heroui/react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+function single(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
 
 function severityColor(severity: StatusSeverity): "danger" | "warning" | "success" | "accent" {
   if (severity === "blocker") return "danger";
@@ -38,13 +47,17 @@ function SectionHeader({ title }: { title: string }) {
   return <h2 className="text-base font-semibold text-zinc-800 mb-3">{title}</h2>;
 }
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams?: SearchParams }) {
+  const params = (await searchParams) ?? {};
+  const quarterId = single(params.quarterId);
   const access = await getWorkspaceAccess();
   const setup = await getPrimaryWorkspaceSetup();
-  const expenseWorkspace = await getExpenseWorkspace();
-  const invoiceWorkspace = await getInvoiceWorkspace();
-  const payrollWorkspace = await getPayrollWorkspace();
-  const comments = await listReviewComments(access.workspaceId, "quarter");
+  const quarterContext = await getWorkspaceQuarterContext(access.workspaceId, quarterId);
+  const selectedQuarterId = quarterContext.selectedQuarterId;
+  const expenseWorkspace = await getExpenseWorkspace("all", selectedQuarterId);
+  const invoiceWorkspace = await getInvoiceWorkspace({}, selectedQuarterId);
+  const payrollWorkspace = await getPayrollWorkspace(selectedQuarterId);
+  const comments = await listReviewComments(access.workspaceId, "quarter", expenseWorkspace.quarter.label);
   const workspaceName = setup.workspace.name || expenseWorkspace.workspaceName;
   const expenses = expenseWorkspace.expenses;
   const invoiceRows = invoiceWorkspace.invoices;
@@ -109,9 +122,6 @@ export default async function Home() {
         <select className="text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-700">
           <option>{workspaceName}</option>
         </select>
-        <select className="text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-700">
-          <option>{expenseWorkspace.quarter.label}</option>
-        </select>
         <input
           className="ml-auto text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 w-56"
           placeholder="Search source records"
@@ -121,6 +131,12 @@ export default async function Home() {
       </header>
 
       <div className="p-6 space-y-8">
+        <ReportingPeriodSwitcher
+          quarters={quarterContext.quarters}
+          selectedQuarterId={selectedQuarterId}
+          className="mb-2"
+        />
+
         {/* Page header */}
         <div className="flex items-start justify-between">
           <div>
@@ -128,7 +144,7 @@ export default async function Home() {
             <p className="text-sm text-zinc-500 mt-0.5">BAS readiness cockpit for {workspaceName}</p>
           </div>
           <div className="flex gap-2">
-            <Link href="/expenses"><Button variant="primary" size="sm">Add expense</Button></Link>
+            <Link href={withQuarterQuery("/expenses", selectedQuarterId)}><Button variant="primary" size="sm">Add expense</Button></Link>
             <Link href="#bas"><Button variant="outline" size="sm">Review BAS</Button></Link>
             <Link href="#ca-pack"><Button variant="outline" size="sm">Prepare CA Pack</Button></Link>
           </div>
@@ -195,7 +211,7 @@ export default async function Home() {
                     ? "Bank accounts, people, and categories are available."
                     : setup.readiness.blockers.join(" ")}
                 </div>
-                <Link href="/admin/setup">
+                <Link href={withQuarterQuery("/admin/setup", selectedQuarterId)}>
                   <Button variant="primary" size="sm" className="w-full">Open full setup</Button>
                 </Link>
               </CardContent>
@@ -250,7 +266,7 @@ export default async function Home() {
                 </table>
               </div>
               <div className="px-4 py-3 border-t border-zinc-100">
-                <Link href="/expenses"><Button variant="outline" size="sm">View all expenses →</Button></Link>
+                <Link href={withQuarterQuery("/expenses", selectedQuarterId)}><Button variant="outline" size="sm">View all expenses →</Button></Link>
               </div>
             </CardContent>
           </Card>

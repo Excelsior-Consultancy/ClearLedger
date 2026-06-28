@@ -60,9 +60,9 @@ export default async function InvitePage({ params, searchParams }: { params: Par
               <p className="text-sm text-zinc-600">
                 Ask the company admin to create a new invite for this email address.
               </p>
-              <Link href={auth ? "/" : "/login"}>
+              <Link href={auth ? "/" : `/signup?invite=${encodeURIComponent(token)}`}>
                 <Button className="w-full" variant="outline">
-                  {auth ? "Back to dashboard" : "Log in"}
+                  {auth ? "Back to dashboard" : "Continue with Google"}
                 </Button>
               </Link>
             </div>
@@ -76,14 +76,14 @@ export default async function InvitePage({ params, searchParams }: { params: Par
           ) : (
             <div className="space-y-3">
               <p className="text-sm text-zinc-600">
-                Please log in using the same email address that received the invite ({normalizeEmail(invitation?.email ?? "")}).
+                Continue with Google using the same email address that received the invite ({normalizeEmail(invitation?.email ?? "")}).
               </p>
               <div className="flex gap-2">
-                <Link href={`/login?invite=${encodeURIComponent(token)}`} className="flex-1">
-                  <Button className="w-full" variant="primary">Log in</Button>
+                <Link href={`/signup?invite=${encodeURIComponent(token)}`} className="flex-1">
+                  <Button className="w-full" variant="primary">Continue with Google</Button>
                 </Link>
-                <Link href="/signup" className="flex-1">
-                  <Button className="w-full" variant="outline">Sign up</Button>
+                <Link href="/login" className="flex-1">
+                  <Button className="w-full" variant="outline">Log in</Button>
                 </Link>
               </div>
             </div>

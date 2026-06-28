@@ -1,8 +1,13 @@
 -- CreateEnum
-CREATE TYPE "InvoiceStatus" AS ENUM ('DRAFT', 'ISSUED', 'PARTIALLY_PAID', 'PAID', 'OVERDUE', 'CANCELLED');
+DO $$
+BEGIN
+    CREATE TYPE "InvoiceStatus" AS ENUM ('DRAFT', 'ISSUED', 'PARTIALLY_PAID', 'PAID', 'OVERDUE', 'CANCELLED');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateTable
-CREATE TABLE "Client" (
+CREATE TABLE IF NOT EXISTS "Client" (
     "id" TEXT NOT NULL,
     "workspaceId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -18,7 +23,7 @@ CREATE TABLE "Client" (
 );
 
 -- CreateTable
-CREATE TABLE "Invoice" (
+CREATE TABLE IF NOT EXISTS "Invoice" (
     "id" TEXT NOT NULL,
     "workspaceId" TEXT NOT NULL,
     "clientId" TEXT NOT NULL,
@@ -40,34 +45,58 @@ CREATE TABLE "Invoice" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Client_workspaceId_name_key" ON "Client"("workspaceId", "name");
+CREATE UNIQUE INDEX IF NOT EXISTS "Client_workspaceId_name_key" ON "Client"("workspaceId", "name");
 
 -- CreateIndex
-CREATE INDEX "Client_workspaceId_idx" ON "Client"("workspaceId");
+CREATE INDEX IF NOT EXISTS "Client_workspaceId_idx" ON "Client"("workspaceId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Invoice_workspaceId_invoiceNumber_key" ON "Invoice"("workspaceId", "invoiceNumber");
+CREATE UNIQUE INDEX IF NOT EXISTS "Invoice_workspaceId_invoiceNumber_key" ON "Invoice"("workspaceId", "invoiceNumber");
 
 -- CreateIndex
-CREATE INDEX "Invoice_workspaceId_idx" ON "Invoice"("workspaceId");
+CREATE INDEX IF NOT EXISTS "Invoice_workspaceId_idx" ON "Invoice"("workspaceId");
 
 -- CreateIndex
-CREATE INDEX "Invoice_clientId_idx" ON "Invoice"("clientId");
+CREATE INDEX IF NOT EXISTS "Invoice_clientId_idx" ON "Invoice"("clientId");
 
 -- CreateIndex
-CREATE INDEX "Invoice_personId_idx" ON "Invoice"("personId");
+CREATE INDEX IF NOT EXISTS "Invoice_personId_idx" ON "Invoice"("personId");
 
 -- CreateIndex
-CREATE INDEX "Invoice_issueDate_idx" ON "Invoice"("issueDate");
+CREATE INDEX IF NOT EXISTS "Invoice_issueDate_idx" ON "Invoice"("issueDate");
 
 -- AddForeignKey
-ALTER TABLE "Client" ADD CONSTRAINT "Client_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "Client"
+    ADD CONSTRAINT "Client_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Invoice" ADD CONSTRAINT "Invoice_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "Invoice"
+    ADD CONSTRAINT "Invoice_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Invoice" ADD CONSTRAINT "Invoice_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "Invoice"
+    ADD CONSTRAINT "Invoice_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Invoice" ADD CONSTRAINT "Invoice_personId_fkey" FOREIGN KEY ("personId") REFERENCES "Person"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$
+BEGIN
+    ALTER TABLE "Invoice"
+    ADD CONSTRAINT "Invoice_personId_fkey" FOREIGN KEY ("personId") REFERENCES "Person"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;

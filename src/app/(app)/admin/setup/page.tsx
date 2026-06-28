@@ -12,9 +12,17 @@ import {
 import { getPrimaryWorkspaceSetup } from "@/modules/setup/service";
 import { canManageCompany, getRoleLabel, getWorkspaceAccess } from "@/modules/auth/service";
 import { Button, Card, CardContent, Chip } from "@heroui/react";
-import { currentExpenseQuarter } from "@/modules/shared/quarter";
+import { getWorkspaceQuarterContext } from "@/modules/quarters/service";
+import { ReportingPeriodSwitcher } from "@/components/ReportingPeriodSwitcher";
+import { withQuarterQuery } from "@/modules/quarters/navigation";
 
 export const dynamic = "force-dynamic";
+
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+function single(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
 
 const gstTreatmentOptions = [
   ["GST_INCLUDED", "GST included"],
@@ -34,9 +42,13 @@ const inputCls = "border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-
 const labelCls = "text-xs text-zinc-500 mb-1 block";
 const fieldCls = "flex flex-col";
 
-export default async function SetupPage() {
+export default async function SetupPage({ searchParams }: { searchParams?: SearchParams }) {
+  const params = (await searchParams) ?? {};
+  const quarterId = single(params.quarterId);
   const access = await getWorkspaceAccess();
   const { workspace, readiness } = await getPrimaryWorkspaceSetup();
+  const quarterContext = await getWorkspaceQuarterContext(access.workspaceId, quarterId);
+  const selectedQuarterId = quarterContext.selectedQuarterId;
   const canManage = canManageCompany(access.role);
 
   if (!canManage) {
@@ -49,7 +61,7 @@ export default async function SetupPage() {
               <h1 className="text-2xl font-semibold text-zinc-900 mt-1">Company setup</h1>
               <p className="text-sm text-zinc-500 mt-1">Only admins can edit company setup.</p>
             </div>
-            <Link href="/"><Button variant="outline" size="sm">Back to dashboard</Button></Link>
+            <Link href={withQuarterQuery("/", quarterId)}><Button variant="outline" size="sm">Back to dashboard</Button></Link>
           </CardContent>
         </Card>
       </div>
@@ -63,9 +75,6 @@ export default async function SetupPage() {
         <select className="text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-700" aria-label="Workspace">
           <option value={workspace.id}>{workspace.name || "New workspace"}</option>
         </select>
-        <select className="text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-700" aria-label="Quarter">
-          <option value={currentExpenseQuarter.label}>{currentExpenseQuarter.label}</option>
-        </select>
         <input
           className="ml-auto text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 w-56"
           placeholder="Search setup records"
@@ -75,6 +84,12 @@ export default async function SetupPage() {
       </header>
 
       <div className="p-6 space-y-6">
+        <ReportingPeriodSwitcher
+          quarters={quarterContext.quarters}
+          selectedQuarterId={selectedQuarterId}
+          className="mb-2"
+        />
+
         {/* Page header */}
         <div className="flex items-start justify-between">
           <div>
@@ -83,7 +98,7 @@ export default async function SetupPage() {
               Complete the company, BAS, bank, people, and category setup used by every MVP module.
             </p>
           </div>
-          <Link href="/"><Button variant="outline" size="sm">← Back to dashboard</Button></Link>
+          <Link href={withQuarterQuery("/", selectedQuarterId)}><Button variant="outline" size="sm">← Back to dashboard</Button></Link>
         </div>
 
         <div className="grid grid-cols-[1fr_300px] gap-4">
@@ -93,7 +108,7 @@ export default async function SetupPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h2 className="text-sm font-semibold text-zinc-700">Quarter lock</h2>
-                    <p className="text-xs text-zinc-500 mt-1">{currentExpenseQuarter.label} for this company</p>
+                    <p className="text-xs text-zinc-500 mt-1">{quarterContext.selectedQuarter.label} for this company</p>
                   </div>
                   <Chip color={workspace.quarterLocked ? "success" : "warning"} variant="soft" size="sm">
                     {workspace.quarterLocked ? "Locked" : "Draft"}
