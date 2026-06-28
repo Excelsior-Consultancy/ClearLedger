@@ -6,21 +6,17 @@ import type {
 } from "@prisma/client";
 import { prisma } from "@/modules/db/prisma";
 import { getWorkspaceAccess } from "@/modules/auth/service";
-import { currentReportingQuarter, withQuarterLock } from "@/modules/shared/quarter";
+import { type ReportingQuarter } from "@/modules/shared/quarter";
 import { calculateGst } from "@/modules/validation/gst";
 import type { Cents } from "@/modules/shared/money";
 import { sumMoney } from "@/modules/shared/money";
 import type { GstTreatment, ValidationIssue } from "@/modules/shared/types";
+import { resolveWorkspaceQuarter } from "@/modules/quarters/service";
 
 export type InvoicePaymentState = "unpaid" | "partial" | "paid";
 export type InvoiceLifecycleState = "draft" | "issued" | "partially_paid" | "paid" | "overdue" | "cancelled";
 
-export type InvoiceRecordQuarter = {
-  label: string;
-  startDate: string;
-  endDate: string;
-  locked: boolean;
-};
+export type InvoiceRecordQuarter = ReportingQuarter;
 
 export type InvoiceRecordInput = {
   workspaceId: string;
@@ -83,11 +79,6 @@ export type InvoiceRecordSummary = {
   partialInvoices: number;
   paidInvoices: number;
   blockers: number;
-};
-
-const defaultQuarter: InvoiceRecordQuarter = {
-  ...currentReportingQuarter,
-  locked: false
 };
 
 const prismaInvoiceStatuses = [
@@ -215,9 +206,23 @@ export function filterInvoiceRecords(
   return rows;
 }
 
-export async function getInvoiceWorkspace(filters: InvoiceRecordWorkspaceFilters = {}): Promise<InvoiceRecordWorkspace> {
+export async function getInvoiceWorkspace(filters: InvoiceRecordWorkspaceFilters = {}, quarterId?: string): Promise<InvoiceRecordWorkspace> {
   const currentWorkspaceId = await getCurrentWorkspaceId();
-  const quarter = filters.quarter ?? defaultQuarter;
+  const selectedQuarter = quarterId
+    ? (await resolveWorkspaceQuarter(currentWorkspaceId, quarterId)).selectedQuarter
+    : filters.quarter
+      ? {
+          id: "selected-quarter",
+          ...filters.quarter,
+          active: false
+        }
+      : (await resolveWorkspaceQuarter(currentWorkspaceId)).selectedQuarter;
+  const quarter = {
+    label: selectedQuarter.label,
+    startDate: selectedQuarter.startDate,
+    endDate: selectedQuarter.endDate,
+    locked: selectedQuarter.locked || !selectedQuarter.active
+  };
   const dateRange = resolveDateRange(quarter, filters.month);
 
   const workspace = await prisma.workspace.findUnique({
@@ -259,7 +264,7 @@ export async function getInvoiceWorkspace(filters: InvoiceRecordWorkspaceFilters
   return {
     workspaceId: workspace.id,
     workspaceName: workspace.name,
-    quarter: withQuarterLock(workspace.quarterLocked),
+    quarter,
     invoices: visibleInvoices,
     activeClientId,
     activePersonId,

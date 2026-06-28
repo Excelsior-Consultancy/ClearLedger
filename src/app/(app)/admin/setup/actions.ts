@@ -12,6 +12,7 @@ import {
 import { prisma } from "@/modules/db/prisma";
 import { canManageCompany, getWorkspaceAccess } from "@/modules/auth/service";
 import { assertQuarterEditable } from "@/modules/shared/quarterGuard";
+import { toggleCurrentQuarterLock } from "@/modules/quarters/service";
 
 function text(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -44,6 +45,7 @@ export async function updateCompanySetup(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/admin/setup");
   revalidatePath("/expenses");
+  revalidatePath("/quarters");
 }
 
 export async function addBankAccount(formData: FormData) {
@@ -65,6 +67,7 @@ export async function addBankAccount(formData: FormData) {
   revalidatePath("/admin/setup");
   revalidatePath("/");
   revalidatePath("/expenses");
+  revalidatePath("/quarters");
 }
 
 export async function setBankAccountActive(formData: FormData) {
@@ -86,6 +89,7 @@ export async function setBankAccountActive(formData: FormData) {
   revalidatePath("/admin/setup");
   revalidatePath("/");
   revalidatePath("/expenses");
+  revalidatePath("/quarters");
 }
 
 export async function addCategory(formData: FormData) {
@@ -107,6 +111,7 @@ export async function addCategory(formData: FormData) {
   revalidatePath("/admin/setup");
   revalidatePath("/");
   revalidatePath("/expenses");
+  revalidatePath("/quarters");
 }
 
 export async function setCategoryActive(formData: FormData) {
@@ -128,6 +133,7 @@ export async function setCategoryActive(formData: FormData) {
   revalidatePath("/admin/setup");
   revalidatePath("/");
   revalidatePath("/expenses");
+  revalidatePath("/quarters");
 }
 
 export async function addPerson(formData: FormData) {
@@ -148,6 +154,7 @@ export async function addPerson(formData: FormData) {
   });
 
   revalidatePath("/admin/setup");
+  revalidatePath("/quarters");
 }
 
 export async function setPersonActive(formData: FormData) {
@@ -167,6 +174,7 @@ export async function setPersonActive(formData: FormData) {
   });
 
   revalidatePath("/admin/setup");
+  revalidatePath("/quarters");
 }
 
 export async function toggleQuarterLock(formData: FormData) {
@@ -176,21 +184,10 @@ export async function toggleQuarterLock(formData: FormData) {
   }
 
   const workspaceId = access.workspaceId;
-  const workspace = await prisma.workspace.findUnique({
-    where: { id: workspaceId },
-    select: { quarterLocked: true }
-  });
-
-  if (!workspace) {
-    throw new Error("Company not found.");
-  }
-
-  await prisma.workspace.update({
-    where: { id: workspaceId },
-    data: { quarterLocked: text(formData, "quarterLocked") === "true" }
-  });
+  await toggleCurrentQuarterLock(workspaceId, text(formData, "quarterLocked") === "true");
 
   revalidatePath("/admin/setup");
   revalidatePath("/");
   revalidatePath("/expenses");
+  revalidatePath("/quarters");
 }

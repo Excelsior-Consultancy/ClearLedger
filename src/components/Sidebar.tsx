@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { MembershipRole } from "@prisma/client";
 import { selectWorkspaceAction, signOutAction } from "@/app/auth/actions";
@@ -12,6 +12,8 @@ const NAV_ITEMS = [
   { href: "/payroll", label: "Payroll Lite", badge: "MVP" },
   { href: "/bas", label: "BAS" },
   { href: "/ca-pack", label: "CA Pack" },
+  { href: "/companies", label: "Companies" },
+  { href: "/quarters", label: "Quarters" },
   { href: "/admin/setup", label: "Admin" },
   { href: "/admin/users", label: "Users" },
 ];
@@ -30,7 +32,14 @@ function roleLabel(role: MembershipRole | null) {
 
 export function Sidebar({ currentRole, userName, memberships, selectedWorkspaceId }: SidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const quarterId = searchParams.get("quarterId");
   const [isPending, startTransition] = useTransition();
+  const withQuarterQuery = (href: string) => {
+    if (!quarterId) return href;
+    const separator = href.includes("?") ? "&" : "?";
+    return `${href}${separator}quarterId=${encodeURIComponent(quarterId)}`;
+  };
 
   return (
     <aside className="w-56 min-h-screen bg-[#111827] text-[#e5e7eb] flex flex-col p-4 shrink-0">
@@ -39,8 +48,8 @@ export function Sidebar({ currentRole, userName, memberships, selectedWorkspaceI
         <p className="text-xs text-[#94a3b8] mt-1">{userName} · {roleLabel(currentRole)}</p>
       </div>
 
-      {memberships.length > 1 && (
-        <form action={selectWorkspaceAction} className="mb-4">
+      <div className="mb-4 space-y-3">
+        <form action={selectWorkspaceAction}>
           <label className="block text-[11px] uppercase tracking-[0.16em] text-[#94a3b8] mb-2">Company</label>
           <select
             name="workspaceId"
@@ -62,7 +71,15 @@ export function Sidebar({ currentRole, userName, memberships, selectedWorkspaceI
             Switch company
           </button>
         </form>
-      )}
+        <div className="grid grid-cols-2 gap-2">
+          <Link href="/companies/new" className="rounded-md border border-[#334155] px-3 py-2 text-xs text-center text-white hover:bg-[#1f2937] transition-colors">
+            New company
+          </Link>
+          <Link href="/quarters" className="rounded-md border border-[#334155] px-3 py-2 text-xs text-center text-white hover:bg-[#1f2937] transition-colors">
+            Quarters
+          </Link>
+        </div>
+      </div>
 
       <nav className="flex flex-col gap-0.5">
         {NAV_ITEMS.map(({ href, label, badge }) => {
@@ -71,7 +88,7 @@ export function Sidebar({ currentRole, userName, memberships, selectedWorkspaceI
           return (
             <Link
               key={href}
-              href={href}
+              href={withQuarterQuery(href)}
               className={`flex justify-between items-center px-3 py-2.5 rounded-md text-sm transition-colors ${
                 isActive
                   ? "bg-[#1f2937] text-white"

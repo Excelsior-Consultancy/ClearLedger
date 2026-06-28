@@ -101,6 +101,21 @@ async function main() {
     }
   });
 
+  const excelsiorQuarter = await prisma.reportingQuarter.create({
+    data: {
+      workspaceId: excelsior.id,
+      label: "Q4 FY2025-26",
+      startDate: new Date("2026-04-01T00:00:00.000Z"),
+      endDate: new Date("2026-06-30T00:00:00.000Z"),
+      locked: false
+    }
+  });
+
+  await prisma.workspace.update({
+    where: { id: excelsior.id },
+    data: { activeQuarterId: excelsiorQuarter.id }
+  });
+
   const harbour = await prisma.workspace.create({
     data: {
       id: "harbour-advisory",
@@ -145,6 +160,21 @@ async function main() {
         ]
       }
     }
+  });
+
+  const harbourQuarter = await prisma.reportingQuarter.create({
+    data: {
+      workspaceId: harbour.id,
+      label: "Q4 FY2025-26",
+      startDate: new Date("2026-04-01T00:00:00.000Z"),
+      endDate: new Date("2026-06-30T00:00:00.000Z"),
+      locked: false
+    }
+  });
+
+  await prisma.workspace.update({
+    where: { id: harbour.id },
+    data: { activeQuarterId: harbourQuarter.id }
   });
 
   const owner = await prisma.user.create({

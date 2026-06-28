@@ -74,6 +74,7 @@ model Workspace {
   financialYearStartMonth Int?
   invoicePrefix           String?
   quarterLocked           Boolean       @default(false)
+  activeQuarterId         String?
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
 
@@ -84,9 +85,28 @@ model Workspace {
   clients      Client[]
   invoices     Invoice[]
   payRuns      PayRun[]
+  quarters     ReportingQuarter[] @relation("WorkspaceQuarters")
+  activeQuarter ReportingQuarter? @relation("WorkspaceActiveQuarter", fields: [activeQuarterId], references: [id], onDelete: SetNull)
   memberships  Membership[]
   invitations  Invitation[]
   comments     Comment[]
+}
+
+model ReportingQuarter {
+  id          String    @id @default(cuid())
+  workspaceId String
+  label       String
+  startDate   DateTime
+  endDate     DateTime
+  locked      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace Workspace @relation("WorkspaceQuarters", fields: [workspaceId], references: [id], onDelete: Cascade)
+  activeWorkspaces Workspace[] @relation("WorkspaceActiveQuarter")
+
+  @@index([workspaceId])
+  @@index([workspaceId, startDate])
 }
 
 model User {

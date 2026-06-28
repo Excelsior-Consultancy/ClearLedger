@@ -10,6 +10,7 @@ import {
   createInvitation,
   createReviewComment,
   createSession,
+  createWorkspaceForCurrentUser,
   destroySession,
   getAuthContext,
   getWorkspaceAccess,
@@ -110,6 +111,8 @@ export async function selectWorkspaceAction(formData: FormData) {
   revalidatePath("/income");
   revalidatePath("/admin/setup");
   revalidatePath("/admin/users");
+  revalidatePath("/companies");
+  revalidatePath("/quarters");
   redirect("/");
 }
 
@@ -221,4 +224,27 @@ export async function addReviewCommentAction(formData: FormData) {
 
   revalidatePath("/");
   redirect("/?saved=comment");
+}
+
+export async function createCompanyAction(formData: FormData) {
+  const context = await getAuthContext();
+  if (!context) {
+    redirect("/login");
+  }
+
+  const companyName = text(formData, "companyName");
+  if (!companyName) {
+    redirect("/companies/new?error=missing-name");
+  }
+
+  const workspace = await createWorkspaceForCurrentUser({
+    userId: context.user.id,
+    workspaceName: companyName
+  });
+
+  await selectWorkspace(workspace.id);
+  revalidatePath("/");
+  revalidatePath("/companies");
+  revalidatePath("/admin/setup");
+  redirect("/companies?saved=company");
 }

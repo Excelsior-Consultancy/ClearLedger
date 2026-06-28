@@ -1,6 +1,7 @@
 import { prisma } from "@/modules/db/prisma";
 import { getSetupReadiness } from "./readiness";
 import { getWorkspaceAccess } from "@/modules/auth/service";
+import { getWorkspaceQuarterContext } from "@/modules/quarters/service";
 
 type SetupWorkspaceRecord = {
   id: string;
@@ -82,6 +83,12 @@ export async function getPrimaryWorkspaceSetup() {
     }
   }))) as unknown as SetupWorkspaceRecord;
 
+  const quarterContext = await getWorkspaceQuarterContext(workspace.id);
+
   const readiness = getSetupReadiness(workspace);
-  return { workspace: { ...workspace, setupComplete: readiness.complete }, readiness };
+  return {
+    workspace: { ...workspace, setupComplete: readiness.complete },
+    quarter: quarterContext.currentQuarter,
+    readiness
+  };
 }

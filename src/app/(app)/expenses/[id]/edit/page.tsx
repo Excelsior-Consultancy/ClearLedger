@@ -40,7 +40,10 @@ export default async function EditExpensePage({
   searchParams?: SearchParams;
 }) {
   const { id } = await params;
-  const error = single((await searchParams)?.error);
+  const paramsQuery = (await searchParams) ?? {};
+  const error = single(paramsQuery.error);
+  const quarterId = single(paramsQuery.quarterId);
+  const quarterQuery = quarterId ? `?quarterId=${encodeURIComponent(quarterId)}` : "";
   const access = await getWorkspaceAccess();
   const canEdit = canEditCompany(access.role);
   const model = await getExpenseForEdit(id);
@@ -55,9 +58,9 @@ export default async function EditExpensePage({
       <aside className="side-nav">
         <p className="brand">ClearLedger</p>
         <nav className="nav-list" aria-label="Main navigation">
-          <Link className="nav-item" href="/">Dashboard</Link>
-          <Link className="nav-item active" href="/expenses">Expenses</Link>
-          <Link className="nav-item" href="/admin/setup">Admin</Link>
+          <Link className="nav-item" href={`/${quarterQuery}`}>Dashboard</Link>
+          <Link className="nav-item active" href={`/expenses${quarterQuery}`}>Expenses</Link>
+          <Link className="nav-item" href={`/admin/setup${quarterQuery}`}>Admin</Link>
         </nav>
       </aside>
 
@@ -76,7 +79,7 @@ export default async function EditExpensePage({
               <h1>Edit expense</h1>
               <p className="muted">{model.expense.supplier ?? "Unnamed expense"} currently contributes {formatMoney(model.expense.gstCents)} GST paid.</p>
             </div>
-            <Link className="button secondary" href="/expenses">Back to expenses</Link>
+            <Link className="button secondary" href={`/expenses${quarterQuery}`}>Back to expenses</Link>
           </div>
 
           {quarterLocked ? (

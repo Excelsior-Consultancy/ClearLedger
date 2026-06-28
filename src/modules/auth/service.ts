@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { MembershipRole } from "@prisma/client";
 import { prisma } from "@/modules/db/prisma";
+import { currentReportingQuarter, parseIsoDate } from "@/modules/shared/quarter";
 
 const SESSION_COOKIE = "clearledger_session";
 const WORKSPACE_COOKIE = "clearledger_workspace";
@@ -278,6 +279,22 @@ export async function registerFirstCompany(input: {
       }
     });
 
+    const initialQuarterStart = parseIsoDate(currentReportingQuarter.startDate);
+    const initialQuarterEnd = parseIsoDate(currentReportingQuarter.endDate);
+    if (!initialQuarterStart || !initialQuarterEnd) {
+      throw new Error("Default reporting quarter configuration is invalid.");
+    }
+
+    const quarter = await tx.reportingQuarter.create({
+      data: {
+        workspaceId: workspace.id,
+        label: currentReportingQuarter.label,
+        startDate: initialQuarterStart,
+        endDate: initialQuarterEnd,
+        locked: false
+      }
+    });
+
     const user = await tx.user.create({
       data: {
         name: input.name.trim(),
@@ -295,6 +312,11 @@ export async function registerFirstCompany(input: {
       }
     });
 
+    await tx.workspace.update({
+      where: { id: workspace.id },
+      data: { activeQuarterId: quarter.id }
+    });
+
     return { user, workspace };
   });
 
@@ -302,6 +324,59 @@ export async function registerFirstCompany(input: {
   await selectWorkspace(result.workspace.id);
 
   return result;
+}
+
+export async function createWorkspaceForCurrentUser(input: {
+  userId: string;
+  workspaceName: string;
+}) {
+  const workspaceName = input.workspaceName.trim();
+  if (!workspaceName) {
+    throw new Error("Company name is required.");
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const workspace = await tx.workspace.create({
+      data: {
+        name: workspaceName,
+        gstRegistered: null,
+        basFrequency: null,
+        financialYearStartMonth: 7,
+        quarterLocked: false
+      }
+    });
+
+    const initialQuarterStart = parseIsoDate(currentReportingQuarter.startDate);
+    const initialQuarterEnd = parseIsoDate(currentReportingQuarter.endDate);
+    if (!initialQuarterStart || !initialQuarterEnd) {
+      throw new Error("Default reporting quarter configuration is invalid.");
+    }
+
+    const quarter = await tx.reportingQuarter.create({
+      data: {
+        workspaceId: workspace.id,
+        label: currentReportingQuarter.label,
+        startDate: initialQuarterStart,
+        endDate: initialQuarterEnd,
+        locked: false
+      }
+    });
+
+    await tx.membership.create({
+      data: {
+        userId: input.userId,
+        workspaceId: workspace.id,
+        role: MembershipRole.ADMIN
+      }
+    });
+
+    await tx.workspace.update({
+      where: { id: workspace.id },
+      data: { activeQuarterId: quarter.id }
+    });
+
+    return workspace;
+  });
 }
 
 export async function createInvitation(input: {
