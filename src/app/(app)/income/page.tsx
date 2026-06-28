@@ -2,16 +2,39 @@ import Link from "next/link";
 import { getInvoiceWorkspace } from "@/modules/income/invoiceRecords";
 import { buildIncomeSummaryViews } from "@/modules/income/summaryViews";
 import { formatMoney } from "@/modules/shared/money";
+import { getWorkspaceAccess } from "@/modules/auth/service";
+import { getWorkspaceQuarterContext } from "@/modules/quarters/service";
+import { ReportingPeriodSwitcher } from "@/components/ReportingPeriodSwitcher";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function IncomePage() {
-  const workspace = await getInvoiceWorkspace();
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+function single(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function IncomePage({ searchParams }: { searchParams?: SearchParams }) {
+  const params = (await searchParams) ?? {};
+  const quarterId = single(params.quarterId);
+  const access = await getWorkspaceAccess();
+  const quarterContext = await getWorkspaceQuarterContext(access.workspaceId);
+  const selectedQuarterId = quarterContext.quarters.some((quarter) => quarter.id === quarterId)
+    ? quarterId!
+    : quarterContext.currentQuarterId;
+  const quarterQuery = `?quarterId=${encodeURIComponent(selectedQuarterId)}`;
+  const workspace = await getInvoiceWorkspace({}, selectedQuarterId);
   const views = buildIncomeSummaryViews(workspace.invoices, workspace.quarter.label);
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
+      <ReportingPeriodSwitcher
+        quarters={quarterContext.quarters}
+        selectedQuarterId={selectedQuarterId}
+        className="mb-6"
+      />
+
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <p className="text-sm uppercase tracking-[0.18em] text-zinc-400">Income summary</p>
@@ -20,7 +43,7 @@ export default async function IncomePage() {
             Quarter view derived from visible invoice records with traceable source rows.
           </p>
         </div>
-        <Link href="/" className="text-sm text-blue-700 hover:underline">Back to dashboard</Link>
+        <Link href={`/${quarterQuery}`} className="text-sm text-blue-700 hover:underline">Back to dashboard</Link>
       </div>
 
       <section className="grid gap-4 md:grid-cols-3 mb-6">

@@ -6,8 +6,9 @@ import type {
 } from "@prisma/client";
 import { prisma } from "@/modules/db/prisma";
 import { getWorkspaceAccess } from "@/modules/auth/service";
-import { currentReportingQuarter, withQuarterLock, type ReportingQuarter } from "@/modules/shared/quarter";
+import { type ReportingQuarter } from "@/modules/shared/quarter";
 import { assertQuarterEditable, getWorkspaceQuarterState } from "@/modules/shared/quarterGuard";
+import { resolveWorkspaceQuarter } from "@/modules/quarters/service";
 import { enrichExpense, summarizeExpenses } from "@/modules/expenses/summary";
 import type { ExpenseSummary, ExpenseWithValidation } from "@/modules/expenses/summary";
 import type { Cents } from "@/modules/shared/money";
@@ -52,8 +53,6 @@ export type ExpenseInput = {
 
 export type ExpenseFilter = "all" | "missing-receipts" | "manual-overrides" | "blockers";
 
-export const currentExpenseQuarter = currentReportingQuarter;
-
 const prismaGstTreatments = ["GST_INCLUDED", "GST_FREE", "NO_GST_OVERSEAS", "MANUAL_OVERRIDE"] as const;
 
 function isPrismaGstTreatment(value: string): value is PrismaGstTreatment {
@@ -81,22 +80,16 @@ function parseDateInput(value: string): Date | null {
   return date;
 }
 
-function addUtcDays(date: Date, days: number): Date {
-  const next = new Date(date);
-  next.setUTCDate(next.getUTCDate() + days);
-  return next;
-}
-
-function currentQuarterDateRange() {
-  const start = parseDateInput(currentExpenseQuarter.startDate);
-  const inclusiveEnd = parseDateInput(currentExpenseQuarter.endDate);
+function quarterDateRange(quarter: { startDate: string; endDate: string }) {
+  const start = parseDateInput(quarter.startDate);
+  const inclusiveEnd = parseDateInput(quarter.endDate);
   if (!start || !inclusiveEnd) {
     throw new Error("Current expense quarter configuration is invalid.");
   }
 
   return {
     start,
-    exclusiveEnd: addUtcDays(inclusiveEnd, 1)
+    exclusiveEnd: new Date(inclusiveEnd.getTime() + 24 * 60 * 60 * 1000)
   };
 }
 
@@ -319,9 +312,10 @@ async function getCurrentWorkspaceId(): Promise<string> {
   return access.workspaceId;
 }
 
-export async function getExpenseWorkspace(filter: ExpenseFilter = "all"): Promise<ExpenseWorkspace> {
+export async function getExpenseWorkspace(filter: ExpenseFilter = "all", quarterId?: string): Promise<ExpenseWorkspace> {
   const currentWorkspaceId = await getCurrentWorkspaceId();
-  const quarterRange = currentQuarterDateRange();
+  const { selectedQuarter } = await resolveWorkspaceQuarter(currentWorkspaceId, quarterId);
+  const quarterRange = quarterDateRange(selectedQuarter);
   const workspace = await prisma.workspace.findUnique({
     where: { id: currentWorkspaceId },
     include: {
@@ -351,7 +345,12 @@ export async function getExpenseWorkspace(filter: ExpenseFilter = "all"): Promis
   return {
     workspaceId: workspace.id,
     workspaceName: workspace.name,
-    quarter: await getWorkspaceQuarterState(workspace.id),
+    quarter: {
+      label: selectedQuarter.label,
+      startDate: selectedQuarter.startDate,
+      endDate: selectedQuarter.endDate,
+      locked: selectedQuarter.locked || !selectedQuarter.active
+    },
     bankAccounts: workspace.bankAccounts.filter((account) => account.active),
     categories: workspace.categories.filter((category) => category.active && category.type === "EXPENSE"),
     expenses: visibleExpenses,
@@ -385,7 +384,7 @@ export async function getExpenseForEdit(id: string) {
     rawGstTreatment: record.gstTreatment,
     workspaceId: record.workspaceId,
     workspaceName: record.workspace.name,
-    quarter: withQuarterLock(record.workspace.quarterLocked),
+    quarter: await getWorkspaceQuarterState(record.workspaceId),
     bankAccounts: record.workspace.bankAccounts.filter((account) => account.active || account.id === record.bankAccountId),
     categories: record.workspace.categories.filter(
       (category) => (category.active && category.type === "EXPENSE") || category.id === record.categoryId

@@ -10,6 +10,8 @@ import {
 } from "@/modules/expenses/service";
 import { formatMoney } from "@/modules/shared/money";
 import { Button, Card, CardContent, Chip } from "@heroui/react";
+import { getWorkspaceQuarterContext } from "@/modules/quarters/service";
+import { ReportingPeriodSwitcher } from "@/components/ReportingPeriodSwitcher";
 
 export const dynamic = "force-dynamic";
 
@@ -58,9 +60,15 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
   const activeFilter: ExpenseFilter = isExpenseFilter(filterParam) ? filterParam : "all";
   const error = single(params.error);
   const saved = single(params.saved);
+  const quarterId = single(params.quarterId);
   const access = await getWorkspaceAccess();
   const canEdit = canEditCompany(access.role);
-  const model = await getExpenseWorkspace(activeFilter);
+  const quarterContext = await getWorkspaceQuarterContext(access.workspaceId);
+  const selectedQuarterId = quarterContext.quarters.some((quarter) => quarter.id === quarterId)
+    ? quarterId!
+    : quarterContext.currentQuarterId;
+  const quarterQuery = `?quarterId=${encodeURIComponent(selectedQuarterId)}`;
+  const model = await getExpenseWorkspace(activeFilter, selectedQuarterId);
   const quarterLocked = model.quarter.locked;
   const canMutateExpenses = canEdit && !quarterLocked;
   const defaultCategory = model.categories[0];
@@ -74,9 +82,6 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
         <select className="text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-700" aria-label="Workspace">
           <option value={model.workspaceId}>{model.workspaceName}</option>
         </select>
-        <select className="text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-700" aria-label="Quarter">
-          <option value={model.quarter.label}>{model.quarter.label}</option>
-        </select>
         <input
           className="ml-auto text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 w-56"
           placeholder="Search expenses"
@@ -86,6 +91,12 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
       </header>
 
       <div className="p-6 space-y-6">
+        <ReportingPeriodSwitcher
+          quarters={quarterContext.quarters}
+          selectedQuarterId={selectedQuarterId}
+          className="mb-2"
+        />
+
         {/* Page header */}
         <div className="flex items-start justify-between">
           <div>
@@ -94,7 +105,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
               Capture expenses by bank account, validate GST, and keep BAS evidence traceable.
             </p>
           </div>
-          <Link href="/admin/setup">
+          <Link href={`/admin/setup${quarterQuery}`}>
             <Button variant="outline" size="sm">Manage setup</Button>
           </Link>
         </div>
@@ -149,7 +160,14 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                   {filters.map((filter) => (
                     <Link
                       key={filter.value}
-                      href={filter.value === "all" ? "/expenses" : `/expenses?filter=${filter.value}`}
+                      href={(() => {
+                        const params = new URLSearchParams();
+                        params.set("quarterId", selectedQuarterId);
+                        if (filter.value !== "all") {
+                          params.set("filter", filter.value);
+                        }
+                        return `/expenses?${params.toString()}`;
+                      })()}
                     >
                       <Chip
                         color={activeFilter === filter.value ? "accent" : "default"}
@@ -177,7 +195,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                           <tr key={expense.id} className="hover:bg-zinc-50">
                             <td className="px-3 py-2.5">
                               {canMutateExpenses ? (
-                                <Link href={`/expenses/${expense.id}/edit`}>
+                                <Link href={`/expenses/${expense.id}/edit${quarterQuery}`}>
                                   <Button variant="outline" size="sm">Edit</Button>
                                 </Link>
                               ) : (

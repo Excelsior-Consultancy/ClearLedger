@@ -1,7 +1,8 @@
 import { prisma } from "@/modules/db/prisma";
 import { getWorkspaceAccess } from "@/modules/auth/service";
-import { currentReportingQuarter, withQuarterLock, type ReportingQuarter } from "@/modules/shared/quarter";
+import { type ReportingQuarter } from "@/modules/shared/quarter";
 import type { PayRun } from "@/modules/shared/types";
+import { resolveWorkspaceQuarter } from "@/modules/quarters/service";
 
 export type PayRunWorkspace = {
   workspaceId: string;
@@ -21,28 +22,30 @@ function parseDateInput(value: string): Date | null {
   return date;
 }
 
-function addUtcDays(date: Date, days: number): Date {
-  const next = new Date(date);
-  next.setUTCDate(next.getUTCDate() + days);
-  return next;
-}
-
-function currentQuarterDateRange() {
-  const start = parseDateInput(currentReportingQuarter.startDate);
-  const inclusiveEnd = parseDateInput(currentReportingQuarter.endDate);
+function currentQuarterDateRange(quarter: ReportingQuarter) {
+  const start = parseDateInput(quarter.startDate);
+  const inclusiveEnd = parseDateInput(quarter.endDate);
   if (!start || !inclusiveEnd) {
     throw new Error("Current payroll quarter configuration is invalid.");
   }
 
   return {
     start,
-    exclusiveEnd: addUtcDays(inclusiveEnd, 1)
+    exclusiveEnd: new Date(inclusiveEnd.getTime() + 24 * 60 * 60 * 1000)
   };
 }
 
-export async function getPayrollWorkspace(): Promise<PayRunWorkspace> {
+export async function getPayrollWorkspace(quarterId?: string): Promise<PayRunWorkspace> {
   const access = await getWorkspaceAccess();
-  const range = currentQuarterDateRange();
+  const { selectedQuarter } = quarterId
+    ? await resolveWorkspaceQuarter(access.workspaceId, quarterId)
+    : await resolveWorkspaceQuarter(access.workspaceId);
+  const range = currentQuarterDateRange({
+    label: selectedQuarter.label,
+    startDate: selectedQuarter.startDate,
+    endDate: selectedQuarter.endDate,
+    locked: selectedQuarter.locked || !selectedQuarter.active
+  });
 
   const workspace = await prisma.workspace.findUnique({
     where: { id: access.workspaceId },
@@ -66,7 +69,12 @@ export async function getPayrollWorkspace(): Promise<PayRunWorkspace> {
   return {
     workspaceId: workspace.id,
     workspaceName: workspace.name,
-    quarter: withQuarterLock(workspace.quarterLocked),
+    quarter: {
+      label: selectedQuarter.label,
+      startDate: selectedQuarter.startDate,
+      endDate: selectedQuarter.endDate,
+      locked: selectedQuarter.locked || !selectedQuarter.active
+    },
     payRuns: workspace.payRuns.map((payRun) => ({
       id: payRun.id,
       workspaceId: payRun.workspaceId,
