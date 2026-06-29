@@ -12,7 +12,7 @@ Australian small-business finance and compliance cockpit. ClearLedger covers the
 | **Admin / Workspace Setup** | Company profile, GST registration, BAS frequency, bank accounts, people & roles, categories |
 | **Income & Invoices** | Invoice tracking with client management, GST treatment, and paid/unpaid status |
 | **Expenses & GST** | Expense entry with category-driven GST defaults, manual overrides, and receipt links |
-| **Payroll Lite** | Pay run tracking — wages, PAYG withholding, and super accrual |
+| **Payroll Lite** | Employee setup, draft/final pay runs, PAYG withholding, super accrual, and non-prod STP submission prep |
 | **BAS Reporting** | Automated BAS totals (GST collected/paid, net GST, PAYG, wages, super) traced back to source records |
 | **CA Pack Export** | Excel export readiness check with per-section status and warning summary |
 

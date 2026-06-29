@@ -7,6 +7,7 @@ import { buildCaPackReadiness } from "@/modules/exports/caPack";
 import { getInvoiceWorkspace } from "@/modules/income/invoiceRecords";
 import { getPayrollWorkspace } from "@/modules/payroll/service";
 import { enrichPayRun } from "@/modules/payroll/summary";
+import { summarizePayroll } from "@/modules/payroll/summary";
 import { getWorkspaceQuarterContext } from "@/modules/quarters/service";
 import { ReportingPeriodSwitcher } from "@/components/ReportingPeriodSwitcher";
 import { withQuarterQuery } from "@/modules/quarters/navigation";
@@ -70,16 +71,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
     draftInvoices: invoiceWorkspace.invoices.filter((invoice) => invoice.lifecycleState === "draft").length,
     blockers: invoiceWorkspace.summary.blockers
   };
-  const payrollSummary = {
-    wagesCents: payRunsWithValidation.reduce((total, payRun) => total + payRun.grossCents, 0),
-    reimbursementsCents: payRunsWithValidation.reduce((total, payRun) => total + payRun.reimbursementsCents, 0),
-    paygCents: payRunsWithValidation.reduce((total, payRun) => total + payRun.paygCents, 0),
-    superCents: payRunsWithValidation.reduce((total, payRun) => total + payRun.superCents, 0),
-    finalizedPayRuns: payRunsWithValidation.filter((payRun) => payRun.finalized).length,
-    draftPayRuns: payRunsWithValidation.filter((payRun) => !payRun.finalized).length,
-    warnings: payRunsWithValidation.filter((payRun) => payRun.issues.some((issue) => issue.severity === "warning")).length,
-    blockers: payRunsWithValidation.filter((payRun) => payRun.issues.some((issue) => issue.severity === "blocker")).length
-  };
+  const payrollSummary = summarizePayroll(payrollWorkspace.payRuns);
   const expenseSummary = expenseWorkspace.summary;
   const basReport = buildBasReport({
     quarter: expenseWorkspace.quarter,
@@ -320,11 +312,16 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
           <div className="rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800 mb-4">
             <strong>External lodgement note</strong> — STP lodgement and super clearing/payment remain external in MVP.
           </div>
+          <div className="flex justify-end mb-3">
+            <Link href={withQuarterQuery("/payroll", selectedQuarterId)}>
+              <Button variant="outline" size="sm">Open payroll workspace</Button>
+            </Link>
+          </div>
           <div className="grid grid-cols-4 gap-3 mb-4">
             <KpiCard title="Wages this quarter" value={formatMoney(payrollSummary.wagesCents)} />
             <KpiCard title="PAYG withholding" value={formatMoney(payrollSummary.paygCents)} />
             <KpiCard title="Super accrued" value={formatMoney(payrollSummary.superCents)} />
-            <KpiCard title="Draft pay runs" value={String(payrollSummary.draftPayRuns)} chip={<Chip color="warning" variant="soft" size="sm">Payroll due</Chip>} />
+            <KpiCard title="Draft pay runs" value={String(payrollSummary.draftPayRuns + payrollSummary.readyForReviewPayRuns)} chip={<Chip color="warning" variant="soft" size="sm">Payroll due</Chip>} />
           </div>
           <Card>
             <CardContent className="p-0">
@@ -342,12 +339,12 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                       <tr key={payRun.id} className="hover:bg-zinc-50">
                         <td className="px-4 py-3 text-zinc-800">{payRun.employeeName}</td>
                         <td className="px-4 py-3 text-zinc-600">{payRun.payDate}</td>
-                        <td className="px-4 py-3 font-medium text-zinc-800">{formatMoney(payRun.grossCents)}</td>
+                        <td className="px-4 py-3 font-medium text-zinc-800">{formatMoney(payRun.calculatedGrossCents)}</td>
                         <td className="px-4 py-3 text-zinc-600">{formatMoney(payRun.paygCents)}</td>
                         <td className="px-4 py-3 text-zinc-600">{formatMoney(payRun.superCents)}</td>
                         <td className="px-4 py-3">
                           <Chip color={payRun.finalized ? "success" : "warning"} variant="soft" size="sm">
-                            {payRun.finalized ? "Finalized" : "Draft"}
+                            {payRun.status ?? (payRun.finalized ? "Finalized" : "Draft")}
                           </Chip>
                         </td>
                       </tr>

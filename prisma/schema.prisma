@@ -62,6 +62,43 @@ enum MembershipRole {
   VIEWER
 }
 
+enum PayrollBasis {
+  SALARY
+  HOURLY
+}
+
+enum PayRunStatus {
+  DRAFT
+  READY_FOR_REVIEW
+  FINALIZED
+  CORRECTED
+  REVERSED
+}
+
+enum PayrollLineItemKind {
+  SALARY
+  HOURLY
+  ALLOWANCE
+  REIMBURSEMENT
+  DEDUCTION
+}
+
+enum PayrollSubmissionType {
+  STP_PAY_EVENT
+  STP_FINALISATION
+  STP_UPDATE
+  SUPER_EXPORT
+}
+
+enum PayrollSubmissionStatus {
+  DRAFT
+  VALIDATED
+  QUEUED
+  SENT
+  ACCEPTED
+  REJECTED
+}
+
 model Workspace {
   id                      String        @id @default(cuid())
   name                    String
@@ -87,6 +124,8 @@ model Workspace {
   memberships  Membership[]
   invitations  Invitation[]
   comments     Comment[]
+  payrollSubmissions PayrollSubmission[]
+  payrollAuditEvents PayrollAuditEvent[]
 }
 
 model User {
@@ -102,6 +141,7 @@ model User {
   memberships  Membership[]
   invitations  Invitation[] @relation("InvitationCreatedBy")
   comments     Comment[]
+  payrollAuditEventsCreated PayrollAuditEvent[]
 
   @@unique([authProvider, authProviderUserId])
   @@index([email])
@@ -193,18 +233,32 @@ model Category {
 }
 
 model Person {
-  id             String        @id @default(cuid())
-  workspaceId    String
-  name           String
-  email          String?
-  personType     PersonType
-  workspaceRole  WorkspaceRole
-  payrollEnabled Boolean       @default(false)
-  active         Boolean       @default(true)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  workspace      Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  invoices       Invoice[]
+  id                        String         @id @default(cuid())
+  workspaceId               String
+  name                      String
+  email                     String?
+  personType                PersonType
+  workspaceRole             WorkspaceRole
+  payrollEnabled            Boolean        @default(false)
+  payrollBasis              PayrollBasis?
+  hourlyRateCents           Int?
+  salaryPerPayPeriodCents   Int?
+  ordinaryHoursPerPayPeriod Float?
+  superRateBps              Int            @default(1100)
+  tfnLast4                  String?
+  employmentStartDate       DateTime?
+  employmentEndDate         DateTime?
+  bankAccountName           String?
+  bankAccountBsb            String?
+  bankAccountNumber         String?
+  notes                     String?
+  active                    Boolean        @default(true)
+  createdAt                 DateTime       @default(now())
+  updatedAt                 DateTime       @updatedAt
+  workspace                 Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invoices                  Invoice[]
+  payRuns                   PayRun[]
+  payrollAuditEvents        PayrollAuditEvent[]
 
   @@index([workspaceId])
 }
@@ -284,25 +338,95 @@ model Expense {
 }
 
 model PayRun {
-  id                String   @id @default(cuid())
-  workspaceId       String
-  employeeName      String
-  periodStart       DateTime
-  periodEnd         DateTime
-  payDate           DateTime
-  grossCents        Int
-  reimbursementsCents Int    @default(0)
-  paygCents         Int
-  superCents        Int
-  finalized         Boolean  @default(true)
-  overrideReason    String?
-  notes             String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                   String             @id @default(cuid())
+  workspaceId          String
+  personId             String?
+  employeeName         String
+  periodStart          DateTime
+  periodEnd            DateTime
+  payDate              DateTime
+  grossCents           Int
+  reimbursementsCents  Int                @default(0)
+  paygCents            Int
+  superCents           Int
+  finalized            Boolean            @default(false)
+  status               PayRunStatus       @default(DRAFT)
+  submissionStatus    PayrollSubmissionStatus @default(DRAFT)
+  submissionReference String?
+  correctsPayRunId    String?
+  reversedByPayRunId  String?
+  overrideReason       String?
+  notes                String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  person    Person?   @relation(fields: [personId], references: [id], onDelete: SetNull)
+  lineItems PayrollLineItem[]
+  submissions PayrollSubmission[]
+  auditEvents PayrollAuditEvent[]
 
   @@index([workspaceId])
+  @@index([personId])
   @@index([periodStart])
   @@index([payDate])
+}
+
+model PayrollLineItem {
+  id           String              @id @default(cuid())
+  payRunId     String
+  kind         PayrollLineItemKind
+  description  String
+  quantityHours Float?
+  rateCents    Int?
+  amountCents  Int
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  payRun PayRun @relation(fields: [payRunId], references: [id], onDelete: Cascade)
+
+  @@index([payRunId])
+}
+
+model PayrollSubmission {
+  id              String                @id @default(cuid())
+  workspaceId     String
+  payRunId        String?
+  type            PayrollSubmissionType
+  status          PayrollSubmissionStatus @default(DRAFT)
+  payloadJson     Json
+  responseJson    Json?
+  errorMessage    String?
+  externalReference String?
+  submittedAt     DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  payRun    PayRun?   @relation(fields: [payRunId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([payRunId])
+  @@index([status])
+}
+
+model PayrollAuditEvent {
+  id              String    @id @default(cuid())
+  workspaceId     String
+  payRunId        String?
+  personId        String?
+  action          String
+  detail          String?
+  createdByUserId String?
+  createdAt       DateTime  @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  payRun    PayRun?   @relation(fields: [payRunId], references: [id], onDelete: SetNull)
+  person    Person?   @relation(fields: [personId], references: [id], onDelete: SetNull)
+  createdBy User?     @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([payRunId])
+  @@index([personId])
+  @@index([createdByUserId])
 }

@@ -7,6 +7,7 @@ import {
   CategoryType,
   GstTreatment,
   PersonType,
+  PayrollBasis,
   WorkspaceRole
 } from "@prisma/client";
 import { prisma } from "@/modules/db/prisma";
@@ -15,6 +16,27 @@ import { assertQuarterEditable } from "@/modules/shared/quarterGuard";
 
 function text(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
+}
+
+function intOrNull(formData: FormData, key: string): number | null {
+  const value = text(formData, key);
+  if (!value) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.trunc(parsed) : null;
+}
+
+function floatOrNull(formData: FormData, key: string): number | null {
+  const value = text(formData, key);
+  if (!value) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function dateOrNull(formData: FormData, key: string): Date | null {
+  const value = text(formData, key);
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
 export async function updateCompanySetup(formData: FormData) {
@@ -143,7 +165,19 @@ export async function addPerson(formData: FormData) {
       email: text(formData, "email") || null,
       personType: text(formData, "personType") as PersonType,
       workspaceRole: text(formData, "workspaceRole") as WorkspaceRole,
-      payrollEnabled: text(formData, "payrollEnabled") === "true"
+      payrollEnabled: text(formData, "payrollEnabled") === "true",
+      payrollBasis: (text(formData, "payrollBasis") || null) as PayrollBasis | null,
+      hourlyRateCents: intOrNull(formData, "hourlyRateCents"),
+      salaryPerPayPeriodCents: intOrNull(formData, "salaryPerPayPeriodCents"),
+      ordinaryHoursPerPayPeriod: floatOrNull(formData, "ordinaryHoursPerPayPeriod"),
+      superRateBps: intOrNull(formData, "superRateBps") ?? 1100,
+      tfnLast4: text(formData, "tfnLast4") || null,
+      employmentStartDate: dateOrNull(formData, "employmentStartDate"),
+      employmentEndDate: dateOrNull(formData, "employmentEndDate"),
+      bankAccountName: text(formData, "bankAccountName") || null,
+      bankAccountBsb: text(formData, "bankAccountBsb") || null,
+      bankAccountNumber: text(formData, "bankAccountNumber") || null,
+      notes: text(formData, "notes") || null
     }
   });
 

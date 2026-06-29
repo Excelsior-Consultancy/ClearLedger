@@ -259,7 +259,7 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-zinc-100">
-                        {["Name", "Email", "Type", "Role", "Payroll", "Status", "Action"].map((h) => (
+                        {["Name", "Email", "Type", "Role", "Payroll", "Rate", "Status", "Action"].map((h) => (
                           <th key={h} className="text-left text-xs font-semibold text-zinc-400 px-3 py-2">{h}</th>
                         ))}
                       </tr>
@@ -272,6 +272,17 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                           <td className="px-3 py-2.5 text-zinc-600">{person.personType}</td>
                           <td className="px-3 py-2.5 text-zinc-600">{person.workspaceRole}</td>
                           <td className="px-3 py-2.5 text-zinc-600">{person.payrollEnabled ? "Yes" : "No"}</td>
+                          <td className="px-3 py-2.5 text-zinc-600">
+                            {person.payrollBasis === "SALARY"
+                              ? person.salaryPerPayPeriodCents
+                                ? `$${(person.salaryPerPayPeriodCents / 100).toFixed(2)}`
+                                : "Salary"
+                              : person.payrollBasis === "HOURLY"
+                                ? person.hourlyRateCents
+                                  ? `$${(person.hourlyRateCents / 100).toFixed(2)}/hr`
+                                  : "Hourly"
+                                : "Not set"}
+                          </td>
                           <td className="px-3 py-2.5">
                             <Chip color={person.active ? "success" : "default"} variant="soft" size="sm">
                               {person.active ? "Active" : "Inactive"}
@@ -318,6 +329,34 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                       <option value="false">No</option>
                       <option value="true">Yes</option>
                     </select>
+                  </div>
+                  <div className={fieldCls}>
+                    <label className={labelCls}>Payroll basis</label>
+                    <select name="payrollBasis" defaultValue="" className={inputCls}>
+                      <option value="">Not set</option>
+                      <option value="SALARY">Salary</option>
+                      <option value="HOURLY">Hourly</option>
+                    </select>
+                  </div>
+                  <div className={fieldCls}>
+                    <label className={labelCls}>Salary per pay period (cents)</label>
+                    <input name="salaryPerPayPeriodCents" type="number" min="0" step="1" placeholder="300000" className={inputCls} />
+                  </div>
+                  <div className={fieldCls}>
+                    <label className={labelCls}>Hourly rate (cents)</label>
+                    <input name="hourlyRateCents" type="number" min="0" step="1" placeholder="4500" className={inputCls} />
+                  </div>
+                  <div className={fieldCls}>
+                    <label className={labelCls}>Ordinary hours per pay period</label>
+                    <input name="ordinaryHoursPerPayPeriod" type="number" min="0" step="0.25" placeholder="76" className={inputCls} />
+                  </div>
+                  <div className={fieldCls}>
+                    <label className={labelCls}>Super rate bps</label>
+                    <input name="superRateBps" type="number" min="0" step="1" defaultValue="1100" className={inputCls} />
+                  </div>
+                  <div className={fieldCls}>
+                    <label className={labelCls}>Employment start</label>
+                    <input name="employmentStartDate" type="date" className={inputCls} />
                   </div>
                   <div className="flex items-end">
                     <button type="submit" className="rounded-lg bg-zinc-900 text-white text-sm font-medium px-4 py-2 hover:bg-zinc-700 transition-colors">

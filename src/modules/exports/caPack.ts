@@ -34,8 +34,8 @@ export function buildCaPackReadiness(input: {
   if (input.income.unpaidInvoices > 0) {
     warnings.push(`${input.income.unpaidInvoices} invoices are unpaid.`);
   }
-  if (input.payroll.draftPayRuns > 0) {
-    warnings.push(`${input.payroll.draftPayRuns} pay runs are still draft.`);
+  if (input.payroll.draftPayRuns > 0 || input.payroll.readyForReviewPayRuns > 0) {
+    warnings.push(`${input.payroll.draftPayRuns + input.payroll.readyForReviewPayRuns} pay runs still need review.`);
   }
 
   return {

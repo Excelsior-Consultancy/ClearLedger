@@ -42,7 +42,7 @@ export function buildDashboardIssues(input: {
       destination: "Income source records"
     });
   }
-  if (input.payroll.draftPayRuns > 0) {
+  if (input.payroll.draftPayRuns > 0 || input.payroll.readyForReviewPayRuns > 0) {
     issues.push({
       label: "Payroll due",
       severity: "warning",

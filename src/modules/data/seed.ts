@@ -29,9 +29,37 @@ export const workspace: Workspace = {
     { id: "bank-fees", name: "Bank fees", type: "expense", defaultGstTreatment: "gst-free", basTreatment: "none", active: true }
   ],
   people: [
-    { id: "owner", name: "Business Owner", email: "owner@example.com", role: "director", payrollEnabled: true },
-    { id: "accountant", name: "Accountant", email: "ca@example.com", role: "accountant", payrollEnabled: false },
-    { id: "employee", name: "Sample Employee", email: "employee@example.com", role: "employee", payrollEnabled: true }
+    {
+      id: "owner",
+      name: "Business Owner",
+      email: "owner@example.com",
+      role: "director",
+      payrollEnabled: true,
+      payrollBasis: "salary",
+      salaryPerPayPeriodCents: dollars(3000),
+      superRateBps: 1100,
+      active: true
+    },
+    {
+      id: "accountant",
+      name: "Accountant",
+      email: "ca@example.com",
+      role: "accountant",
+      payrollEnabled: false,
+      active: true
+    },
+    {
+      id: "employee",
+      name: "Sample Employee",
+      email: "employee@example.com",
+      role: "employee",
+      payrollEnabled: true,
+      payrollBasis: "hourly",
+      hourlyRateCents: dollars(45),
+      ordinaryHoursPerPayPeriod: 60,
+      superRateBps: 1100,
+      active: true
+    }
   ]
 };
 
@@ -101,6 +129,7 @@ export const payRuns: PayRun[] = [
   {
     id: "pay-001",
     workspaceId: workspace.id,
+    personId: "employee",
     employeeName: "Sample Employee",
     periodStart: "2026-04-01",
     periodEnd: "2026-04-14",
@@ -109,11 +138,14 @@ export const payRuns: PayRun[] = [
     reimbursementsCents: dollars(120),
     paygCents: dollars(620),
     superCents: dollars(345),
-    finalized: true
+    finalized: true,
+    status: "finalized",
+    submissionStatus: "accepted"
   },
   {
     id: "pay-002",
     workspaceId: workspace.id,
+    personId: "employee",
     employeeName: "Sample Employee",
     periodStart: "2026-04-15",
     periodEnd: "2026-04-28",
@@ -123,6 +155,8 @@ export const payRuns: PayRun[] = [
     paygCents: dollars(620),
     superCents: dollars(345),
     finalized: false,
+    status: "draft",
+    submissionStatus: "draft",
     overrideReason: "Draft pay run pending review"
   }
 ];

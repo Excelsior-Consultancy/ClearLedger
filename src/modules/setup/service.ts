@@ -38,6 +38,18 @@ type SetupWorkspaceRecord = {
     personType: string;
     workspaceRole: string;
     payrollEnabled: boolean;
+    payrollBasis: string | null;
+    hourlyRateCents: number | null;
+    salaryPerPayPeriodCents: number | null;
+    ordinaryHoursPerPayPeriod: number | null;
+    superRateBps: number | null;
+    tfnLast4: string | null;
+    employmentStartDate: Date | null;
+    employmentEndDate: Date | null;
+    bankAccountName: string | null;
+    bankAccountBsb: string | null;
+    bankAccountNumber: string | null;
+    notes: string | null;
     active: boolean;
   }>;
 };

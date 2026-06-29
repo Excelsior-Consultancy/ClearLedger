@@ -24,11 +24,20 @@ export type InvoiceRecordQuarter = {
   locked: boolean;
 };
 
+export type InvoiceRecordClient = {
+  id: string;
+  name: string;
+  email?: string;
+  abn?: string;
+  active: boolean;
+};
+
 export type InvoiceRecordInput = {
   workspaceId: string;
   clientId: string;
   invoiceNumber: string;
   issueDate: string;
+  dueDate: string;
   grossCents: Cents;
   gstTreatment: GstTreatment;
   paymentState: InvoicePaymentState;
@@ -46,6 +55,8 @@ export type InvoiceRecordRow = {
   personName?: string;
   invoiceNumber: string;
   issueDate: string;
+  dueDate: string;
+  paymentDate?: string;
   grossCents: Cents;
   gstCents: Cents;
   netCents: Cents;
@@ -60,7 +71,10 @@ export type InvoiceRecordRow = {
 export type InvoiceRecordWorkspace = {
   workspaceId: string;
   workspaceName: string;
+  invoicePrefix?: string;
+  invoiceCount: number;
   quarter: InvoiceRecordQuarter;
+  clients: InvoiceRecordClient[];
   invoices: InvoiceRecordRow[];
   activeClientId?: string;
   activePersonId?: string;
@@ -87,15 +101,6 @@ export type InvoiceRecordSummary = {
   blockers: number;
 };
 
-const prismaInvoiceStatuses = [
-  "DRAFT",
-  "ISSUED",
-  "PARTIALLY_PAID",
-  "PAID",
-  "OVERDUE",
-  "CANCELLED"
-] as const satisfies readonly PrismaInvoiceStatus[];
-
 export function mapInvoiceStatusToPaymentState(status: PrismaInvoiceStatus): InvoicePaymentState {
   if (status === "PAID") return "paid";
   if (status === "PARTIALLY_PAID") return "partial";
@@ -109,6 +114,7 @@ export function mapInvoiceStatusToLifecycleState(status: PrismaInvoiceStatus): I
 export function validateInvoiceRecordInput(input: InvoiceRecordInput): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   const issueDate = parseDateInput(input.issueDate);
+  const dueDate = parseDateInput(input.dueDate);
 
   if (!input.workspaceId.trim()) {
     issues.push({ severity: "blocker", code: "invoice-workspace", message: "Workspace is required." });
@@ -121,6 +127,9 @@ export function validateInvoiceRecordInput(input: InvoiceRecordInput): Validatio
   }
   if (!issueDate) {
     issues.push({ severity: "blocker", code: "invoice-date-invalid", message: "Invoice date must be valid." });
+  }
+  if (!dueDate) {
+    issues.push({ severity: "blocker", code: "invoice-due-date-invalid", message: "Due date must be valid." });
   }
   if (input.grossCents <= 0) {
     issues.push({ severity: "blocker", code: "invoice-gross", message: "Invoice amount must be greater than $0." });
@@ -158,6 +167,8 @@ export function enrichInvoiceRecord(record: PrismaInvoice & { client: Client; pe
     personName: record.person?.name ?? undefined,
     invoiceNumber: record.invoiceNumber,
     issueDate: toDateString(record.issueDate),
+    dueDate: record.dueDate ? toDateString(record.dueDate) : "",
+    paymentDate: record.paymentDate ? toDateString(record.paymentDate) : undefined,
     grossCents: record.grossCents,
     gstCents: gst.userEnteredGstCents,
     netCents: gst.netCents,
@@ -171,6 +182,7 @@ export function enrichInvoiceRecord(record: PrismaInvoice & { client: Client; pe
       clientId: record.clientId,
       invoiceNumber: record.invoiceNumber,
       issueDate: toDateString(record.issueDate),
+      dueDate: record.dueDate ? toDateString(record.dueDate) : "",
       grossCents: record.grossCents,
       gstTreatment: mapPrismaTreatment(record.gstTreatment),
       paymentState,
@@ -230,6 +242,9 @@ export async function getInvoiceWorkspace(filters: InvoiceRecordWorkspaceFilters
   const workspace = await prisma.workspace.findUnique({
     where: { id: currentWorkspaceId },
     include: {
+      clients: {
+        orderBy: [{ createdAt: "asc" }]
+      },
       invoices: {
         where: {
           issueDate: {
@@ -241,6 +256,9 @@ export async function getInvoiceWorkspace(filters: InvoiceRecordWorkspaceFilters
         include: { client: true, person: true }
       }
     }
+  });
+  const invoiceCount = await prisma.invoice.count({
+    where: { workspaceId: currentWorkspaceId }
   });
 
   if (!workspace) {
@@ -266,7 +284,16 @@ export async function getInvoiceWorkspace(filters: InvoiceRecordWorkspaceFilters
   return {
     workspaceId: workspace.id,
     workspaceName: workspace.name,
+    invoicePrefix: workspace.invoicePrefix ?? undefined,
+    invoiceCount,
     quarter,
+    clients: workspace.clients.map((client) => ({
+      id: client.id,
+      name: client.name,
+      email: client.email ?? undefined,
+      abn: client.abn ?? undefined,
+      active: client.active
+    })),
     invoices: visibleInvoices,
     activeClientId,
     activePersonId,

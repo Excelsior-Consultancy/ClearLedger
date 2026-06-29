@@ -64,7 +64,10 @@ async function main() {
             email: "123@123.com",
             personType: "DIRECTOR",
             workspaceRole: "DIRECTOR",
-            payrollEnabled: true
+            payrollEnabled: true,
+            payrollBasis: "SALARY",
+            salaryPerPayPeriodCents: 300000,
+            superRateBps: 1100
           },
           {
             name: "Accountant",
@@ -77,7 +80,11 @@ async function main() {
             email: "345@345.com",
             personType: "EMPLOYEE",
             workspaceRole: "EMPLOYEE",
-            payrollEnabled: true
+            payrollEnabled: true,
+            payrollBasis: "HOURLY",
+            hourlyRateCents: 4500,
+            ordinaryHoursPerPayPeriod: 60,
+            superRateBps: 1100
           }
         ]
       }
@@ -123,7 +130,10 @@ async function main() {
             email: "456@456.com",
             personType: "DIRECTOR",
             workspaceRole: "DIRECTOR",
-            payrollEnabled: true
+            payrollEnabled: true,
+            payrollBasis: "SALARY",
+            salaryPerPayPeriodCents: 320000,
+            superRateBps: 1100
           }
         ]
       }
@@ -201,6 +211,9 @@ async function main() {
   });
   const ownerPerson = await prisma.person.findFirstOrThrow({
     where: { workspaceId: excelsior.id, email: "123@123.com" }
+  });
+  const employeePerson = await prisma.person.findFirstOrThrow({
+    where: { workspaceId: excelsior.id, email: "345@345.com" }
   });
   const northstar = await prisma.client.create({
     data: {
@@ -317,6 +330,7 @@ async function main() {
     data: [
       {
         workspaceId: excelsior.id,
+        personId: employeePerson.id,
         employeeName: "Sample Employee",
         periodStart: new Date("2025-04-01T00:00:00.000Z"),
         periodEnd: new Date("2025-04-14T00:00:00.000Z"),
@@ -325,10 +339,13 @@ async function main() {
         reimbursementsCents: 0,
         paygCents: 54000,
         superCents: 29400,
-        finalized: true
+        finalized: true,
+        status: "FINALIZED",
+        submissionStatus: "ACCEPTED"
       },
       {
         workspaceId: excelsior.id,
+        personId: employeePerson.id,
         employeeName: "Sample Employee",
         periodStart: new Date("2026-04-01T00:00:00.000Z"),
         periodEnd: new Date("2026-04-14T00:00:00.000Z"),
@@ -337,10 +354,13 @@ async function main() {
         reimbursementsCents: 12000,
         paygCents: 62000,
         superCents: 34500,
-        finalized: true
+        finalized: true,
+        status: "FINALIZED",
+        submissionStatus: "ACCEPTED"
       },
       {
         workspaceId: excelsior.id,
+        personId: employeePerson.id,
         employeeName: "Sample Employee",
         periodStart: new Date("2026-04-15T00:00:00.000Z"),
         periodEnd: new Date("2026-04-28T00:00:00.000Z"),
@@ -350,6 +370,8 @@ async function main() {
         paygCents: 62000,
         superCents: 34500,
         finalized: false,
+        status: "DRAFT",
+        submissionStatus: "DRAFT",
         overrideReason: "Draft pay run pending review"
       }
     ]

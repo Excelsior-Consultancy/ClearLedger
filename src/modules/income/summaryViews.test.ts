@@ -95,6 +95,7 @@ function row(input: {
     personName: input.personName,
     invoiceNumber: input.invoiceNumber,
     issueDate: input.issueDate,
+    dueDate: input.issueDate,
     grossCents: input.grossCents,
     gstCents: input.gstCents,
     netCents: input.netCents,

@@ -70,8 +70,17 @@ export function validateInvoice(invoice: Invoice): ValidationIssue[] {
 
 export function validatePayRun(payRun: PayRun): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
+  const lineItemsTotal = (payRun.lineItems ?? []).reduce((total, item) => total + item.amountCents, 0);
+
   if (!payRun.employeeName.trim()) {
     issues.push({ severity: "blocker", code: "employee", message: "Employee is required." });
+  }
+  if (!payRun.personId) {
+    issues.push({
+      severity: "warning",
+      code: "payroll-person-link",
+      message: "Pay run is not linked to a company employee record."
+    });
   }
   if (!payRun.payDate) {
     issues.push({ severity: "blocker", code: "pay-date", message: "Pay date is required." });
@@ -79,8 +88,22 @@ export function validatePayRun(payRun: PayRun): ValidationIssue[] {
   if (payRun.grossCents <= 0) {
     issues.push({ severity: "blocker", code: "gross-pay", message: "Gross pay must be greater than $0." });
   }
+  if ((payRun.lineItems ?? []).length > 0 && lineItemsTotal !== payRun.grossCents) {
+    issues.push({
+      severity: "blocker",
+      code: "payroll-line-items-total",
+      message: "Pay run line items must total the same gross pay amount."
+    });
+  }
   if (payRun.overrideReason) {
     issues.push({ severity: "warning", code: "payroll-manual-override", message: "Payroll value was manually overridden." });
+  }
+  if (payRun.status === "finalized" && !payRun.finalized) {
+    issues.push({
+      severity: "blocker",
+      code: "payroll-state",
+      message: "Finalized payroll state must also be marked finalized."
+    });
   }
   return issues;
 }

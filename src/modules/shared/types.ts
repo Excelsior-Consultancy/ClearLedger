@@ -39,6 +39,19 @@ export type Person = {
   email: string;
   role: "director" | "accountant" | "employee";
   payrollEnabled: boolean;
+  payrollBasis?: "salary" | "hourly";
+  hourlyRateCents?: Cents;
+  salaryPerPayPeriodCents?: Cents;
+  ordinaryHoursPerPayPeriod?: number;
+  superRateBps?: number;
+  tfnLast4?: string;
+  employmentStartDate?: string;
+  employmentEndDate?: string;
+  bankAccountName?: string;
+  bankAccountBsb?: string;
+  bankAccountNumber?: string;
+  notes?: string;
+  active?: boolean;
 };
 
 export type GstTreatment =
@@ -84,6 +97,7 @@ export type Invoice = {
 export type PayRun = {
   id: string;
   workspaceId: string;
+  personId?: string;
   employeeName: string;
   periodStart: string;
   periodEnd: string;
@@ -93,7 +107,47 @@ export type PayRun = {
   paygCents: Cents;
   superCents: Cents;
   finalized: boolean;
+  status?: "draft" | "ready_for_review" | "finalized" | "corrected" | "reversed";
+  submissionStatus?: "draft" | "validated" | "queued" | "sent" | "accepted" | "rejected";
+  submissionReference?: string;
+  correctsPayRunId?: string;
+  reversedByPayRunId?: string;
   overrideReason?: string;
+  notes?: string;
+  lineItems?: PayrollLineItem[];
+};
+
+export type PayrollLineItem = {
+  id?: string;
+  kind: "salary" | "hourly" | "allowance" | "reimbursement" | "deduction";
+  description: string;
+  quantityHours?: number;
+  rateCents?: Cents;
+  amountCents: Cents;
+};
+
+export type PayrollSubmission = {
+  id: string;
+  workspaceId: string;
+  payRunId?: string;
+  type: "stp_pay_event" | "stp_finalisation" | "stp_update" | "super_export";
+  status: "draft" | "validated" | "queued" | "sent" | "accepted" | "rejected";
+  payloadJson: unknown;
+  responseJson?: unknown;
+  errorMessage?: string;
+  externalReference?: string;
+  submittedAt?: string;
+};
+
+export type PayrollAuditEvent = {
+  id: string;
+  workspaceId: string;
+  payRunId?: string;
+  personId?: string;
+  action: string;
+  detail?: string;
+  createdByUserId?: string;
+  createdAt: string;
 };
 
 export type Quarter = ReportingQuarter & {

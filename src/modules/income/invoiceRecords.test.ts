@@ -5,6 +5,16 @@ import type { ValidationIssue } from "@/modules/shared/types";
 const mockPrisma = vi.hoisted(() => ({
   workspace: {
     findUnique: vi.fn()
+  },
+  expense: {
+    aggregate: vi.fn()
+  },
+  invoice: {
+    aggregate: vi.fn(),
+    count: vi.fn()
+  },
+  payRun: {
+    aggregate: vi.fn()
   }
 }));
 
@@ -31,12 +41,29 @@ import {
 describe("invoice records", () => {
   beforeEach(() => {
     mockPrisma.workspace.findUnique.mockReset();
+    mockPrisma.expense.aggregate.mockReset();
+    mockPrisma.invoice.aggregate.mockReset();
+    mockPrisma.invoice.count.mockReset();
+    mockPrisma.payRun.aggregate.mockReset();
     mockAuth.getWorkspaceAccess.mockReset();
     mockAuth.getWorkspaceAccess.mockResolvedValue({
       workspaceId: "workspace-a",
       workspaceName: "Excelsior Consulting",
       role: "ADMIN",
       memberships: []
+    });
+    mockPrisma.expense.aggregate.mockResolvedValue({
+      _min: { date: null },
+      _max: { date: null }
+    });
+    mockPrisma.invoice.aggregate.mockResolvedValue({
+      _min: { issueDate: null },
+      _max: { issueDate: null }
+    });
+    mockPrisma.invoice.count.mockResolvedValue(3);
+    mockPrisma.payRun.aggregate.mockResolvedValue({
+      _min: { periodStart: null },
+      _max: { periodStart: null }
     });
   });
 
@@ -46,6 +73,7 @@ describe("invoice records", () => {
       clientId: "client-a",
       invoiceNumber: "EXC-010",
       issueDate: "2026-05-12",
+      dueDate: "2026-05-26",
       grossCents: dollars(1100),
       gstTreatment: "gst-included",
       paymentState: "partial",
@@ -61,6 +89,7 @@ describe("invoice records", () => {
       clientId: "",
       invoiceNumber: " ",
       issueDate: "2026-02-31",
+      dueDate: "2026-03-15",
       grossCents: 0,
       gstTreatment: "manual-override",
       paymentState: "unpaid",
@@ -120,6 +149,7 @@ describe("invoice records", () => {
           client: client("client-a", "Northstar Labs"),
           person: person("owner", "Owner"),
           issueDate: "2026-04-08",
+          dueDate: "2026-04-22",
           grossCents: dollars(1100),
           gstTreatment: "GST_INCLUDED",
           status: "ISSUED"
@@ -130,6 +160,7 @@ describe("invoice records", () => {
           client: client("client-b", "Bluegum Systems"),
           person: person("accountant", "Accountant"),
           issueDate: "2026-05-12",
+          dueDate: "2026-05-26",
           grossCents: dollars(2200),
           gstTreatment: "GST_INCLUDED",
           status: "PARTIALLY_PAID",
@@ -141,6 +172,7 @@ describe("invoice records", () => {
           client: client("client-a", "Northstar Labs"),
           person: person("owner", "Owner"),
           issueDate: "2026-06-02",
+          dueDate: "2026-06-16",
           grossCents: dollars(3300),
           gstTreatment: "GST_INCLUDED",
           status: "PAID"
@@ -171,7 +203,9 @@ describe("invoice records", () => {
         })
       })
     );
+    expect(mockPrisma.invoice.count).toHaveBeenCalledWith({ where: { workspaceId: "workspace-a" } });
     expect(model.invoices.map((invoice) => invoice.id)).toEqual(["inv-3"]);
+    expect(model.invoiceCount).toBe(3);
     expect(model.activeClientId).toBe("client-a");
     expect(model.activePersonId).toBe("owner");
     expect(model.activePaymentState).toBe("paid");
@@ -188,6 +222,7 @@ describe("invoice records", () => {
       client: client("client-a", "Northstar Labs"),
       person: person("owner", "Owner"),
       issueDate: "2026-04-08",
+      dueDate: "2026-04-22",
       grossCents: dollars(1100),
       gstTreatment: "GST_INCLUDED",
       status: "OVERDUE"
@@ -222,6 +257,7 @@ function row(input: Partial<ReturnType<typeof prismaRecord>> & {
     gstTreatment: "gst-included",
     paymentState: input.paymentState,
     lifecycleState: input.paymentState === "paid" ? "paid" : input.paymentState === "partial" ? "partially_paid" : "issued",
+    dueDate: "2026-05-26",
     evidenceUrl: undefined,
     notes: undefined,
     issues: [] as ValidationIssue[]
@@ -264,6 +300,7 @@ function prismaRecord(input: {
   client: ReturnType<typeof client>;
   person: ReturnType<typeof person>;
   issueDate: string;
+  dueDate: string;
   grossCents: number;
   gstTreatment: "GST_INCLUDED" | "GST_FREE" | "NO_GST_OVERSEAS" | "MANUAL_OVERRIDE";
   status: "DRAFT" | "ISSUED" | "PARTIALLY_PAID" | "PAID" | "OVERDUE" | "CANCELLED";
@@ -276,7 +313,7 @@ function prismaRecord(input: {
     personId: input.person.id,
     invoiceNumber: input.invoiceNumber,
     issueDate: new Date(`${input.issueDate}T00:00:00.000Z`),
-    dueDate: null,
+    dueDate: new Date(`${input.dueDate}T00:00:00.000Z`),
     status: input.status,
     grossCents: input.grossCents,
     gstTreatment: input.gstTreatment,
