@@ -2,14 +2,26 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { AuthProvider, AuthIdentity, AuthStartInput } from "../provider";
 
-function resolvedSupabaseEnv(primary: string, fallback: string) {
-  return process.env[primary] ?? process.env[fallback] ?? null;
+function resolvedSupabaseEnv(...names: string[]) {
+  for (const name of names) {
+    const value = process.env[name];
+    if (value) {
+      return value;
+    }
+  }
+  return null;
 }
 
 async function createClient() {
   const cookieStore = await cookies();
-  const supabaseUrl = resolvedSupabaseEnv("NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_PROD_SUPABASE_URL");
-  const supabaseAnonKey = resolvedSupabaseEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "NEXT_PUBLIC_PROD_SUPABASE_ANON_KEY");
+  const supabaseUrl = resolvedSupabaseEnv("NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_PROD_SUPABASE_URL", "PROD_SUPABASE_URL");
+  const supabaseAnonKey = resolvedSupabaseEnv(
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "NEXT_PUBLIC_PROD_SUPABASE_ANON_KEY",
+    "PROD_SUPABASE_ANON_KEY",
+    "NEXT_PUBLIC_PROD_SUPABASE_PUBLISHABLE_KEY",
+    "PROD_SUPABASE_PUBLISHABLE_KEY"
+  );
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error("Supabase auth is not configured.");
   }
