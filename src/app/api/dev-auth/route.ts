@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   acceptInvitation,
-  createSession,
   createWorkspaceForUser,
-  destroySession,
-  findOrCreateGoogleUser,
+  findOrCreateAuthUser,
   selectWorkspace
 } from "@/modules/auth/service";
 import { getAppOrigin } from "@/modules/auth/google";
+import { writeDevIdentityCookie } from "@/modules/auth/provider";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -19,7 +18,8 @@ export async function GET(request: NextRequest) {
 
   if (url.searchParams.get("logout") === "1") {
     const response = NextResponse.redirect(new URL("/login", appOrigin));
-    await destroySession(request.cookies.get("clearledger_session")?.value, response.cookies);
+    await writeDevIdentityCookie(null, response.cookies);
+    response.cookies.delete("clearledger_workspace");
     return response;
   }
 
@@ -32,9 +32,24 @@ export async function GET(request: NextRequest) {
   const inviteToken = url.searchParams.get("inviteToken")?.trim() || "";
   const companyName = url.searchParams.get("companyName")?.trim() || "";
 
-  const user = await findOrCreateGoogleUser({ email, name });
+  const user = await findOrCreateAuthUser({
+    provider: "dev",
+    providerUserId: email,
+    email,
+    name,
+    emailVerified: true
+  });
   const response = NextResponse.redirect(new URL("/", appOrigin));
-  await createSession(user.id, response.cookies);
+  await writeDevIdentityCookie(
+    {
+      provider: "dev",
+      providerUserId: email,
+      email,
+      name,
+      emailVerified: true
+    },
+    response.cookies
+  );
 
   if (inviteToken) {
     await acceptInvitation(inviteToken, user.id, response.cookies);

@@ -1,30 +1,13 @@
-import crypto from "node:crypto";
 import { MembershipRole, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const PASSWORD = "pwd@123";
-const PASSWORD_ITERATIONS = 210_000;
-const KEY_LENGTH = 64;
-const DIGEST = "sha512";
-
-function hashPassword(password: string, salt = crypto.randomBytes(16).toString("hex")) {
-  const hash = crypto.pbkdf2Sync(password, salt, PASSWORD_ITERATIONS, KEY_LENGTH, DIGEST).toString("hex");
-  return { salt, hash };
-}
-
 async function main() {
   await prisma.comment.deleteMany();
-  await prisma.session.deleteMany();
   await prisma.invitation.deleteMany();
   await prisma.membership.deleteMany();
   await prisma.user.deleteMany();
   await prisma.workspace.deleteMany();
-
-  const ownerAuth = hashPassword(PASSWORD);
-  const accountantAuth = hashPassword(PASSWORD);
-  const multiAuth = hashPassword(PASSWORD);
-  const viewerAuth = hashPassword(PASSWORD);
 
   const excelsior = await prisma.workspace.create({
     data: {
@@ -149,37 +132,41 @@ async function main() {
 
   const owner = await prisma.user.create({
     data: {
+      id: "supabase:123@123.com",
+      authProvider: "supabase",
+      authProviderUserId: "123@123.com",
       name: "Business Owner",
-      email: "123@123.com",
-      passwordHash: ownerAuth.hash,
-      passwordSalt: ownerAuth.salt
+      email: "123@123.com"
     }
   });
 
   const accountant = await prisma.user.create({
     data: {
+      id: "supabase:234@234.com",
+      authProvider: "supabase",
+      authProviderUserId: "234@234.com",
       name: "Accountant",
-      email: "234@234.com",
-      passwordHash: accountantAuth.hash,
-      passwordSalt: accountantAuth.salt
+      email: "234@234.com"
     }
   });
 
   const multiCompany = await prisma.user.create({
     data: {
+      id: "supabase:456@456.com",
+      authProvider: "supabase",
+      authProviderUserId: "456@456.com",
       name: "Multi Company User",
-      email: "456@456.com",
-      passwordHash: multiAuth.hash,
-      passwordSalt: multiAuth.salt
+      email: "456@456.com"
     }
   });
 
   const viewer = await prisma.user.create({
     data: {
+      id: "supabase:789@789.com",
+      authProvider: "supabase",
+      authProviderUserId: "789@789.com",
       name: "Viewer User",
-      email: "789@789.com",
-      passwordHash: viewerAuth.hash,
-      passwordSalt: viewerAuth.salt
+      email: "789@789.com"
     }
   });
 

@@ -1,15 +1,11 @@
 import crypto from "node:crypto";
+import { MembershipRole, Prisma } from "@prisma/client";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { MembershipRole, Prisma } from "@prisma/client";
+import { getAuthProvider, readDevIdentityCookie, type AuthIdentity } from "@/modules/auth/provider";
 import { prisma } from "@/modules/db/prisma";
 
-const SESSION_COOKIE = "clearledger_session";
 const WORKSPACE_COOKIE = "clearledger_workspace";
-const PASSWORD_ITERATIONS = 210_000;
-const KEY_LENGTH = 64;
-const DIGEST = "sha512";
-const SESSION_DAYS = 30;
 const INVITE_DAYS = 14;
 
 export type WorkspaceOption = {
@@ -57,87 +53,56 @@ function hashToken(token: string) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-export function hashPassword(password: string, salt = crypto.randomBytes(16).toString("hex")) {
-  const hash = crypto.pbkdf2Sync(password, salt, PASSWORD_ITERATIONS, KEY_LENGTH, DIGEST).toString("hex");
-  return { salt, hash };
-}
-
-function sessionCookieOptions(maxAgeDays = SESSION_DAYS) {
-  return {
-    httpOnly: true,
-    sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: maxAgeDays * 24 * 60 * 60
-  };
-}
-
 type CookieStoreLike = {
-  set: (name: string, value: string, options: ReturnType<typeof sessionCookieOptions>) => void;
+  set: (name: string, value: string, options?: any) => void;
   delete: (name: string) => void;
+  get: (name: string) => { value: string } | undefined;
 };
 
-export async function createSession(userId: string, cookieStore?: CookieStoreLike) {
-  const token = randomToken(32);
-  const expiresAt = new Date(now().getTime() + SESSION_DAYS * 24 * 60 * 60 * 1000);
-
-  await prisma.session.create({
-    data: {
-      userId,
-      tokenHash: hashToken(token),
-      expiresAt
-    }
-  });
-
-  const store = cookieStore ?? (await cookies());
-  store.set(SESSION_COOKIE, token, sessionCookieOptions());
-  return token;
+function appUserId(identity: AuthIdentity) {
+  return `${identity.provider}:${identity.providerUserId}`;
 }
 
-export async function destroySession(sessionToken?: string, cookieStore?: CookieStoreLike) {
-  const readStore = await cookies();
-  const token = sessionToken ?? readStore.get(SESSION_COOKIE)?.value;
-  if (token) {
-    await prisma.session.deleteMany({
-      where: { tokenHash: hashToken(token) }
-    });
-  }
+async function upsertUserFromIdentity(identity: AuthIdentity) {
+  const id = appUserId(identity);
+  const email = normalizeEmail(identity.email);
+  const name = identity.name.trim() || email.split("@")[0] || "User";
 
-  const store = cookieStore ?? readStore;
-  store.delete(SESSION_COOKIE);
-  store.delete(WORKSPACE_COOKIE);
-}
-
-async function getSessionRecord() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
-  if (!token) {
-    return null;
-  }
-
-  return prisma.session.findUnique({
-    where: { tokenHash: hashToken(token) },
+  return prisma.user.upsert({
+    where: {
+      authProvider_authProviderUserId: {
+        authProvider: identity.provider,
+        authProviderUserId: identity.providerUserId
+      }
+    },
+    create: {
+      id,
+      authProvider: identity.provider,
+      authProviderUserId: identity.providerUserId,
+      name,
+      email
+    },
+    update: {
+      name,
+      email,
+      active: true
+    },
     select: {
-      expiresAt: true,
-      user: {
+      id: true,
+      name: true,
+      email: true,
+      active: true,
+      memberships: {
+        where: { active: true },
+        orderBy: [{ createdAt: "asc" }],
         select: {
           id: true,
-          name: true,
-          email: true,
-          active: true,
-          memberships: {
-            where: { active: true },
-            orderBy: [{ createdAt: "asc" }],
+          role: true,
+          workspaceId: true,
+          workspace: {
             select: {
               id: true,
-              role: true,
-              workspaceId: true,
-              workspace: {
-                select: {
-                  id: true,
-                  name: true
-                }
-              }
+              name: true
             }
           }
         }
@@ -146,15 +111,27 @@ async function getSessionRecord() {
   });
 }
 
+async function currentIdentity() {
+  const provider = getAuthProvider();
+  const identity = await provider.getCurrentIdentity();
+  if (identity) return identity;
+  return readDevIdentityCookie();
+}
+
 export async function getAuthContext(): Promise<AuthContext | null> {
-  const session = await getSessionRecord();
-  if (!session || session.expiresAt < now() || !session.user.active) {
+  const identity = await currentIdentity();
+  if (!identity || !identity.emailVerified) {
+    return null;
+  }
+
+  const user = await upsertUserFromIdentity(identity);
+  if (!user.active) {
     return null;
   }
 
   const cookieStore = await cookies();
   const selectedWorkspaceId = cookieStore.get(WORKSPACE_COOKIE)?.value;
-  const memberships = session.user.memberships.map((membership) => ({
+  const memberships = user.memberships.map((membership) => ({
     ...membership,
     workspace: {
       id: membership.workspace.id,
@@ -168,9 +145,9 @@ export async function getAuthContext(): Promise<AuthContext | null> {
 
   return {
     user: {
-      id: session.user.id,
-      name: session.user.name,
-      email: session.user.email
+      id: user.id,
+      name: user.name,
+      email: user.email
     },
     memberships,
     currentMembership
@@ -245,68 +222,8 @@ export async function createWorkspaceForUser(input: { userId: string; companyNam
   return workspace;
 }
 
-export async function findOrCreateGoogleUser(input: { email: string; name: string }) {
-  const email = normalizeEmail(input.email);
-  const name = input.name.trim() || email.split("@")[0] || "Google user";
-  const existing = await prisma.user.findUnique({
-    where: { email },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      active: true,
-      memberships: {
-        where: { active: true },
-        orderBy: [{ createdAt: "asc" }],
-        select: {
-          id: true,
-          role: true,
-          workspaceId: true,
-          workspace: {
-            select: {
-              id: true,
-              name: true
-            }
-          }
-        }
-      }
-    }
-  });
-
-  if (existing) {
-    return existing;
-  }
-
-  const { salt, hash } = hashPassword(randomToken(24));
-  return prisma.user.create({
-    data: {
-      name,
-      email,
-      passwordHash: hash,
-      passwordSalt: salt
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      active: true,
-      memberships: {
-        where: { active: true },
-        orderBy: [{ createdAt: "asc" }],
-        select: {
-          id: true,
-          role: true,
-          workspaceId: true,
-          workspace: {
-            select: {
-              id: true,
-              name: true
-            }
-          }
-        }
-      }
-    }
-  });
+export async function findOrCreateAuthUser(identity: AuthIdentity) {
+  return upsertUserFromIdentity(identity);
 }
 
 export async function createInvitation(input: {
@@ -393,7 +310,7 @@ export async function selectWorkspace(workspaceId: string, cookieStore?: CookieS
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: SESSION_DAYS * 24 * 60 * 60
+    maxAge: 30 * 24 * 60 * 60
   });
 }
 

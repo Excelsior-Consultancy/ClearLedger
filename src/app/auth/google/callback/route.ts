@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   acceptInvitation,
-  createSession,
   createWorkspaceForUser,
-  findOrCreateGoogleUser,
+  findOrCreateAuthUser,
   selectWorkspace
 } from "@/modules/auth/service";
-import {
-  clearPendingGoogleAuth,
-  exchangeGoogleCode,
-  getPendingGoogleAuth
-} from "@/modules/auth/google";
+import { clearPendingGoogleAuth, getPendingGoogleAuth } from "@/modules/auth/google";
 import { getAppOrigin } from "@/modules/auth/google";
+import { getAuthProvider } from "@/modules/auth/provider";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -22,28 +18,25 @@ export async function GET(request: NextRequest) {
   }
 
   const code = url.searchParams.get("code");
-  const state = url.searchParams.get("state");
   const pending = await getPendingGoogleAuth();
 
-  if (!code || !state) {
+  if (!code) {
     return NextResponse.redirect(new URL("/login?error=missing-google-code", appOrigin));
-  }
-  if (!pending.state || pending.state !== state || !pending.verifier) {
-    return NextResponse.redirect(new URL("/login?error=invalid-google-state", appOrigin));
   }
 
   try {
-    const profile = await exchangeGoogleCode({
+    const provider = getAuthProvider();
+    const identity = await provider.completeSignIn({
       code,
-      codeVerifier: pending.verifier,
-      origin: url.origin
+      redirectUrl: url.toString()
     });
-    const user = await findOrCreateGoogleUser({
-      email: profile.email,
-      name: profile.name
-    });
+
+    if (!identity || !identity.emailVerified) {
+      throw new Error("Google account email is not verified.");
+    }
+
+    const user = await findOrCreateAuthUser(identity);
     const response = NextResponse.redirect(new URL("/", appOrigin));
-    await createSession(user.id, response.cookies);
 
     if (pending.inviteToken) {
       await acceptInvitation(pending.inviteToken, user.id, response.cookies);
@@ -62,10 +55,13 @@ export async function GET(request: NextRequest) {
     }
 
     if (pending.companyName) {
-      await createWorkspaceForUser({
-        userId: user.id,
-        companyName: pending.companyName
-      }, response.cookies);
+      await createWorkspaceForUser(
+        {
+          userId: user.id,
+          companyName: pending.companyName
+        },
+        response.cookies
+      );
       await clearPendingGoogleAuth(response.cookies);
       return response;
     }

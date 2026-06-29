@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import crypto from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { MembershipRole } from "@prisma/client";
@@ -10,8 +9,6 @@ import {
   canManageCompany,
   createInvitation,
   createReviewComment,
-  createSession,
-  destroySession,
   getAuthContext,
   getWorkspaceAccess,
   createWorkspaceForUser,
@@ -22,14 +19,12 @@ import {
 } from "@/modules/auth/service";
 import { prisma } from "@/modules/db/prisma";
 import {
-  createGoogleAuthUrl,
-  createPkcePair,
   GOOGLE_PENDING_COMPANY_COOKIE,
   GOOGLE_PENDING_INVITE_COOKIE,
-  GOOGLE_PENDING_STATE_COOKIE,
-  GOOGLE_PENDING_VERIFIER_COOKIE,
+  clearPendingGoogleAuth,
   pendingGoogleAuthCookieOptions
 } from "@/modules/auth/google";
+import { getAuthProvider } from "@/modules/auth/provider";
 
 function text(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -58,12 +53,9 @@ export async function beginGoogleAuthAction(formData: FormData) {
   const shouldStoreCompanyName = companyName.length > 0;
 
   const cookieStore = await cookies();
-  const { verifier, challenge } = createPkcePair();
-  const state = crypto.randomBytes(24).toString("base64url");
+  let url: string;
 
   try {
-    cookieStore.set(GOOGLE_PENDING_STATE_COOKIE, state, pendingGoogleAuthCookieOptions());
-    cookieStore.set(GOOGLE_PENDING_VERIFIER_COOKIE, verifier, pendingGoogleAuthCookieOptions());
     if (inviteToken) {
       cookieStore.set(GOOGLE_PENDING_INVITE_COOKIE, inviteToken, pendingGoogleAuthCookieOptions());
     }
@@ -72,16 +64,19 @@ export async function beginGoogleAuthAction(formData: FormData) {
     }
 
     const origin = await getRequestOrigin();
-    const authUrl = createGoogleAuthUrl({
+    const provider = getAuthProvider();
+    url = await provider.beginSignIn({
       origin,
-      state,
-      codeChallenge: challenge
+      inviteToken,
+      companyName,
+      state: "unused"
     });
-    redirect(authUrl);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Google sign-in is not available right now.";
     redirect(`/login?error=${encodeURIComponent(message)}`);
   }
+
+  redirect(url);
 }
 
 export async function createCompanyAction(formData: FormData) {
@@ -108,7 +103,16 @@ export async function createCompanyAction(formData: FormData) {
 }
 
 export async function signOutAction() {
-  await destroySession();
+  try {
+    const provider = getAuthProvider();
+    await provider.signOut();
+  } catch {
+    // Best-effort sign-out. The app cookie state is cleared below.
+  }
+  const store = await cookies();
+  store.delete("clearledger_dev_identity");
+  store.delete("clearledger_workspace");
+  await clearPendingGoogleAuth(store);
   redirect("/login");
 }
 
