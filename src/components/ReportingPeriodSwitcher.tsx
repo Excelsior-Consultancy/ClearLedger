@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Chip } from "@heroui/react";
 
 type QuarterOption = {
@@ -54,7 +54,6 @@ export function ReportingPeriodSwitcher({
   selectedQuarterId,
   className
 }: ReportingPeriodSwitcherProps) {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const groupedYears = useMemo(() => buildFinancialYears(quarters), [quarters]);
@@ -67,8 +66,7 @@ export function ReportingPeriodSwitcher({
 
   function navigateToQuarter(quarterId: string) {
     const params = new URLSearchParams(searchParams.toString());
-    router.replace(buildHref(pathname, params, quarterId));
-    router.refresh();
+    window.location.assign(buildHref(pathname, params, quarterId));
   }
 
   return (
@@ -78,14 +76,15 @@ export function ReportingPeriodSwitcher({
           <label className="mb-1 block text-[11px] uppercase tracking-[0.16em] text-zinc-400">Financial year</label>
           <select
             value={selectedFinancialYear}
-            onChange={(event) => {
-              const nextYear = event.target.value;
-              const nextGroup = groupedYears.find((group) => group.value === nextYear);
-              const nextQuarter = nextGroup?.quarters[0];
-              if (nextQuarter?.id) {
-                navigateToQuarter(nextQuarter.id);
-              }
-            }}
+          onChange={(event) => {
+            const nextYear = event.target.value;
+            const nextGroup = groupedYears.find((group) => group.value === nextYear);
+            const nextQuarter = nextGroup?.quarters[0];
+            const nextQuarterId = nextQuarter?.id ?? nextQuarter?.startDate;
+            if (nextQuarterId) {
+              navigateToQuarter(nextQuarterId);
+            }
+          }}
             className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-800"
             aria-label="Financial year"
             data-testid="financial-year-select"

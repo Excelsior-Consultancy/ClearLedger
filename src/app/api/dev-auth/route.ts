@@ -30,10 +30,11 @@ export async function GET(request: NextRequest) {
 
   const name = url.searchParams.get("name")?.trim() || email.split("@")[0] || "Google user";
   const inviteToken = url.searchParams.get("inviteToken")?.trim() || "";
-  const companyName = url.searchParams.get("companyName")?.trim() || "";
+  const workspaceName = url.searchParams.get("workspaceName")?.trim() || "";
+  const abn = url.searchParams.get("abn")?.trim() || "";
 
   const user = await findOrCreateAuthUser({
-    provider: "dev",
+    provider: "supabase",
     providerUserId: email,
     email,
     name,
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
   const response = NextResponse.redirect(new URL("/", appOrigin));
   await writeDevIdentityCookie(
     {
-      provider: "dev",
+      provider: "supabase",
       providerUserId: email,
       email,
       name,
@@ -64,17 +65,23 @@ export async function GET(request: NextRequest) {
     return response;
   }
 
-  if (companyName) {
-    await createWorkspaceForUser(
-      {
-        userId: user.id,
-        companyName
-      },
-      response.cookies
-    );
-    return response;
+  if (workspaceName && abn) {
+    try {
+      await createWorkspaceForUser(
+        {
+          userId: user.id,
+          workspaceName,
+          abn
+        },
+        response.cookies
+      );
+      return response;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to create workspace.";
+      return NextResponse.redirect(new URL(`/signup?error=${encodeURIComponent(message)}`, appOrigin));
+    }
   }
 
-  response.headers.set("location", new URL("/signup?setup=1", appOrigin).toString());
+  response.headers.set("location", new URL("/signup", appOrigin).toString());
   return response;
 }

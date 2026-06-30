@@ -19,7 +19,6 @@ import {
 } from "@/modules/auth/service";
 import { prisma } from "@/modules/db/prisma";
 import {
-  GOOGLE_PENDING_COMPANY_COOKIE,
   GOOGLE_PENDING_INVITE_COOKIE,
   clearPendingGoogleAuth,
   pendingGoogleAuthCookieOptions
@@ -49,8 +48,6 @@ async function getRequestOrigin() {
 
 export async function beginGoogleAuthAction(formData: FormData) {
   const inviteToken = text(formData, "inviteToken");
-  const companyName = text(formData, "companyName");
-  const shouldStoreCompanyName = companyName.length > 0;
 
   const cookieStore = await cookies();
   let url: string;
@@ -59,16 +56,12 @@ export async function beginGoogleAuthAction(formData: FormData) {
     if (inviteToken) {
       cookieStore.set(GOOGLE_PENDING_INVITE_COOKIE, inviteToken, pendingGoogleAuthCookieOptions());
     }
-    if (shouldStoreCompanyName) {
-      cookieStore.set(GOOGLE_PENDING_COMPANY_COOKIE, encodeURIComponent(companyName), pendingGoogleAuthCookieOptions());
-    }
 
     const origin = await getRequestOrigin();
     const provider = getAuthProvider();
     url = await provider.beginSignIn({
       origin,
       inviteToken,
-      companyName,
       state: "unused"
     });
   } catch (error) {
@@ -89,17 +82,28 @@ export async function createCompanyAction(formData: FormData) {
   }
 
   const companyName = text(formData, "companyName");
+  const abn = text(formData, "abn");
   if (!companyName) {
     redirect("/signup?error=missing-company");
   }
 
-  await createWorkspaceForUser({
-    userId: context!.user.id,
-    companyName
-  });
+  if (!abn) {
+    redirect("/signup?error=missing-abn");
+  }
+
+  try {
+    await createWorkspaceForUser({
+      userId: context!.user.id,
+      workspaceName: companyName,
+      abn
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to create workspace.";
+    redirect(`/signup?error=${encodeURIComponent(message)}`);
+  }
 
   revalidatePath("/");
-  redirect("/");
+  redirect("/onboarding");
 }
 
 export async function signOutAction() {

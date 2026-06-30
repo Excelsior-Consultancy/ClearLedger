@@ -14,7 +14,6 @@ export type AuthStartInput = {
   origin: string;
   state: string;
   inviteToken?: string | null;
-  companyName?: string | null;
 };
 
 export type AuthProvider = {

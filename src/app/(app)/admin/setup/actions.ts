@@ -1,8 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import {
-  BasFrequency,
   BasTreatment,
   CategoryType,
   GstTreatment,
@@ -13,9 +13,17 @@ import {
 import { prisma } from "@/modules/db/prisma";
 import { canManageCompany, getWorkspaceAccess } from "@/modules/auth/service";
 import { assertQuarterEditable } from "@/modules/shared/quarterGuard";
+import { saveWorkspaceProfile } from "@/modules/setup/service";
 
 function text(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
+}
+
+function booleanOrNull(formData: FormData, key: string) {
+  const value = text(formData, key);
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return null;
 }
 
 function intOrNull(formData: FormData, key: string): number | null {
@@ -46,26 +54,27 @@ export async function updateCompanySetup(formData: FormData) {
   }
   const workspaceId = access.workspaceId;
   await assertQuarterEditable(workspaceId);
-  const month = Number(text(formData, "financialYearStartMonth") || 7);
-
-  await prisma.workspace.update({
-    where: { id: workspaceId },
-    data: {
+  try {
+    await saveWorkspaceProfile(workspaceId, {
       name: text(formData, "name"),
-      legalName: text(formData, "legalName") || null,
-      abn: text(formData, "abn") || null,
-      address: text(formData, "address") || null,
-      contactEmail: text(formData, "contactEmail") || null,
-      gstRegistered: text(formData, "gstRegistered") === "true",
-      basFrequency: text(formData, "basFrequency") as BasFrequency,
-      financialYearStartMonth: month,
+      legalName: text(formData, "legalName"),
+      abn: text(formData, "abn"),
+      address: text(formData, "address"),
+      contactEmail: text(formData, "contactEmail"),
+      gstRegistered: booleanOrNull(formData, "gstRegistered"),
+      basFrequency: text(formData, "basFrequency") as "QUARTERLY" | "MONTHLY",
+      financialYearStartMonth: Number(text(formData, "financialYearStartMonth") || 7),
       invoicePrefix: text(formData, "invoicePrefix") || null
-    }
-  });
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to save company profile.";
+    redirect(`/admin/setup?error=${encodeURIComponent(message)}`);
+  }
 
   revalidatePath("/");
   revalidatePath("/admin/setup");
   revalidatePath("/expenses");
+  redirect("/admin/setup?saved=company-profile");
 }
 
 export async function addBankAccount(formData: FormData) {

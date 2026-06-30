@@ -1,6 +1,19 @@
 import { prisma } from "@/modules/db/prisma";
 import { getSetupReadiness } from "./readiness";
 import { getWorkspaceAccess } from "@/modules/auth/service";
+import { formatAbn, getCompanyProfileIssues, normalizeAbn } from "@/modules/company/profile";
+
+export type WorkspaceProfileInput = {
+  name: string;
+  legalName: string;
+  abn: string;
+  address: string;
+  contactEmail: string;
+  gstRegistered: boolean | null;
+  basFrequency: "QUARTERLY" | "MONTHLY";
+  financialYearStartMonth: number;
+  invoicePrefix?: string | null;
+};
 
 type SetupWorkspaceRecord = {
   id: string;
@@ -96,4 +109,52 @@ export async function getPrimaryWorkspaceSetup() {
 
   const readiness = getSetupReadiness(workspace);
   return { workspace: { ...workspace, setupComplete: readiness.complete }, readiness };
+}
+
+export async function saveWorkspaceProfile(workspaceId: string, input: WorkspaceProfileInput) {
+  const normalizedAbn = normalizeAbn(input.abn);
+  const validationIssues = getCompanyProfileIssues({
+    name: input.name,
+    legalName: input.legalName,
+    abn: normalizedAbn,
+    address: input.address,
+    contactEmail: input.contactEmail,
+    gstRegistered: input.gstRegistered,
+    basFrequency: input.basFrequency,
+    financialYearStartMonth: input.financialYearStartMonth,
+    invoicePrefix: input.invoicePrefix
+  });
+
+  if (validationIssues.length > 0) {
+    throw new Error(validationIssues[0].message);
+  }
+
+  const duplicate = await prisma.workspace.findFirst({
+    where: {
+      abn: normalizedAbn,
+      NOT: { id: workspaceId }
+    },
+    select: { id: true, name: true, abn: true }
+  });
+
+  if (duplicate) {
+    throw new Error(
+      `That ABN is already registered for another workspace. Ask an admin to invite you to ${formatAbn(normalizedAbn)} instead.`
+    );
+  }
+
+  return prisma.workspace.update({
+    where: { id: workspaceId },
+    data: {
+      name: input.name.trim(),
+      legalName: input.legalName.trim(),
+      abn: normalizedAbn,
+      address: input.address.trim(),
+      contactEmail: input.contactEmail.trim().toLowerCase(),
+      gstRegistered: input.gstRegistered,
+      basFrequency: input.basFrequency,
+      financialYearStartMonth: input.financialYearStartMonth,
+      invoicePrefix: input.invoicePrefix?.trim() || null
+    }
+  });
 }

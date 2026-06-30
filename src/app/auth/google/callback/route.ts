@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   acceptInvitation,
-  createWorkspaceForUser,
   findOrCreateAuthUser,
   selectWorkspace
 } from "@/modules/auth/service";
@@ -41,6 +40,7 @@ export async function GET(request: NextRequest) {
     if (pending.inviteToken) {
       await acceptInvitation(pending.inviteToken, user.id, response.cookies);
       await clearPendingGoogleAuth(response.cookies);
+      response.headers.set("location", new URL("/", url).toString());
       return response;
     }
 
@@ -54,20 +54,8 @@ export async function GET(request: NextRequest) {
       return response;
     }
 
-    if (pending.companyName) {
-      await createWorkspaceForUser(
-        {
-          userId: user.id,
-          companyName: pending.companyName
-        },
-        response.cookies
-      );
-      await clearPendingGoogleAuth(response.cookies);
-      return response;
-    }
-
     await clearPendingGoogleAuth(response.cookies);
-    response.headers.set("location", new URL("/signup?setup=1", url).toString());
+    response.headers.set("location", new URL("/signup", url).toString());
     return response;
   } catch (caught) {
     const message = caught instanceof Error ? caught.message : "Unable to complete Google sign-in.";

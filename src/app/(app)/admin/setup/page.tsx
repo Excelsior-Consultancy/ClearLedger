@@ -45,6 +45,8 @@ const fieldCls = "flex flex-col";
 export default async function SetupPage({ searchParams }: { searchParams?: SearchParams }) {
   const params = (await searchParams) ?? {};
   const quarterId = single(params.quarterId);
+  const error = single(params.error);
+  const saved = single(params.saved);
   const access = await getWorkspaceAccess();
   const { workspace, readiness } = await getPrimaryWorkspaceSetup();
   const quarterContext = await getWorkspaceQuarterContext(access.workspaceId, quarterId);
@@ -89,6 +91,17 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
           selectedQuarterId={selectedQuarterId}
           className="mb-2"
         />
+
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            {decodeURIComponent(error)}
+          </div>
+        )}
+        {saved && (
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            Company profile saved.
+          </div>
+        )}
 
         {/* Page header */}
         <div className="flex items-start justify-between">

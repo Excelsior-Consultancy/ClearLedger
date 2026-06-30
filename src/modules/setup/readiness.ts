@@ -1,5 +1,11 @@
+import { getCompanyProfileIssues } from "@/modules/company/profile";
+
 export type SetupWorkspace = {
   name?: string | null;
+  legalName?: string | null;
+  abn?: string | null;
+  address?: string | null;
+  contactEmail?: string | null;
   gstRegistered?: boolean | null;
   basFrequency?: string | null;
   financialYearStartMonth?: number | null;
@@ -13,22 +19,26 @@ export type SetupReadiness = {
   warnings: string[];
 };
 
-export function getSetupReadiness(workspace: SetupWorkspace): SetupReadiness {
-  const blockers: string[] = [];
+export function getOnboardingReadiness(workspace: SetupWorkspace): SetupReadiness {
+  const blockers = getCompanyProfileIssues(workspace).map((issue) => issue.message);
   const warnings: string[] = [];
 
-  if (!workspace.name?.trim()) {
-    blockers.push("Company name is required.");
+  if (workspace.name?.trim() && workspace.name.length < 3) {
+    warnings.push("Company name looks unusually short.");
   }
-  if (workspace.gstRegistered === null || workspace.gstRegistered === undefined) {
-    blockers.push("GST registration setting is required.");
-  }
-  if (!workspace.basFrequency) {
-    blockers.push("BAS frequency is required.");
-  }
-  if (!workspace.financialYearStartMonth) {
-    blockers.push("Financial year start month is required.");
-  }
+
+  return {
+    complete: blockers.length === 0,
+    blockers,
+    warnings
+  };
+}
+
+export function getSetupReadiness(workspace: SetupWorkspace): SetupReadiness {
+  const onboarding = getOnboardingReadiness(workspace);
+  const blockers = [...onboarding.blockers];
+  const warnings = [...onboarding.warnings];
+
   if (!workspace.bankAccounts.some((account) => account.active)) {
     blockers.push("At least one active bank account is required.");
   }

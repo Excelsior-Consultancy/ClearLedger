@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { MembershipRole, Prisma } from "@prisma/client";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { formatAbn, isValidAbn, normalizeAbn } from "@/modules/company/profile";
 import { getAuthProvider, readDevIdentityCookie, type AuthIdentity } from "@/modules/auth/provider";
 import { prisma } from "@/modules/db/prisma";
 
@@ -189,10 +190,11 @@ export function getRoleLabel(role: MembershipRole) {
   }
 }
 
-async function createWorkspaceWithMembership(tx: Prisma.TransactionClient, userId: string, companyName: string) {
+async function createWorkspaceWithMembership(tx: Prisma.TransactionClient, userId: string, workspaceName: string, abn: string) {
   const workspace = await tx.workspace.create({
     data: {
-      name: companyName.trim(),
+      name: workspaceName.trim(),
+      abn: normalizeAbn(abn),
       gstRegistered: null,
       basFrequency: null,
       financialYearStartMonth: 7,
@@ -211,15 +213,38 @@ async function createWorkspaceWithMembership(tx: Prisma.TransactionClient, userI
   return workspace;
 }
 
-export async function createWorkspaceForUser(input: { userId: string; companyName: string }, cookieStore?: CookieStoreLike) {
-  const companyName = input.companyName.trim();
-  if (!companyName) {
+export async function createWorkspaceForUser(
+  input: { userId: string; workspaceName: string; abn: string },
+  cookieStore?: CookieStoreLike
+) {
+  const workspaceName = input.workspaceName.trim();
+  const normalizedAbn = normalizeAbn(input.abn);
+  if (!workspaceName) {
     throw new Error("Company name is required.");
   }
+  if (!isValidAbn(normalizedAbn)) {
+    throw new Error("Enter a valid 11-digit ABN.");
+  }
 
-  const workspace = await prisma.$transaction(async (tx) => createWorkspaceWithMembership(tx, input.userId, companyName));
-  await selectWorkspace(workspace.id, cookieStore);
-  return workspace;
+  try {
+    const workspace = await prisma.$transaction(async (tx) =>
+      createWorkspaceWithMembership(tx, input.userId, workspaceName, normalizedAbn)
+    );
+    await selectWorkspace(workspace.id, cookieStore);
+    return workspace;
+  } catch (error) {
+    const prismaError = error as { code?: string; meta?: { target?: unknown } } | null;
+    if (
+      prismaError?.code === "P2002" &&
+      Array.isArray(prismaError.meta?.target) &&
+      prismaError.meta.target.includes("abn")
+    ) {
+      throw new Error(
+        `That ABN is already registered for another workspace. Ask an admin to invite you to ${formatAbn(normalizedAbn)} instead.`
+      );
+    }
+    throw error;
+  }
 }
 
 export async function findOrCreateAuthUser(identity: AuthIdentity) {

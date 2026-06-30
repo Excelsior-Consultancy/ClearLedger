@@ -1,18 +1,13 @@
 import { calculateGst } from "./gst";
 import type { Expense, Invoice, PayRun, ValidationIssue, Workspace } from "@/modules/shared/types";
+import { getCompanyProfileIssues } from "@/modules/company/profile";
 
 export function validateWorkspace(workspace: Workspace): ValidationIssue[] {
-  const issues: ValidationIssue[] = [];
+  const issues: ValidationIssue[] = getCompanyProfileIssues(workspace).map((issue) => {
+    const code = `company-${String(issue.field)}`;
+    return { severity: "blocker", code, message: issue.message };
+  });
 
-  if (!workspace.name.trim()) {
-    issues.push({ severity: "blocker", code: "company-name", message: "Company name is required." });
-  }
-  if (workspace.gstRegistered == null) {
-    issues.push({ severity: "blocker", code: "gst-setting", message: "GST registration setting is required." });
-  }
-  if (!workspace.basFrequency) {
-    issues.push({ severity: "blocker", code: "bas-frequency", message: "BAS frequency is required." });
-  }
   if (!workspace.bankAccounts.some((account) => account.active)) {
     issues.push({ severity: "blocker", code: "bank-account", message: "At least one active bank account is required." });
   }

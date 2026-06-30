@@ -6,6 +6,10 @@ export type StatusSeverity = "blocker" | "warning" | "info" | "final";
 export type Workspace = {
   id: string;
   name: string;
+  legalName?: string | null;
+  abn?: string | null;
+  address?: string | null;
+  contactEmail?: string | null;
   setupComplete: boolean;
   gstRegistered: boolean | null;
   basFrequency: string | null;

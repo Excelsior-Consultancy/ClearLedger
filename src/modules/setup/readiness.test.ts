@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { getSetupReadiness } from "./readiness";
+import { getOnboardingReadiness, getSetupReadiness } from "./readiness";
 
 describe("getSetupReadiness", () => {
   it("reports setup complete when essentials exist", () => {
     const readiness = getSetupReadiness({
       name: "Excelsior Consulting",
+      legalName: "Excelsior Business Manager Pty Ltd",
+      abn: "51824753556",
+      address: "Sydney NSW",
+      contactEmail: "123@123.com",
       gstRegistered: true,
       basFrequency: "QUARTERLY",
       financialYearStartMonth: 7,
@@ -19,6 +23,10 @@ describe("getSetupReadiness", () => {
   it("blocks setup when bank accounts or categories are missing", () => {
     const readiness = getSetupReadiness({
       name: "Excelsior Consulting",
+      legalName: "Excelsior Business Manager Pty Ltd",
+      abn: "51824753556",
+      address: "Sydney NSW",
+      contactEmail: "123@123.com",
       gstRegistered: true,
       basFrequency: "QUARTERLY",
       financialYearStartMonth: 7,
@@ -29,5 +37,34 @@ describe("getSetupReadiness", () => {
     expect(readiness.complete).toBe(false);
     expect(readiness.blockers).toContain("At least one active bank account is required.");
     expect(readiness.blockers).toContain("At least one active category is required.");
+  });
+});
+
+describe("getOnboardingReadiness", () => {
+  it("blocks onboarding when company profile details are missing", () => {
+    const readiness = getOnboardingReadiness({
+      name: "Excelsior Consulting",
+      legalName: "",
+      abn: "51824753556",
+      address: "",
+      contactEmail: "",
+      gstRegistered: null,
+      basFrequency: null,
+      financialYearStartMonth: null,
+      bankAccounts: [],
+      categories: []
+    });
+
+    expect(readiness.complete).toBe(false);
+    expect(readiness.blockers).toEqual(
+      expect.arrayContaining([
+        "Legal name is required.",
+        "Contact email is required.",
+        "Registered business address is required.",
+        "GST registration status is required.",
+        "BAS frequency is required.",
+        "Financial year start month is required."
+      ])
+    );
   });
 });

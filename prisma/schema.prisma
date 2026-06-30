@@ -103,7 +103,7 @@ model Workspace {
   id                      String        @id @default(cuid())
   name                    String
   legalName               String?
-  abn                     String?
+  abn                     String?       @unique
   address                 String?
   contactEmail            String?
   gstRegistered           Boolean?

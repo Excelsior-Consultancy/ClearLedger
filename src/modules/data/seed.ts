@@ -12,6 +12,10 @@ export const currentQuarter: Quarter = {
 export const workspace: Workspace = {
   id: "excelsior",
   name: "Excelsior Consulting",
+  legalName: "Excelsior Business Manager Pty Ltd",
+  abn: "51824753556",
+  address: "Sydney NSW",
+  contactEmail: "123@123.com",
   setupComplete: true,
   gstRegistered: true,
   basFrequency: "quarterly",
