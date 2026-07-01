@@ -7,6 +7,7 @@ export type SetupWorkspace = {
   address?: string | null;
   contactEmail?: string | null;
   gstRegistered?: boolean | null;
+  gstAccountingBasis?: string | null;
   basFrequency?: string | null;
   financialYearStartMonth?: number | null;
   bankAccounts: Array<{ active: boolean }>;

@@ -175,7 +175,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                   <table className="w-full text-sm" style={{ minWidth: 760 }}>
                     <thead>
                       <tr className="border-b border-zinc-100">
-                        {["Action", "Date", "Supplier", "Category", "Bank account", "Gross", "GST", "Evidence", "Status"].map((h) => (
+                        {["Action", "Date", "Supplier", "Category", "Bank account", "Gross", "GST", "Paid", "Evidence", "Status"].map((h) => (
                           <th key={h} className="text-left text-xs font-semibold text-zinc-400 px-3 py-2.5">{h}</th>
                         ))}
                       </tr>
@@ -204,6 +204,11 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                             </td>
                             <td className="px-3 py-2.5 font-medium text-zinc-800">{formatMoney(expense.grossCents)}</td>
                             <td className="px-3 py-2.5 text-zinc-600">{formatMoney(expense.gstCents)}</td>
+                            <td className="px-3 py-2.5">
+                              <Chip color={expense.paymentState === "paid" ? "success" : "warning"} variant="soft" size="sm">
+                                {expense.paymentState === "paid" ? "Paid" : "Unpaid"}
+                              </Chip>
+                            </td>
                             <td className="px-3 py-2.5">
                               {expense.receiptUrl
                                 ? <a className="text-blue-600 underline underline-offset-2 text-xs" href={expense.receiptUrl}>Receipt</a>
@@ -280,6 +285,14 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                     <p className="text-xs text-zinc-400">Category default applies unless manual override.</p>
                   </div>
                   <div className="flex flex-col gap-1">
+                    <label className="text-xs text-zinc-500" htmlFor="paymentState">Payment state</label>
+                    <select id="paymentState" name="paymentState" defaultValue="UNPAID"
+                      className="border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-800 bg-white">
+                      <option value="UNPAID">Unpaid</option>
+                      <option value="PAID">Paid</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1">
                     <label className="text-xs text-zinc-500" htmlFor="userEnteredGst">Manual GST amount</label>
                     <input id="userEnteredGst" name="userEnteredGst" inputMode="decimal" placeholder="Only for override"
                       className="border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-800 bg-white" />
@@ -337,6 +350,9 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                     <p className="text-sm font-medium text-zinc-800">{selectedExpense.supplier ?? "Unnamed expense"}</p>
                     <p className="text-xs text-zinc-500">
                       BAS GST paid: {formatMoney(selectedExpense.gstCents)} from {formatMoney(selectedExpense.grossCents)} gross.
+                    </p>
+                    <p className="text-xs text-zinc-500">
+                      Payment state: {selectedExpense.paymentState === "paid" ? "Paid" : "Unpaid"}
                     </p>
                     <p className="text-xs text-zinc-500">
                       CA Pack evidence: {selectedExpense.receiptUrl ? "Receipt linked" : "Receipt missing"}

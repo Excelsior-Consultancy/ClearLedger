@@ -12,6 +12,7 @@ export type Workspace = {
   contactEmail?: string | null;
   setupComplete: boolean;
   gstRegistered: boolean | null;
+  gstAccountingBasis: string | null;
   basFrequency: string | null;
   financialYearStartMonth: number | null;
   quarterLocked: boolean;
@@ -79,6 +80,7 @@ export type Expense = {
   bankAccountId: string;
   grossCents: Cents;
   gstTreatment: GstTreatment;
+  paymentState: "unpaid" | "paid";
   userEnteredGstCents?: Cents;
   receiptUrl?: string;
   notes?: string;

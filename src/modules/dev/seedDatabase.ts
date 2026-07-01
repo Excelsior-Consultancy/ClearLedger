@@ -17,6 +17,7 @@ export async function seedDatabase() {
       address: "Sydney NSW",
       contactEmail: "123@123.com",
       gstRegistered: true,
+      gstAccountingBasis: "ACCRUAL",
       basFrequency: "QUARTERLY",
       financialYearStartMonth: 7,
       invoicePrefix: "EXC",
@@ -99,6 +100,7 @@ export async function seedDatabase() {
       address: "Melbourne VIC",
       contactEmail: "456@456.com",
       gstRegistered: true,
+      gstAccountingBasis: "ACCRUAL",
       basFrequency: "QUARTERLY",
       financialYearStartMonth: 7,
       invoicePrefix: "HBR",
@@ -243,6 +245,7 @@ export async function seedDatabase() {
         bankAccountId: raja.id,
         grossCents: 27500,
         gstTreatment: "GST_INCLUDED",
+        paymentState: "PAID",
         receiptUrl: "https://drive.google.com/example/legacy-aws",
         notes: "Historical quarter sample"
       },
@@ -254,6 +257,7 @@ export async function seedDatabase() {
         bankAccountId: raja.id,
         grossCents: 33000,
         gstTreatment: "GST_INCLUDED",
+        paymentState: "PAID",
         receiptUrl: "https://drive.google.com/example/aws",
         notes: "Cloud hosting"
       },
@@ -265,6 +269,7 @@ export async function seedDatabase() {
         bankAccountId: charchit.id,
         grossCents: 22000,
         gstTreatment: "MANUAL_OVERRIDE",
+        paymentState: "PAID",
         userEnteredGstCents: 1500,
         overrideReason: "Mixed business/private usage"
       },
@@ -275,7 +280,8 @@ export async function seedDatabase() {
         categoryId: bankFees.id,
         bankAccountId: main.id,
         grossCents: 2800,
-        gstTreatment: "GST_FREE"
+        gstTreatment: "GST_FREE",
+        paymentState: "UNPAID"
       }
     ]
   });

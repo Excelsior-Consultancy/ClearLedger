@@ -30,6 +30,7 @@ export async function completeOnboardingAction(formData: FormData) {
       address: text(formData, "address"),
       contactEmail: text(formData, "contactEmail"),
       gstRegistered: booleanOrNull(formData, "gstRegistered"),
+      gstAccountingBasis: text(formData, "gstAccountingBasis") as "CASH" | "ACCRUAL",
       basFrequency: text(formData, "basFrequency") as "QUARTERLY" | "MONTHLY",
       financialYearStartMonth: Number(text(formData, "financialYearStartMonth") || 7),
       invoicePrefix: text(formData, "invoicePrefix") || null

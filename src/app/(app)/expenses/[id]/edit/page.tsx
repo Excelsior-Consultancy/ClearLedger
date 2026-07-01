@@ -139,6 +139,13 @@ export default async function EditExpensePage({
                 <p className="muted">Category default applies unless this is a manual override.</p>
               </div>
               <div className="field">
+                <label htmlFor="paymentState">Payment state</label>
+                <select id="paymentState" name="paymentState" defaultValue={model.expense.paymentState === "paid" ? "PAID" : "UNPAID"}>
+                  <option value="UNPAID">Unpaid</option>
+                  <option value="PAID">Paid</option>
+                </select>
+              </div>
+              <div className="field">
                 <label htmlFor="userEnteredGst">Manual GST amount</label>
                 <input id="userEnteredGst" name="userEnteredGst" inputMode="decimal" defaultValue={model.expense.userEnteredGstCents ? (model.expense.userEnteredGstCents / 100).toFixed(2) : ""} />
               </div>

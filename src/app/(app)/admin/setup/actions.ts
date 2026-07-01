@@ -13,6 +13,7 @@ import {
 import { prisma } from "@/modules/db/prisma";
 import { canManageCompany, getWorkspaceAccess } from "@/modules/auth/service";
 import { getAuthContext } from "@/modules/auth/service";
+import { toBasFilingBasis } from "@/modules/company/profile";
 import { assertQuarterEditable } from "@/modules/shared/quarterGuard";
 import { getExpenseWorkspace } from "@/modules/expenses/service";
 import { buildBasReport } from "@/modules/bas/report";
@@ -69,6 +70,7 @@ export async function updateCompanySetup(formData: FormData) {
       address: text(formData, "address"),
       contactEmail: text(formData, "contactEmail"),
       gstRegistered: booleanOrNull(formData, "gstRegistered"),
+      gstAccountingBasis: text(formData, "gstAccountingBasis") as "CASH" | "ACCRUAL",
       basFrequency: text(formData, "basFrequency") as "QUARTERLY" | "MONTHLY",
       financialYearStartMonth: Number(text(formData, "financialYearStartMonth") || 7),
       invoicePrefix: text(formData, "invoicePrefix") || null
@@ -229,7 +231,7 @@ export async function toggleQuarterLock(formData: FormData) {
   const quarterId = text(formData, "quarterId") || undefined;
   const workspace = await prisma.workspace.findUnique({
     where: { id: workspaceId },
-    select: { quarterLocked: true }
+    select: { quarterLocked: true, gstAccountingBasis: true }
   });
 
   if (!workspace) {
@@ -254,6 +256,7 @@ export async function toggleQuarterLock(formData: FormData) {
     ]);
 
     const basReport = buildBasReport({
+      basis: toBasFilingBasis(workspace.gstAccountingBasis),
       quarter: quarterContext.selectedQuarter,
       invoices: invoiceWorkspace.invoices.map((invoice) => ({
         id: invoice.id,
@@ -275,6 +278,7 @@ export async function toggleQuarterLock(formData: FormData) {
         bankAccountId: expense.bankAccountId,
         grossCents: expense.grossCents,
         gstTreatment: expense.gstTreatment,
+        paymentState: expense.paymentState,
         userEnteredGstCents: expense.userEnteredGstCents,
         receiptUrl: expense.receiptUrl,
         notes: expense.notes,
@@ -310,7 +314,7 @@ export async function toggleQuarterLock(formData: FormData) {
       quarterLabel: quarterContext.selectedQuarter.label,
       report: basReport,
       status: "finalized",
-      basis: "not_configured",
+      basis: basReport.filing.basis,
       lockedAt: new Date(),
       finalizedAt: new Date()
     });

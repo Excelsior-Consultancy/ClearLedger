@@ -46,6 +46,7 @@ test("creates a new workspace, then keeps the user in onboarding until the profi
   await page.locator('input[name="contactEmail"]').fill(`accounts-${Date.now()}@example.com`);
   await page.locator('textarea[name="address"]').fill("Level 5, 123 George St, Sydney NSW 2000");
   await page.locator('select[name="gstRegistered"]').selectOption("true");
+  await page.locator('select[name="gstAccountingBasis"]').selectOption("ACCRUAL");
   await page.locator('select[name="basFrequency"]').selectOption("QUARTERLY");
   await page.locator('select[name="financialYearStartMonth"]').selectOption("7");
   await page.locator('input[name="invoicePrefix"]').fill("FRS");

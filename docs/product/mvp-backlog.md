@@ -13,6 +13,7 @@ This backlog reflects the current codebase and the remaining MVP work for ClearL
 - Role-based workspace access.
 - BAS totals with source traceability for income, expenses, and payroll.
 - ATO-style BAS filing summary labels on the dashboard.
+- GST accounting basis selection and cash/accrual BAS handling.
 - Quarter lock now persists a BAS filing snapshot for the selected quarter.
 - CA Pack readiness checks and exception summary.
 
@@ -34,9 +35,6 @@ This backlog reflects the current codebase and the remaining MVP work for ClearL
 
 ### BAS filing readiness
 
-- A versioned BAS snapshot for each quarter, not just a live rollup.
-- Clear mapping to the ATO BAS labels for quarterly GST and PAYG withholding.
-- Cash vs accrual basis handling where it affects GST reporting.
 - BAS adjustments and corrections for prior-period edits.
 - Lodgement/export history so we can prove what was filed, when, and from which source records.
 

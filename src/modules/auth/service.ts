@@ -196,6 +196,7 @@ async function createWorkspaceWithMembership(tx: Prisma.TransactionClient, userI
       name: workspaceName.trim(),
       abn: normalizeAbn(abn),
       gstRegistered: null,
+      gstAccountingBasis: null,
       basFrequency: null,
       financialYearStartMonth: 7,
       quarterLocked: false

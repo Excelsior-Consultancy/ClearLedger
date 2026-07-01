@@ -50,6 +50,7 @@ export type ExpenseInput = {
   bankAccountId: string;
   grossCents: Cents;
   gstTreatment: PrismaGstTreatment | string;
+  paymentState: "UNPAID" | "PAID";
   userEnteredGstCents?: Cents;
   receiptUrl?: string;
   notes?: string;
@@ -61,9 +62,14 @@ export type ExpenseFilter = "all" | "missing-receipts" | "manual-overrides" | "b
 export const currentExpenseQuarter = currentReportingQuarter;
 
 const prismaGstTreatments = ["GST_INCLUDED", "GST_FREE", "NO_GST_OVERSEAS", "MANUAL_OVERRIDE"] as const;
+const expensePaymentStates = ["UNPAID", "PAID"] as const;
 
 function isPrismaGstTreatment(value: string): value is PrismaGstTreatment {
   return prismaGstTreatments.includes(value as PrismaGstTreatment);
+}
+
+function isExpensePaymentState(value: string): value is "UNPAID" | "PAID" {
+  return expensePaymentStates.includes(value as "UNPAID" | "PAID");
 }
 
 export function mapPrismaGstTreatment(treatment: PrismaGstTreatment): GstTreatment {
@@ -121,7 +127,8 @@ function mapExpense(record: ExpenseRecord): ExpenseRow {
     userEnteredGstCents: record.userEnteredGstCents ?? undefined,
     receiptUrl: record.receiptUrl ?? undefined,
     notes: record.notes ?? undefined,
-    overrideReason: record.overrideReason ?? undefined
+    overrideReason: record.overrideReason ?? undefined,
+    paymentState: record.paymentState.toLowerCase() as "unpaid" | "paid"
   };
 
   return {
@@ -162,6 +169,7 @@ export function expenseStatus(expense: ExpenseWithValidation): "blocker" | "warn
 export function validateExpenseInput(input: ExpenseInput): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   const validTreatment = isPrismaGstTreatment(input.gstTreatment);
+  const validPaymentState = isExpensePaymentState(input.paymentState);
   const date = parseDateInput(input.date);
   const receiptIssue = safeReceiptUrlIssue(input.receiptUrl);
 
@@ -179,6 +187,13 @@ export function validateExpenseInput(input: ExpenseInput): ValidationIssue[] {
       message: "Expense date must be a valid date."
     });
   }
+  if (!validPaymentState) {
+    issues.push({
+      severity: "blocker",
+      code: "expense-payment-state-invalid",
+      message: "Expense payment state is invalid."
+    });
+  }
   if (receiptIssue) {
     issues.push(receiptIssue);
   }
@@ -186,6 +201,7 @@ export function validateExpenseInput(input: ExpenseInput): ValidationIssue[] {
   const treatment: GstTreatment = validTreatment
     ? mapPrismaGstTreatment(input.gstTreatment as PrismaGstTreatment)
     : "gst-free";
+  const paymentState = validPaymentState ? (input.paymentState.toLowerCase() as "unpaid" | "paid") : "unpaid";
 
   return issues.concat(validateExpense({
     id: "draft",
@@ -196,6 +212,7 @@ export function validateExpenseInput(input: ExpenseInput): ValidationIssue[] {
     bankAccountId: input.bankAccountId,
     grossCents: input.grossCents,
     gstTreatment: treatment,
+    paymentState,
     userEnteredGstCents: input.userEnteredGstCents,
     receiptUrl: input.receiptUrl,
     notes: input.notes,
@@ -405,6 +422,7 @@ export async function createExpense(input: ExpenseInput) {
       bankAccountId: normalizedInput.bankAccountId,
       grossCents: normalizedInput.grossCents,
       gstTreatment: normalizedInput.gstTreatment as PrismaGstTreatment,
+      paymentState: normalizedInput.paymentState as "UNPAID" | "PAID",
       userEnteredGstCents: normalizedInput.gstTreatment === "MANUAL_OVERRIDE" ? normalizedInput.userEnteredGstCents ?? 0 : null,
       receiptUrl: normalizedInput.receiptUrl || null,
       notes: normalizedInput.notes || null,
@@ -449,6 +467,7 @@ export async function updateExpense(id: string, input: ExpenseInput) {
       bankAccountId: normalizedInput.bankAccountId,
       grossCents: normalizedInput.grossCents,
       gstTreatment: normalizedInput.gstTreatment as PrismaGstTreatment,
+      paymentState: normalizedInput.paymentState as "UNPAID" | "PAID",
       userEnteredGstCents: normalizedInput.gstTreatment === "MANUAL_OVERRIDE" ? normalizedInput.userEnteredGstCents ?? 0 : null,
       receiptUrl: normalizedInput.receiptUrl || null,
       notes: normalizedInput.notes || null,

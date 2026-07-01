@@ -26,6 +26,7 @@ function parseCents(value: string): number {
 function parseExpenseInput(formData: FormData): ExpenseInput {
   const gstTreatment = text(formData, "gstTreatment") as PrismaGstTreatment;
   const userEnteredGst = text(formData, "userEnteredGst");
+  const paymentState = text(formData, "paymentState") as "UNPAID" | "PAID";
 
   return {
     workspaceId: text(formData, "workspaceId"),
@@ -35,6 +36,7 @@ function parseExpenseInput(formData: FormData): ExpenseInput {
     bankAccountId: text(formData, "bankAccountId"),
     grossCents: parseCents(text(formData, "grossAmount")),
     gstTreatment,
+    paymentState,
     userEnteredGstCents: userEnteredGst ? parseCents(userEnteredGst) : undefined,
     receiptUrl: text(formData, "receiptUrl") || undefined,
     notes: text(formData, "notes") || undefined,

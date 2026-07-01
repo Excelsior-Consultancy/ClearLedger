@@ -9,7 +9,7 @@ import { buildCaPackReadiness } from "./caPack";
 describe("buildCaPackReadiness", () => {
   it("allows draft export when only warnings exist", () => {
     const readiness = buildCaPackReadiness({
-      bas: buildBasReport({ quarter: currentQuarter, invoices, expenses, payRuns }),
+      bas: buildBasReport({ basis: "accrual", quarter: currentQuarter, invoices, expenses, payRuns }),
       income: summarizeIncome(invoices),
       expenses: summarizeExpenses(expenses),
       payroll: summarizePayroll(payRuns)
@@ -25,11 +25,18 @@ describe("buildCaPackReadiness", () => {
   it("marks locked clean quarters as final", () => {
     const readiness = buildCaPackReadiness({
       bas: buildBasReport({
+        basis: "accrual",
         quarter: { ...currentQuarter, locked: true },
         invoices: invoices.map((invoice) => ({ ...invoice, paid: true })),
         expenses: expenses
           .filter((expense) => expense.receiptUrl)
-          .map((expense) => ({ ...expense, gstTreatment: "gst-included", userEnteredGstCents: undefined, overrideReason: undefined })),
+          .map((expense) => ({
+            ...expense,
+            gstTreatment: "gst-included",
+            paymentState: "paid",
+            userEnteredGstCents: undefined,
+            overrideReason: undefined
+          })),
         payRuns: payRuns.map((payRun) => ({ ...payRun, finalized: true, overrideReason: undefined }))
       }),
       income: summarizeIncome(invoices.map((invoice) => ({ ...invoice, paid: true }))),

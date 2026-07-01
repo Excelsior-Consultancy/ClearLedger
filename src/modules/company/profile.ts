@@ -5,6 +5,7 @@ export type CompanyProfileFields = {
   address?: string | null;
   contactEmail?: string | null;
   gstRegistered?: boolean | null;
+  gstAccountingBasis?: string | null;
   basFrequency?: string | null;
   financialYearStartMonth?: number | null;
   invoicePrefix?: string | null;
@@ -51,6 +52,19 @@ export function validateContactEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+export function formatGstAccountingBasis(value: string) {
+  if (value === "CASH") return "Cash";
+  if (value === "ACCRUAL") return "Accrual";
+  return value;
+}
+
+export function toBasFilingBasis(value?: string | null) {
+  const normalized = value?.toUpperCase();
+  if (normalized === "CASH") return "cash" as const;
+  if (normalized === "ACCRUAL") return "accrual" as const;
+  return "not_configured" as const;
+}
+
 export function getCompanyProfileIssues(profile: CompanyProfileFields): CompanyProfileIssue[] {
   const issues: CompanyProfileIssue[] = [];
 
@@ -75,6 +89,11 @@ export function getCompanyProfileIssues(profile: CompanyProfileFields): CompanyP
   }
   if (profile.gstRegistered === null || profile.gstRegistered === undefined) {
     issues.push({ field: "gstRegistered", message: "GST registration status is required." });
+  }
+  if (!profile.gstAccountingBasis?.trim()) {
+    issues.push({ field: "gstAccountingBasis", message: "GST accounting basis is required." });
+  } else if (!["CASH", "ACCRUAL"].includes(profile.gstAccountingBasis)) {
+    issues.push({ field: "gstAccountingBasis", message: "Select cash or accrual GST accounting." });
   }
   if (!profile.basFrequency?.trim()) {
     issues.push({ field: "basFrequency", message: "BAS frequency is required." });

@@ -545,6 +545,7 @@ async function main() {
           bankAccountId: row.bankAccountRaw || "",
           grossCents: row.grossCents,
           gstTreatment: treatment.treatment,
+          paymentState: "paid",
           userEnteredGstCents: treatment.userEnteredGstCents,
           receiptUrl: undefined,
           notes: undefined,

@@ -23,7 +23,8 @@ describe("expense service rules", () => {
       categoryId: "software",
       bankAccountId: "raja",
       grossCents: dollars(110),
-      gstTreatment: "GST_INCLUDED"
+      gstTreatment: "GST_INCLUDED",
+      paymentState: "UNPAID" as const
     });
 
     expect(missingReceiptIssues).toContainEqual(
@@ -38,6 +39,7 @@ describe("expense service rules", () => {
       bankAccountId: "raja",
       grossCents: dollars(10),
       gstTreatment: "MANUAL_OVERRIDE",
+      paymentState: "PAID" as const,
       userEnteredGstCents: dollars(20),
       overrideReason: "Bad import"
     });
@@ -73,7 +75,8 @@ describe("expense service rules", () => {
         categoryId: "income-category",
         bankAccountId: "foreign-bank",
         grossCents: dollars(110),
-        gstTreatment: "GST_INCLUDED"
+        gstTreatment: "GST_INCLUDED",
+        paymentState: "PAID"
       },
       {
         category: { id: "income-category", workspaceId: "workspace-a", type: "INCOME", active: true },
@@ -97,6 +100,7 @@ describe("expense service rules", () => {
       bankAccountId: "raja",
       grossCents: dollars(110),
       gstTreatment: "NOT_A_GST_TREATMENT",
+      paymentState: "UNPAID",
       receiptUrl: "javascript:alert(1)"
     });
 
@@ -119,8 +123,9 @@ describe("expense service rules", () => {
       bankAccountId: "raja",
       grossCents: dollars(110),
       gstTreatment: "GST_INCLUDED",
+      paymentState: "PAID",
       receiptUrl: "https://drive.google.com/receipt"
-    };
+    } as const;
 
     expect(
       normalizeExpenseGstTreatment(input, {

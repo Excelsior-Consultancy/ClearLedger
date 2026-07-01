@@ -10,6 +10,7 @@ export type WorkspaceProfileInput = {
   address: string;
   contactEmail: string;
   gstRegistered: boolean | null;
+  gstAccountingBasis: "CASH" | "ACCRUAL";
   basFrequency: "QUARTERLY" | "MONTHLY";
   financialYearStartMonth: number;
   invoicePrefix?: string | null;
@@ -23,6 +24,7 @@ type SetupWorkspaceRecord = {
   address: string | null;
   contactEmail: string | null;
   gstRegistered: boolean | null;
+  gstAccountingBasis: string | null;
   basFrequency: string | null;
   financialYearStartMonth: number | null;
   invoicePrefix: string | null;
@@ -82,6 +84,7 @@ export async function getPrimaryWorkspaceSetup() {
         id: access.workspaceId,
         name: access.workspaceName,
         gstRegistered: null,
+        gstAccountingBasis: null,
         basFrequency: null,
         financialYearStartMonth: 7,
         quarterLocked: false
@@ -96,6 +99,7 @@ export async function getPrimaryWorkspaceSetup() {
       id: access.workspaceId,
       name: access.workspaceName,
       gstRegistered: null,
+      gstAccountingBasis: null,
       basFrequency: null,
       financialYearStartMonth: 7,
       quarterLocked: false
@@ -120,6 +124,7 @@ export async function saveWorkspaceProfile(workspaceId: string, input: Workspace
     address: input.address,
     contactEmail: input.contactEmail,
     gstRegistered: input.gstRegistered,
+    gstAccountingBasis: input.gstAccountingBasis,
     basFrequency: input.basFrequency,
     financialYearStartMonth: input.financialYearStartMonth,
     invoicePrefix: input.invoicePrefix
@@ -152,6 +157,7 @@ export async function saveWorkspaceProfile(workspaceId: string, input: Workspace
       address: input.address.trim(),
       contactEmail: input.contactEmail.trim().toLowerCase(),
       gstRegistered: input.gstRegistered,
+      gstAccountingBasis: input.gstAccountingBasis,
       basFrequency: input.basFrequency,
       financialYearStartMonth: input.financialYearStartMonth,
       invoicePrefix: input.invoicePrefix?.trim() || null

@@ -5,12 +5,14 @@ import { buildCaPackReadiness } from "@/modules/exports/caPack";
 import { summarizeExpenses } from "@/modules/expenses/summary";
 import { summarizeIncome } from "@/modules/income/summary";
 import { summarizePayroll } from "@/modules/payroll/summary";
+import { toBasFilingBasis } from "@/modules/company/profile";
 
 export function getAppModel() {
   const incomeSummary = summarizeIncome(invoices);
   const expenseSummary = summarizeExpenses(expenses);
   const payrollSummary = summarizePayroll(payRuns);
   const basReport = buildBasReport({
+    basis: toBasFilingBasis(workspace.gstAccountingBasis),
     quarter: currentQuarter,
     invoices,
     expenses,

@@ -18,6 +18,7 @@ export const workspace: Workspace = {
   contactEmail: "123@123.com",
   setupComplete: true,
   gstRegistered: true,
+  gstAccountingBasis: "accrual",
   basFrequency: "quarterly",
   financialYearStartMonth: 7,
   quarterLocked: false,
@@ -102,6 +103,7 @@ export const expenses: Expense[] = [
     bankAccountId: "raja",
     grossCents: dollars(330),
     gstTreatment: "gst-included",
+    paymentState: "paid",
     receiptUrl: "https://drive.google.com/example/aws",
     notes: "Cloud hosting"
   },
@@ -114,6 +116,7 @@ export const expenses: Expense[] = [
     bankAccountId: "charchit",
     grossCents: dollars(220),
     gstTreatment: "manual-override",
+    paymentState: "paid",
     userEnteredGstCents: dollars(15),
     overrideReason: "Mixed business/private usage"
   },
@@ -125,7 +128,8 @@ export const expenses: Expense[] = [
     categoryId: "bank-fees",
     bankAccountId: "main",
     grossCents: dollars(28),
-    gstTreatment: "gst-free"
+    gstTreatment: "gst-free",
+    paymentState: "unpaid"
   }
 ];
 

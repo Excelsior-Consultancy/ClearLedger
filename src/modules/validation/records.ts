@@ -33,6 +33,9 @@ export function validateExpense(expense: Expense): ValidationIssue[] {
   if (!expense.bankAccountId) {
     issues.push({ severity: "blocker", code: "expense-bank-account", message: "Bank account is required." });
   }
+  if (!expense.paymentState) {
+    issues.push({ severity: "blocker", code: "expense-payment-state", message: "Expense payment state is required." });
+  }
   if (!expense.receiptUrl) {
     issues.push({ severity: "warning", code: "missing-receipt", message: "Receipt link is missing." });
   }

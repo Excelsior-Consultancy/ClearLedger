@@ -20,6 +20,7 @@ describe("company profile helpers", () => {
       address: "",
       contactEmail: "",
       gstRegistered: null,
+      gstAccountingBasis: null,
       basFrequency: null,
       financialYearStartMonth: null
     });
@@ -32,6 +33,7 @@ describe("company profile helpers", () => {
         "address",
         "contactEmail",
         "gstRegistered",
+        "gstAccountingBasis",
         "basFrequency",
         "financialYearStartMonth"
       ])

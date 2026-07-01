@@ -10,6 +10,7 @@ import {
   updateCompanySetup,
 } from "./actions";
 import { getBasFiling } from "@/modules/bas/filing";
+import { formatGstAccountingBasis } from "@/modules/company/profile";
 import { getPrimaryWorkspaceSetup } from "@/modules/setup/service";
 import { canManageCompany, getRoleLabel, getWorkspaceAccess } from "@/modules/auth/service";
 import { Button, Card, CardContent, Chip } from "@heroui/react";
@@ -160,7 +161,7 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                       <span className="font-mono text-xs">{basFiling.sourceHash.slice(0, 12)}...</span>
                     </p>
                     <p>
-                      Filing basis: <span className="font-medium">{basFiling.basis}</span>
+                      Filing basis: <span className="font-medium">{formatGstAccountingBasis(basFiling.basis.toUpperCase())}</span>
                     </p>
                     <p className="text-xs text-zinc-500">
                       The stored snapshot is what we will review for filing, while the workspace lock keeps the quarter read-only.
@@ -206,6 +207,13 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                     <select id="gstRegistered" name="gstRegistered" defaultValue={String(workspace.gstRegistered ?? true)} className={inputCls}>
                       <option value="true">Yes</option>
                       <option value="false">No</option>
+                    </select>
+                  </div>
+                  <div className={fieldCls}>
+                    <label className={labelCls} htmlFor="gstAccountingBasis">GST accounting basis</label>
+                    <select id="gstAccountingBasis" name="gstAccountingBasis" defaultValue={workspace.gstAccountingBasis ?? "CASH"} className={inputCls}>
+                      <option value="CASH">Cash</option>
+                      <option value="ACCRUAL">Accrual</option>
                     </select>
                   </div>
                   <div className={fieldCls}>

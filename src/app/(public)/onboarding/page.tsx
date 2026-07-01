@@ -45,6 +45,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams?: 
       address: true,
       contactEmail: true,
       gstRegistered: true,
+      gstAccountingBasis: true,
       basFrequency: true,
       financialYearStartMonth: true,
       invoicePrefix: true
@@ -62,6 +63,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams?: 
     address: workspace.address,
     contactEmail: workspace.contactEmail,
     gstRegistered: workspace.gstRegistered,
+    gstAccountingBasis: workspace.gstAccountingBasis,
     basFrequency: workspace.basFrequency,
     financialYearStartMonth: workspace.financialYearStartMonth,
     bankAccounts: [],
@@ -173,6 +175,19 @@ export default async function OnboardingPage({ searchParams }: { searchParams?: 
                 </div>
 
                 <div>
+                  <label className="mb-1 block text-sm font-medium text-zinc-700">GST accounting basis</label>
+                  <select
+                    name="gstAccountingBasis"
+                    required
+                    defaultValue={workspace.gstAccountingBasis ?? "CASH"}
+                    className="w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm"
+                  >
+                    <option value="CASH">Cash</option>
+                    <option value="ACCRUAL">Accrual</option>
+                  </select>
+                </div>
+
+                <div>
                   <label className="mb-1 block text-sm font-medium text-zinc-700">BAS frequency</label>
                   <select
                     name="basFrequency"
@@ -232,6 +247,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams?: 
               <li>Workspace name and legal entity name</li>
               <li>ABN validated as the workspace identifier</li>
               <li>Contact email and registered business address</li>
+              <li>GST accounting basis for BAS timing</li>
               <li>GST registration status and BAS frequency</li>
               <li>Financial year start month for reporting periods</li>
             </ul>

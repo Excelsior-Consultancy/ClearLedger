@@ -116,6 +116,7 @@ Required onboarding fields:
 - contact email
 - registered business address
 - GST registration status
+- GST accounting basis
 - BAS frequency
 - financial year start month
 - invoice prefix, if used

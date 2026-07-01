@@ -19,6 +19,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       address: true,
       contactEmail: true,
       gstRegistered: true,
+      gstAccountingBasis: true,
       basFrequency: true,
       financialYearStartMonth: true
     }

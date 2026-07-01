@@ -16,6 +16,7 @@ import { formatMoney } from "@/modules/shared/money";
 import type { StatusSeverity } from "@/modules/shared/types";
 import { Button, Card, CardContent, Chip } from "@heroui/react";
 import Link from "next/link";
+import { toBasFilingBasis } from "@/modules/company/profile";
 
 export const dynamic = "force-dynamic";
 
@@ -136,7 +137,7 @@ function BASFilingCard({
         </div>
         <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-zinc-600">
           <Chip color="default" variant="soft" size="sm">
-            Basis: {filing.basis}
+            Basis: {filing.basis === "cash" ? "Cash" : filing.basis === "accrual" ? "Accrual" : "Not configured"}
           </Chip>
           {filing.notes.map((note) => (
             <span key={note} className="rounded-full border border-zinc-200 bg-white px-2 py-1">
@@ -175,6 +176,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
   const payrollSummary = summarizePayroll(payrollWorkspace.payRuns);
   const expenseSummary = expenseWorkspace.summary;
   const basReport = buildBasReport({
+    basis: toBasFilingBasis(setup.workspace.gstAccountingBasis),
     quarter: expenseWorkspace.quarter,
     invoices: invoiceWorkspace.invoices.map((invoice) => ({
       id: invoice.id,
@@ -288,7 +290,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                   </Chip>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  {[["Company name", workspaceName], ["BAS frequency", setup.workspace.basFrequency ?? "Quarterly"]].map(([label, value]) => (
+                  {[["Company name", workspaceName], ["GST basis", setup.workspace.gstAccountingBasis === "accrual" ? "Accrual" : setup.workspace.gstAccountingBasis === "cash" ? "Cash" : "Not set"], ["BAS frequency", setup.workspace.basFrequency ?? "Quarterly"]].map(([label, value]) => (
                     <div key={label}>
                       <p className="text-xs text-zinc-400 mb-0.5">{label}</p>
                       <p className="text-sm text-zinc-800">{value}</p>

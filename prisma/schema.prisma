@@ -46,6 +46,11 @@ enum BasFrequency {
   MONTHLY
 }
 
+enum GstAccountingBasis {
+  CASH
+  ACCRUAL
+}
+
 enum BasFilingStatus {
   DRAFT
   FINALIZED
@@ -64,6 +69,11 @@ enum InvoiceStatus {
   PAID
   OVERDUE
   CANCELLED
+}
+
+enum ExpensePaymentState {
+  UNPAID
+  PAID
 }
 
 enum MembershipRole {
@@ -118,6 +128,7 @@ model Workspace {
   address                 String?
   contactEmail            String?
   gstRegistered           Boolean?
+  gstAccountingBasis      GstAccountingBasis?
   basFrequency            BasFrequency?
   financialYearStartMonth Int?
   invoicePrefix           String?
@@ -334,6 +345,7 @@ model Expense {
   bankAccountId       String
   grossCents          Int
   gstTreatment        GstTreatment
+  paymentState        ExpensePaymentState @default(UNPAID)
   userEnteredGstCents Int?
   receiptUrl          String?
   notes               String?

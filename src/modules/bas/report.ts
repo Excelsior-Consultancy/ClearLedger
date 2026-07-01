@@ -59,15 +59,31 @@ export type BasReport = {
 };
 
 export function buildBasReport(input: {
+  basis?: "cash" | "accrual" | "not_configured";
   quarter: Quarter;
   invoices: Invoice[];
   expenses: Expense[];
   payRuns: PayRun[];
 }): BasReport {
-  const income = summarizeIncome(input.invoices);
-  const expenses = summarizeExpenses(input.expenses);
+  const basis = input.basis ?? "not_configured";
+  const allIncome = summarizeIncome(input.invoices);
+  const allExpenses = summarizeExpenses(input.expenses);
+  const incomeRecords = basis === "cash" ? input.invoices.filter((invoice) => invoice.paid) : input.invoices;
+  const expenseRecords = basis === "cash" ? input.expenses.filter((expense) => expense.paymentState === "paid") : input.expenses;
+  const income = summarizeIncome(incomeRecords);
+  const expenses = summarizeExpenses(expenseRecords);
   const payroll = summarizePayroll(input.payRuns);
   const activePayRuns = input.payRuns.filter((payRun) => payRun.status !== "reversed" && payRun.status !== "corrected");
+  const notes = ["Super is tracked separately for reporting but is not a BAS label."];
+
+  if (basis === "cash") {
+    notes.push(
+      `${input.invoices.filter((invoice) => !invoice.paid).length} unpaid invoices are excluded until cash is received.`,
+      `${input.expenses.filter((expense) => expense.paymentState !== "paid").length} unpaid expenses are excluded until paid.`
+    );
+  } else if (basis === "not_configured") {
+    notes.push("BAS filing basis is not configured yet.");
+  }
 
   return {
     quarter: input.quarter,
@@ -79,7 +95,7 @@ export function buildBasReport(input: {
     superCents: payroll.superCents,
     sources: {
       gstCollected: buildSourceGroup(
-        input.invoices.map((invoice) => ({
+        incomeRecords.map((invoice) => ({
           sourceKind: "invoice" as const,
           sourceId: invoice.id,
           label: `Invoice ${invoice.invoiceNumber}`,
@@ -93,7 +109,7 @@ export function buildBasReport(input: {
         income.gstCollectedCents
       ),
       gstPaid: buildSourceGroup(
-        input.expenses.map((expense) => ({
+        expenseRecords.map((expense) => ({
           sourceKind: "expense" as const,
           sourceId: expense.id,
           label: expense.supplier?.trim() || "Expense",
@@ -143,7 +159,7 @@ export function buildBasReport(input: {
       )
     },
     filing: {
-      basis: "not_configured",
+      basis,
       lines: [
         {
           code: "G1",
@@ -176,14 +192,11 @@ export function buildBasReport(input: {
           sourceGroup: "paygWithholding"
         }
       ],
-      readyToFile: false,
-      notes: [
-        "Super is tracked separately for reporting but is not a BAS label.",
-        "BAS filing basis is not configured yet."
-      ]
+      readyToFile: basis !== "not_configured" && allIncome.blockers === 0 && allExpenses.blockers === 0 && payroll.blockers === 0,
+      notes
     },
-    blockers: income.blockers + expenses.blockers + payroll.blockers,
-    warnings: expenses.missingReceipts + expenses.manualOverrides + payroll.warnings + income.unpaidInvoices
+    blockers: allIncome.blockers + allExpenses.blockers + payroll.blockers,
+    warnings: allExpenses.missingReceipts + allExpenses.manualOverrides + payroll.warnings + allIncome.unpaidInvoices
   };
 }
 

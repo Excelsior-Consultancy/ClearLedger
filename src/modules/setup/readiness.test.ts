@@ -10,6 +10,7 @@ describe("getSetupReadiness", () => {
       address: "Sydney NSW",
       contactEmail: "123@123.com",
       gstRegistered: true,
+      gstAccountingBasis: "ACCRUAL",
       basFrequency: "QUARTERLY",
       financialYearStartMonth: 7,
       bankAccounts: [{ active: true }],
@@ -28,6 +29,7 @@ describe("getSetupReadiness", () => {
       address: "Sydney NSW",
       contactEmail: "123@123.com",
       gstRegistered: true,
+      gstAccountingBasis: "ACCRUAL",
       basFrequency: "QUARTERLY",
       financialYearStartMonth: 7,
       bankAccounts: [],
@@ -49,6 +51,7 @@ describe("getOnboardingReadiness", () => {
       address: "",
       contactEmail: "",
       gstRegistered: null,
+      gstAccountingBasis: null,
       basFrequency: null,
       financialYearStartMonth: null,
       bankAccounts: [],
@@ -62,6 +65,7 @@ describe("getOnboardingReadiness", () => {
         "Contact email is required.",
         "Registered business address is required.",
         "GST registration status is required.",
+        "GST accounting basis is required.",
         "BAS frequency is required.",
         "Financial year start month is required."
       ])
