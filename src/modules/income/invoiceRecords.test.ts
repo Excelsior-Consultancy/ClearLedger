@@ -142,6 +142,7 @@ describe("invoice records", () => {
     mockPrisma.workspace.findUnique.mockResolvedValue({
       id: "workspace-a",
       name: "Excelsior Consulting",
+      clients: [],
       invoices: [
         prismaRecord({
           id: "inv-1",

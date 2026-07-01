@@ -12,7 +12,14 @@ import {
 } from "@prisma/client";
 import { prisma } from "@/modules/db/prisma";
 import { canManageCompany, getWorkspaceAccess } from "@/modules/auth/service";
+import { getAuthContext } from "@/modules/auth/service";
 import { assertQuarterEditable } from "@/modules/shared/quarterGuard";
+import { getExpenseWorkspace } from "@/modules/expenses/service";
+import { buildBasReport } from "@/modules/bas/report";
+import { createBasFilingPayload, upsertBasFiling } from "@/modules/bas/filing";
+import { getInvoiceWorkspace } from "@/modules/income/invoiceRecords";
+import { getPayrollWorkspace } from "@/modules/payroll/service";
+import { getWorkspaceQuarterContext } from "@/modules/quarters/service";
 import { saveWorkspaceProfile } from "@/modules/setup/service";
 
 function text(formData: FormData, key: string): string {
@@ -219,6 +226,7 @@ export async function toggleQuarterLock(formData: FormData) {
   }
 
   const workspaceId = access.workspaceId;
+  const quarterId = text(formData, "quarterId") || undefined;
   const workspace = await prisma.workspace.findUnique({
     where: { id: workspaceId },
     select: { quarterLocked: true }
@@ -228,9 +236,95 @@ export async function toggleQuarterLock(formData: FormData) {
     throw new Error("Company not found.");
   }
 
+  const shouldLock = text(formData, "quarterLocked") === "true";
+
+  if (shouldLock) {
+    const auth = await getAuthContext();
+    if (!auth) {
+      throw new Error("Complete company setup before continuing.");
+    }
+
+    const quarterContext = await getWorkspaceQuarterContext(workspaceId, quarterId);
+    const selectedQuarterId = quarterContext.selectedQuarterId;
+
+    const [expenseWorkspace, invoiceWorkspace, payrollWorkspace] = await Promise.all([
+      getExpenseWorkspace("all", selectedQuarterId),
+      getInvoiceWorkspace({}, selectedQuarterId),
+      getPayrollWorkspace(selectedQuarterId)
+    ]);
+
+    const basReport = buildBasReport({
+      quarter: quarterContext.selectedQuarter,
+      invoices: invoiceWorkspace.invoices.map((invoice) => ({
+        id: invoice.id,
+        workspaceId: invoice.workspaceId,
+        invoiceNumber: invoice.invoiceNumber,
+        clientName: invoice.clientName,
+        issueDate: invoice.issueDate,
+        dueDate: invoice.dueDate,
+        grossCents: invoice.grossCents,
+        gstTreatment: invoice.gstTreatment,
+        paid: invoice.paymentState === "paid"
+      })),
+      expenses: expenseWorkspace.expenses.map((expense) => ({
+        id: expense.id,
+        workspaceId: expense.workspaceId,
+        date: expense.date,
+        supplier: expense.supplier,
+        categoryId: expense.categoryId,
+        bankAccountId: expense.bankAccountId,
+        grossCents: expense.grossCents,
+        gstTreatment: expense.gstTreatment,
+        userEnteredGstCents: expense.userEnteredGstCents,
+        receiptUrl: expense.receiptUrl,
+        notes: expense.notes,
+        overrideReason: expense.overrideReason
+      })),
+      payRuns: payrollWorkspace.payRuns.map((payRun) => ({
+        id: payRun.id,
+        workspaceId: payRun.workspaceId,
+        personId: payRun.personId,
+        employeeName: payRun.employeeName,
+        periodStart: payRun.periodStart,
+        periodEnd: payRun.periodEnd,
+        payDate: payRun.payDate,
+        grossCents: payRun.grossCents,
+        reimbursementsCents: payRun.reimbursementsCents,
+        paygCents: payRun.paygCents,
+        superCents: payRun.superCents,
+        finalized: payRun.finalized,
+        status: payRun.status,
+        submissionStatus: payRun.submissionStatus,
+        submissionReference: payRun.submissionReference,
+        correctsPayRunId: payRun.correctsPayRunId,
+        reversedByPayRunId: payRun.reversedByPayRunId,
+        overrideReason: payRun.overrideReason,
+        notes: payRun.notes,
+        lineItems: payRun.lineItems
+      }))
+    });
+
+    const payload = createBasFilingPayload({
+      workspaceId,
+      quarterId: selectedQuarterId,
+      quarterLabel: quarterContext.selectedQuarter.label,
+      report: basReport,
+      status: "finalized",
+      basis: "not_configured",
+      lockedAt: new Date(),
+      finalizedAt: new Date()
+    });
+
+    await upsertBasFiling({
+      ...payload,
+      createdByUserId: auth.user.id,
+      finalizedByUserId: auth.user.id
+    });
+  }
+
   await prisma.workspace.update({
     where: { id: workspaceId },
-    data: { quarterLocked: text(formData, "quarterLocked") === "true" }
+    data: { quarterLocked: shouldLock }
   });
 
   revalidatePath("/admin/setup");

@@ -30,6 +30,13 @@ test("surfaces BAS and CA Pack readiness from source data", async ({ page }) => 
 
   await expect(page.getByTestId("bas-section")).toContainText("GST collected");
   await expect(page.getByTestId("bas-section")).toContainText("PAYG withholding");
+  await expect(page.getByTestId("bas-section")).toContainText("GST collected links");
+  await expect(page.getByTestId("bas-section")).toContainText("Northstar Labs");
+  await expect(page.getByTestId("bas-section")).toContainText("AWS");
+  await expect(page.getByTestId("bas-section")).toContainText("Sample Employee");
+  await expect(page.getByTestId("bas-section")).toContainText("ATO filing summary");
+  await expect(page.getByTestId("bas-section")).toContainText("1A");
+  await expect(page.getByTestId("bas-section")).toContainText("W2");
   await expect(page.getByTestId("ca-pack-section")).toContainText("Draft export");
   await expect(page.getByTestId("ca-pack-section")).toContainText("Download draft Excel");
   await expect(page.getByTestId("ca-pack-section")).toContainText("Evidence links");

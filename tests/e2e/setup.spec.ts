@@ -35,8 +35,15 @@ test("KAN-8 setup page persists bank accounts, people, and categories", async ({
   await categorySection.getByRole("button", { name: "Add category" }).click();
   await expect(categorySection).toContainText(`QA Category ${suffix}`);
 
+  const lockCard = page.getByTestId("setup-quarter-lock");
+  await lockCard.getByRole("button", { name: "Lock quarter" }).click();
+  await expect(page.getByText("BAS filing snapshot")).toBeVisible();
+  await expect(page.getByText(/Saved on/)).toBeVisible();
+  await expect(page.getByText("finalized")).toBeVisible();
+
   await page.reload();
   await expect(page.getByTestId("setup-bank-accounts")).toContainText(`Test Bank ${suffix}`);
   await expect(page.getByTestId("setup-people")).toContainText(`QA Person ${suffix}`);
   await expect(page.getByTestId("setup-categories")).toContainText(`QA Category ${suffix}`);
+  await expect(page.getByText("BAS filing snapshot")).toBeVisible();
 });

@@ -9,6 +9,7 @@ import {
   toggleQuarterLock,
   updateCompanySetup,
 } from "./actions";
+import { getBasFiling } from "@/modules/bas/filing";
 import { getPrimaryWorkspaceSetup } from "@/modules/setup/service";
 import { canManageCompany, getRoleLabel, getWorkspaceAccess } from "@/modules/auth/service";
 import { Button, Card, CardContent, Chip } from "@heroui/react";
@@ -51,6 +52,7 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
   const { workspace, readiness } = await getPrimaryWorkspaceSetup();
   const quarterContext = await getWorkspaceQuarterContext(access.workspaceId, quarterId);
   const selectedQuarterId = quarterContext.selectedQuarterId;
+  const basFiling = await getBasFiling(access.workspaceId, selectedQuarterId);
   const canManage = canManageCompany(access.role);
 
   if (!canManage) {
@@ -116,7 +118,7 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
 
         <div className="grid grid-cols-[1fr_300px] gap-4">
           <div className="space-y-6">
-            <Card>
+            <Card data-testid="setup-quarter-lock">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-4">
                   <div>
@@ -131,11 +133,44 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                   When locked, expense and setup edits are blocked for this company until an admin unlocks the quarter.
                 </p>
                 <form action={toggleQuarterLock} className="flex items-center gap-3">
+                  <input type="hidden" name="quarterId" value={selectedQuarterId} />
                   <input type="hidden" name="quarterLocked" value={String(!workspace.quarterLocked)} />
                   <Button type="submit" variant={workspace.quarterLocked ? "outline" : "primary"} size="sm">
                     {workspace.quarterLocked ? "Unlock quarter" : "Lock quarter"}
                   </Button>
                 </form>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-sm font-semibold text-zinc-700">BAS filing snapshot</h2>
+                    <p className="text-xs text-zinc-500 mt-1">{quarterContext.selectedQuarter.label}</p>
+                  </div>
+                  <Chip color={basFiling ? "success" : "warning"} variant="soft" size="sm">
+                    {basFiling ? basFiling.status : "Draft"}
+                  </Chip>
+                </div>
+                {basFiling ? (
+                  <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700 space-y-2">
+                    <p>
+                      Saved on {new Date(basFiling.createdAt).toLocaleDateString("en-AU")} with source hash{" "}
+                      <span className="font-mono text-xs">{basFiling.sourceHash.slice(0, 12)}...</span>
+                    </p>
+                    <p>
+                      Filing basis: <span className="font-medium">{basFiling.basis}</span>
+                    </p>
+                    <p className="text-xs text-zinc-500">
+                      The stored snapshot is what we will review for filing, while the workspace lock keeps the quarter read-only.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-zinc-600">
+                    No BAS snapshot has been saved for this quarter yet. Locking the quarter creates one.
+                  </p>
+                )}
               </CardContent>
             </Card>
 

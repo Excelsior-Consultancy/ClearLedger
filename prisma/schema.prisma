@@ -46,6 +46,17 @@ enum BasFrequency {
   MONTHLY
 }
 
+enum BasFilingStatus {
+  DRAFT
+  FINALIZED
+}
+
+enum BasFilingBasis {
+  NOT_CONFIGURED
+  CASH
+  ACCRUAL
+}
+
 enum InvoiceStatus {
   DRAFT
   ISSUED
@@ -126,6 +137,7 @@ model Workspace {
   comments     Comment[]
   payrollSubmissions PayrollSubmission[]
   payrollAuditEvents PayrollAuditEvent[]
+  basFilings   BasFiling[]
 }
 
 model User {
@@ -142,6 +154,8 @@ model User {
   invitations  Invitation[] @relation("InvitationCreatedBy")
   comments     Comment[]
   payrollAuditEventsCreated PayrollAuditEvent[]
+  basFilingsCreated BasFiling[] @relation("BasFilingCreatedBy")
+  basFilingsFinalized BasFiling[] @relation("BasFilingFinalizedBy")
 
   @@unique([authProvider, authProviderUserId])
   @@index([email])
@@ -429,4 +443,29 @@ model PayrollAuditEvent {
   @@index([payRunId])
   @@index([personId])
   @@index([createdByUserId])
+}
+
+model BasFiling {
+  id                String          @id @default(cuid())
+  workspaceId       String
+  quarterId         String
+  quarterLabel      String
+  status            BasFilingStatus @default(DRAFT)
+  basis             BasFilingBasis  @default(NOT_CONFIGURED)
+  reportJson        Json
+  sourceHash        String
+  lockedAt          DateTime?
+  finalizedAt       DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  createdByUserId   String?
+  finalizedByUserId String?
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy   User?     @relation("BasFilingCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  finalizedBy User?     @relation("BasFilingFinalizedBy", fields: [finalizedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, quarterId])
+  @@index([workspaceId])
+  @@index([quarterId])
 }

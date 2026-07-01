@@ -48,6 +48,107 @@ function SectionHeader({ title }: { title: string }) {
   return <h2 className="text-base font-semibold text-zinc-800 mb-3">{title}</h2>;
 }
 
+function BASSourceCard({
+  title,
+  total,
+  records
+}: {
+  title: string;
+  total: number;
+  records: Array<{
+    sourceKind: string;
+    sourceId: string;
+    label: string;
+    date: string;
+    amountCents: number;
+    detail?: string;
+  }>;
+}) {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div>
+            <p className="text-sm font-medium text-zinc-700">{title}</p>
+            <p className="text-xs text-zinc-500">
+              {formatMoney(total)} across {records.length} source records
+            </p>
+          </div>
+        </div>
+        <div className="space-y-2">
+          {records.slice(0, 4).map((record) => (
+            <div key={record.sourceId} className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm text-zinc-800">{record.label}</p>
+                <p className="text-sm font-medium text-zinc-900">{formatMoney(record.amountCents)}</p>
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-3 text-[11px] text-zinc-500">
+                <span>{record.date}</span>
+                {record.detail && <span>{record.detail}</span>}
+              </div>
+            </div>
+          ))}
+          {!records.length && <p className="text-sm text-zinc-500">No linked source records yet.</p>}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function BASFilingCard({
+  filing
+}: {
+  filing: {
+    basis: "cash" | "accrual" | "not_configured";
+    lines: Array<{
+      code: string;
+      label: string;
+      amountCents: number;
+      sourceGroup: string;
+    }>;
+    readyToFile: boolean;
+    notes: string[];
+  };
+}) {
+  return (
+    <Card className="mt-4 border border-dashed border-zinc-300 bg-zinc-50/70">
+      <CardContent className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <div>
+            <p className="text-sm font-medium text-zinc-700">ATO filing summary</p>
+            <p className="text-xs text-zinc-500">Current BAS labels and filing basis status</p>
+          </div>
+          <Chip color={filing.readyToFile ? "success" : "warning"} variant="soft" size="sm">
+            {filing.readyToFile ? "Ready to file" : "Not filing-ready"}
+          </Chip>
+        </div>
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          {filing.lines.map((line) => (
+            <div key={line.code} className="rounded-lg border border-zinc-200 bg-white px-3 py-2">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-semibold tracking-wide text-zinc-500">{line.code}</p>
+                <p className="text-sm font-semibold text-zinc-900">{formatMoney(line.amountCents)}</p>
+              </div>
+              <p className="mt-1 text-sm text-zinc-800">{line.label}</p>
+              <p className="mt-1 text-[11px] text-zinc-500">From {line.sourceGroup}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-zinc-600">
+          <Chip color="default" variant="soft" size="sm">
+            Basis: {filing.basis}
+          </Chip>
+          {filing.notes.map((note) => (
+            <span key={note} className="rounded-full border border-zinc-200 bg-white px-2 py-1">
+              {note}
+            </span>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default async function Home({ searchParams }: { searchParams?: SearchParams }) {
   const params = (await searchParams) ?? {};
   const quarterId = single(params.quarterId);
@@ -81,7 +182,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
       invoiceNumber: invoice.invoiceNumber,
       clientName: invoice.clientName,
       issueDate: invoice.issueDate,
-      dueDate: invoice.issueDate,
+      dueDate: invoice.dueDate,
       grossCents: invoice.grossCents,
       gstTreatment: invoice.gstTreatment,
       paid: invoice.paymentState === "paid"
@@ -367,6 +468,29 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
             <KpiCard title="Wages" value={formatMoney(basReport.wagesCents)} />
             <KpiCard title="Super" value={formatMoney(basReport.superCents)} />
           </div>
+          <div className="grid gap-3 lg:grid-cols-2 mt-4">
+            <BASSourceCard
+              title="GST collected links"
+              total={basReport.sources.gstCollected.totalCents}
+              records={basReport.sources.gstCollected.records}
+            />
+            <BASSourceCard
+              title="GST paid links"
+              total={basReport.sources.gstPaid.totalCents}
+              records={basReport.sources.gstPaid.records}
+            />
+            <BASSourceCard
+              title="PAYG withholding links"
+              total={basReport.sources.paygWithholding.totalCents}
+              records={basReport.sources.paygWithholding.records}
+            />
+            <BASSourceCard
+              title="Super links"
+              total={basReport.sources.super.totalCents}
+              records={basReport.sources.super.records}
+            />
+          </div>
+          <BASFilingCard filing={basReport.filing} />
         </section>
 
         {/* KAN-7 CA Pack */}

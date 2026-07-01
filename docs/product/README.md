@@ -5,3 +5,4 @@ Product references copied or summarized from Jira/Notion when needed for impleme
 ## Documents
 
 - [Users, Login, and Permissions](./users-and-permissions.md)
+- [MVP Backlog](./mvp-backlog.md)

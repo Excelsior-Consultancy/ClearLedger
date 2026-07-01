@@ -6,7 +6,8 @@ This document defines the MVP user journeys and access model for ClearLedger.
 
 The MVP must support:
 
-- login and sign up
+- Google sign in
+- workspace creation and onboarding
 - one person belonging to multiple companies later
 - company-level permissions only
 - accountant users as real app users
@@ -15,8 +16,8 @@ The MVP must support:
 ## Core model
 
 - A `User` is a person with one login identity.
-- A `Company` is the company/workspace being managed.
-- A `Membership` links one user to one company.
+- A `Workspace` is the company/ABN being managed.
+- A `Membership` links one user to one workspace.
 - A user can have a different role in each company.
 - Permissions are enforced at the company level only for MVP.
 
@@ -55,58 +56,40 @@ The MVP must support:
 
 ## Global auth journeys
 
-### 1) Sign up
+### 1) Google sign in
 
-Use when a person is new to ClearLedger and does not yet belong to a company.
-
-Flow:
-
-1. User opens the sign up screen.
-2. User enters name, email, and password.
-3. User verifies email if required.
-4. User lands in onboarding.
-5. User either creates a new company or accepts an invite.
-
-Required sign up fields:
-
-- full name
-- email
-- password
-
-Recommended sign up behavior:
-
-- If the user arrives from an invite link, pre-associate the sign up with that company membership.
-- If the user is the first person for the company, create the company during onboarding.
-
-### 2) Login
-
-Use when the user already has a ClearLedger account.
+Use when a person enters the app for the first time or returns to an existing workspace.
 
 Flow:
 
-1. User enters email and password.
-2. User logs in.
-3. If the user belongs to one company, land them inside that company.
-4. If the user belongs to multiple companies, show a company picker or last-used company.
+1. User clicks sign in with Google.
+2. System resolves the Google identity.
+3. If the user already has one or more workspace memberships, land them in the last-used workspace or show a workspace picker.
+4. If the user has no workspace membership, send them to the onboarding choice screen.
 
-Recommended login behavior:
+Recommended behavior:
 
-- Remember the last active company.
-- Allow the user to switch companies after login.
-- Keep company membership isolated so switching company changes both data and permissions.
+- Remember the last active workspace.
+- Keep membership scoped to workspace, not to the global user.
+- If the sign in email does not match an invitation, block invite acceptance with a clear message.
 
-### 3) Forgot password / reset password
+### 2) Invitation-first join
 
-Use when the user cannot access their account.
+Use when a user has an invitation to an existing workspace.
 
 Flow:
 
-1. User requests a reset link.
-2. System sends reset email.
-3. User sets a new password.
-4. User returns to login.
+1. User opens the invitation email.
+2. User follows the invitation URL.
+3. User signs in with the invited Google account.
+4. System creates the membership and lands the user in the workspace.
 
-This is required for a production-capable MVP auth flow.
+Required behavior:
+
+- The invite must be tied to the invited email address.
+- If the user already has a different Google identity open, they should close that browser window and use the invitation email instead.
+- Accepted invites are single use.
+- Pending invites remain visible until accepted or expired.
 
 ## Company journeys
 
@@ -116,11 +99,33 @@ Use when a new owner signs up and starts from scratch.
 
 Flow:
 
-1. User signs up.
-2. User creates company name, ABN, GST registration, BAS frequency, and financial year.
-3. User becomes Admin for that company.
-4. User lands on the dashboard.
-5. User can now invite an accountant or bookkeeping helper.
+1. User signs in with Google.
+2. User chooses to create a new workspace.
+3. User enters workspace name and ABN.
+4. System checks ABN uniqueness across all workspaces.
+5. If the ABN is already in use, show an error and tell the user to ask the existing workspace admin for an invite.
+6. If the ABN is new, create the workspace.
+7. The creator becomes Admin for that workspace.
+8. User lands in onboarding and must complete the company profile before using BAS, payroll, expenses, or invoice workflows.
+
+Required onboarding fields:
+
+- workspace name
+- legal entity name
+- ABN
+- contact email
+- registered business address
+- GST registration status
+- BAS frequency
+- financial year start month
+- invoice prefix, if used
+
+Recommended later setup fields:
+
+- bank accounts
+- categories
+- people and roles
+- payroll defaults
 
 ### 5) Join a company by invite
 
@@ -129,10 +134,11 @@ Use when an existing company member or accountant is invited.
 Flow:
 
 1. Admin creates an invite for an email address and role.
-2. Invitee opens the invite link.
-3. Invitee logs in or signs up.
-4. System creates a membership for that user in the company.
-5. Invitee lands in the company based on the invited role.
+2. Admin copies a full invitation URL.
+3. Invitee opens the invite email and uses the invitation URL.
+4. Invitee signs in with the invited Google account.
+5. System creates a membership for that user in the workspace.
+6. Invitee lands in the workspace based on the invited role.
 
 Acceptance rules:
 
@@ -308,9 +314,8 @@ Recommended screen behavior:
 
 ## Screen list for MVP auth and access
 
-- Sign up
-- Login
-- Forgot password
+- Google sign in
+- Workspace selection or create workspace
 - Company onboarding
 - Company picker
 - Users screen
@@ -335,3 +340,9 @@ Recommended screen behavior:
 - Should invitation acceptance require email verification before joining?
 - Should the company picker appear on every login for multi-company users, or only when there is more than one membership?
 - Should deactivated memberships preserve historical audit visibility?
+
+## Backlog link
+
+The current implementation backlog, including what is done and what is still pending for BAS filing, lives in:
+
+- [MVP backlog](./mvp-backlog.md)
