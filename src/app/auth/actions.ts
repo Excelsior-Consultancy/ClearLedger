@@ -73,6 +73,10 @@ export async function beginGoogleAuthAction(formData: FormData) {
     }
 
     const origin = await getRequestOrigin();
+    console.info("[auth] beginGoogleAuthAction", {
+      origin,
+      inviteTokenPresent: Boolean(inviteToken)
+    });
     const provider = getAuthProvider();
     url = await provider.beginSignIn({
       origin,
