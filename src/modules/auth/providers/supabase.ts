@@ -1,30 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { getSupabaseConfig, requireSupabaseConfig } from "@/modules/supabase/env";
 import type { AuthProvider, AuthIdentity, AuthStartInput } from "../provider";
 
-function resolvedSupabaseEnv(...names: string[]) {
-  for (const name of names) {
-    const value = process.env[name];
-    if (value) {
-      return value;
-    }
-  }
-  return null;
-}
-
 async function createClient() {
+  const { supabaseUrl, supabaseAnonKey } = requireSupabaseConfig();
   const cookieStore = await cookies();
-  const supabaseUrl = resolvedSupabaseEnv("NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_PROD_SUPABASE_URL", "PROD_SUPABASE_URL");
-  const supabaseAnonKey = resolvedSupabaseEnv(
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-    "NEXT_PUBLIC_PROD_SUPABASE_ANON_KEY",
-    "PROD_SUPABASE_ANON_KEY",
-    "NEXT_PUBLIC_PROD_SUPABASE_PUBLISHABLE_KEY",
-    "PROD_SUPABASE_PUBLISHABLE_KEY"
-  );
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Supabase auth is not configured.");
-  }
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -43,6 +24,10 @@ async function createClient() {
 
 export function createSupabaseAuthProvider(): AuthProvider {
   async function getCurrentIdentity(): Promise<AuthIdentity | null> {
+    if (!getSupabaseConfig().configured) {
+      return null;
+    }
+
     const client = await createClient();
     const { data, error } = await client.auth.getUser();
     if (error || !data.user?.email) {
@@ -101,6 +86,9 @@ export function createSupabaseAuthProvider(): AuthProvider {
       return getCurrentIdentity();
     },
     async signOut() {
+      if (!getSupabaseConfig().configured) {
+        return;
+      }
       const client = await createClient();
       await client.auth.signOut();
     }

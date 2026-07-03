@@ -88,25 +88,29 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Deployments
 
-ClearLedger uses branch-based Vercel deployments and GitHub Actions checks:
+ClearLedger is set up for two environments:
 
-| Branch | Target | Database | Seed |
+| Branch / action | Vercel target | Supabase auth env | Database |
 |---|---|---|---|
-| `develop` and `feature/*` | Vercel Preview / non-prod | Dev Supabase | Yes |
-| `main` | Vercel Production | Prod Supabase | No |
+| `develop` push | Preview deploy | Preview Supabase project | Preview / non-prod |
+| `feature/*` push | Preview deploy | Preview Supabase project | Preview / non-prod |
+| Manual production deploy | Production deploy | Production Supabase project | Production database |
+
+The app reads the Supabase URL + anon key from the current Vercel environment. It supports the current repo convention (`NEXT_PUBLIC_DEV_SUPABASE_*` for Preview, `NEXT_PUBLIC_PROD_SUPABASE_*` for Production) and the canonical `NEXT_PUBLIC_SUPABASE_*` names.
+
+- Preview: non-production Supabase project
+- Production: production Supabase project
+
+Do not reuse production auth/database env vars in Preview. Keep real secrets in Vercel and Supabase only, not in git.
+
+For Prisma, the canonical env names are `POSTGRES_PRISMA_URL` and `POSTGRES_URL_NON_POOLING`. `DATABASE_URL` and `DIRECT_URL` are accepted as compatibility aliases at runtime.
 
 GitHub Actions handles validation:
 
 - `CI` runs lint, typecheck, unit tests, and build.
 - `E2E` runs Playwright against a seeded Postgres service container.
-- Pushes to `develop` and `main` also run Prisma migrations in CI so schema changes are applied before the app is served.
-
-The deploy build itself is configured in [`vercel.json`](./vercel.json):
-
-1. Generate Prisma Client
-2. Run `prisma migrate deploy`
-3. Seed only when `SEED_ON_DEPLOY=true`
-4. Run the Next.js build
+- Pushes to `develop` should auto-deploy as preview builds.
+- Production deployments should be manual, not automatic from `develop`.
 
 ---
 

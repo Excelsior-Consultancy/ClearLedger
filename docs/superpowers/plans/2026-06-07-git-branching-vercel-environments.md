@@ -14,9 +14,9 @@
 
 | Git branch | Vercel environment | Supabase project | Seed on deploy |
 |---|---|---|---|
-| `main` | Production | `pkefwtiskpajedprgigg` (prod) | No |
-| `develop` | Preview | `gepxzsnfqfzgnwucsucc` (dev) | Yes |
-| `feature/*` | Preview | `gepxzsnfqfzgnwucsucc` (dev) | Yes |
+| `main` | Production | production Supabase project | No |
+| `develop` | Preview | preview Supabase project | Yes |
+| `feature/*` | Preview | preview Supabase project | Yes |
 
 ---
 
@@ -64,12 +64,12 @@ Nothing to commit — branch creation is the artefact.
 
 **Files:** none (Vercel config only)
 
-The dev Supabase project ref is `gepxzsnfqfzgnwucsucc`. The encoded connection string was already set for the `development` scope in the previous session. We need to set it for `preview` (all branches) and add `SEED_ON_DEPLOY`.
+The preview Supabase project ref is your non-production Supabase project. Set the preview `DATABASE_URL`/`DIRECT_URL` values in Vercel and add `SEED_ON_DEPLOY`.
 
 - [ ] **Step 1: Set `DATABASE_URL` for Preview (all branches)**
 
 ```bash
-DEV_URL=$(node -e "process.stdout.write('postgresql://postgres:' + encodeURIComponent('N2f\$Tt@7spCB2ZT') + '@db.gepxzsnfqfzgnwucsucc.supabase.co:5432/postgres')")
+DEV_URL="<your preview postgres connection string>"
 vercel env add DATABASE_URL preview --value "$DEV_URL" --yes --force
 ```
 
@@ -108,8 +108,8 @@ The dev Supabase schema is currently empty. Apply migrations and seed it now.
 - [ ] **Step 1: Apply migrations to dev Supabase**
 
 ```bash
-DIRECT_URL=$(node -e "process.stdout.write('postgresql://postgres:' + encodeURIComponent('N2f\$Tt@7spCB2ZT') + '@db.gepxzsnfqfzgnwucsucc.supabase.co:5432/postgres')") \
-DATABASE_URL=$(node -e "process.stdout.write('postgresql://postgres:' + encodeURIComponent('N2f\$Tt@7spCB2ZT') + '@db.gepxzsnfqfzgnwucsucc.supabase.co:5432/postgres')") \
+DIRECT_URL="$DEV_URL" \
+DATABASE_URL="$DEV_URL" \
 npx prisma migrate deploy
 ```
 
@@ -122,8 +122,8 @@ All migrations have been successfully applied.
 - [ ] **Step 2: Seed the dev Supabase**
 
 ```bash
-DIRECT_URL=$(node -e "process.stdout.write('postgresql://postgres:' + encodeURIComponent('N2f\$Tt@7spCB2ZT') + '@db.gepxzsnfqfzgnwucsucc.supabase.co:5432/postgres')") \
-DATABASE_URL=$(node -e "process.stdout.write('postgresql://postgres:' + encodeURIComponent('N2f\$Tt@7spCB2ZT') + '@db.gepxzsnfqfzgnwucsucc.supabase.co:5432/postgres')") \
+DIRECT_URL="$DEV_URL" \
+DATABASE_URL="$DEV_URL" \
 npx prisma db seed
 ```
 
@@ -160,8 +160,8 @@ Expected output: `SEED_ON_DEPLOY not set — skipping seed.`
 - [ ] **Step 3: Verify the script runs seed when SEED_ON_DEPLOY=true**
 
 ```bash
-SEED_ON_DEPLOY=true DATABASE_URL=$(node -e "process.stdout.write('postgresql://postgres:' + encodeURIComponent('N2f\$Tt@7spCB2ZT') + '@db.gepxzsnfqfzgnwucsucc.supabase.co:5432/postgres')") \
-DIRECT_URL=$(node -e "process.stdout.write('postgresql://postgres:' + encodeURIComponent('N2f\$Tt@7spCB2ZT') + '@db.gepxzsnfqfzgnwucsucc.supabase.co:5432/postgres')") \
+SEED_ON_DEPLOY=true DATABASE_URL="$DEV_URL" \
+DIRECT_URL="$DEV_URL" \
 node scripts/seed-if-needed.mjs
 ```
 

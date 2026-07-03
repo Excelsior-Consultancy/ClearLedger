@@ -5,12 +5,11 @@ import {
   findOrCreateAuthUser,
   selectWorkspace
 } from "@/modules/auth/service";
-import { getAppOrigin } from "@/modules/auth/google";
 import { writeDevIdentityCookie } from "@/modules/auth/provider";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const appOrigin = getAppOrigin();
+  const appOrigin = url.origin;
 
   if (process.env.NODE_ENV === "production") {
     return NextResponse.redirect(new URL("/login?error=dev-auth-disabled", appOrigin));

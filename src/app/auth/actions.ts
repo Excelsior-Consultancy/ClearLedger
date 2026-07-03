@@ -40,10 +40,16 @@ async function getRequestOrigin() {
   const headerStore = await headers();
   const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
   const protocol = headerStore.get("x-forwarded-proto") ?? (process.env.NODE_ENV === "production" ? "https" : "http");
-  if (!host) {
-    return process.env.NEXT_PUBLIC_APP_URL ?? "http://127.0.0.1:3000";
+  if (host) {
+    return `${protocol}://${host}`;
   }
-  return `${protocol}://${host}`;
+
+  const vercelUrl = process.env.VERCEL_URL?.trim();
+  if (vercelUrl) {
+    return `https://${vercelUrl}`;
+  }
+
+  return process.env.NEXT_PUBLIC_APP_URL ?? "http://127.0.0.1:3000";
 }
 
 export async function beginGoogleAuthAction(formData: FormData) {

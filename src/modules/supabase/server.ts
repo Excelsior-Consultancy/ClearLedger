@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { requireSupabaseConfig } from "@/modules/supabase/env";
 
 type CookieStoreLike = Awaited<ReturnType<typeof cookies>>;
 
@@ -13,16 +14,6 @@ type SupabaseCookieAdapter = {
   set(name: string, value: string, options: any): void;
   remove(name: string, options: any): void;
 };
-
-function resolvedSupabaseEnv(...names: string[]) {
-  for (const name of names) {
-    const value = process.env[name];
-    if (value) {
-      return value;
-    }
-  }
-  return null;
-}
 
 export async function createSupabaseServerClient(options?: {
   cookieStore?: CookieStoreLike;
@@ -52,17 +43,7 @@ export async function createSupabaseServerClient(options?: {
     }
   };
 
-  const supabaseUrl = resolvedSupabaseEnv("NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_PROD_SUPABASE_URL", "PROD_SUPABASE_URL");
-  const supabaseAnonKey = resolvedSupabaseEnv(
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-    "NEXT_PUBLIC_PROD_SUPABASE_ANON_KEY",
-    "PROD_SUPABASE_ANON_KEY",
-    "NEXT_PUBLIC_PROD_SUPABASE_PUBLISHABLE_KEY",
-    "PROD_SUPABASE_PUBLISHABLE_KEY"
-  );
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Supabase auth is not configured.");
-  }
+  const { supabaseUrl, supabaseAnonKey } = requireSupabaseConfig();
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: adapter

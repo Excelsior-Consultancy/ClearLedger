@@ -5,12 +5,11 @@ import {
   selectWorkspace
 } from "@/modules/auth/service";
 import { clearPendingGoogleAuth, getPendingGoogleAuth } from "@/modules/auth/google";
-import { getAppOrigin } from "@/modules/auth/google";
 import { getAuthProvider } from "@/modules/auth/provider";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const appOrigin = getAppOrigin();
+  const appOrigin = url.origin;
   const error = url.searchParams.get("error");
   if (error) {
     return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(error)}`, appOrigin));

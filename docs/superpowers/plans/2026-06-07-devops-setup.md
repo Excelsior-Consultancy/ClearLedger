@@ -14,9 +14,9 @@
 
 | Git branch | Vercel environment | Supabase project | Seeded on deploy |
 |---|---|---|---|
-| `main` | Production | `pkefwtiskpajedprgigg` (prod) | No |
-| `develop` | Preview | `gepxzsnfqfzgnwucsucc` (dev) | Yes |
-| `feature/*` | Preview | `gepxzsnfqfzgnwucsucc` (dev) | Yes |
+| `main` | Production | production Supabase project | No |
+| `develop` | Preview | preview Supabase project | Yes |
+| `feature/*` | Preview | preview Supabase project | Yes |
 
 ## CI/CD Flow
 
@@ -43,8 +43,8 @@ Before starting, confirm you have:
 - [ ] Vercel CLI authenticated: `vercel whoami`
 - [ ] Project linked to Vercel: `vercel link` (links to `charchit26s-projects/clear-ledger`)
 - [ ] Two Supabase projects created:
-  - Prod: `pkefwtiskpajedprgigg` (already migrated, no seed)
-  - Dev: `gepxzsnfqfzgnwucsucc` (not yet migrated)
+  - Prod: production Supabase project (already migrated, no seed)
+  - Dev: preview Supabase project (not yet migrated)
 - [ ] Git remote (`origin`) points to the GitHub repo
 
 ---
@@ -98,14 +98,14 @@ Vercel needs separate `DATABASE_URL` and `DIRECT_URL` values per environment. Pr
 vercel env ls
 ```
 
-Expected: `DATABASE_URL` and `DIRECT_URL` listed under Production, pointing to `db.pkefwtiskpajedprgigg.supabase.co`.
+Expected: `DATABASE_URL` and `DIRECT_URL` listed under Production, pointing to the production Supabase host.
 
 ### Preview (dev Supabase — all branches)
 
 - [ ] **Step 2: Set `DATABASE_URL` for Preview**
 
 ```bash
-DEV_URL=$(node -e "process.stdout.write('postgresql://postgres:' + encodeURIComponent('N2f\$Tt@7spCB2ZT') + '@db.gepxzsnfqfzgnwucsucc.supabase.co:5432/postgres')")
+DEV_URL="<your preview postgres connection string>"
 vercel env add DATABASE_URL preview --value "$DEV_URL" --yes --force
 ```
 
@@ -154,8 +154,8 @@ The dev Supabase schema is currently empty. Apply the three existing migrations 
 - [ ] **Step 1: Apply migrations to dev Supabase**
 
 ```bash
-DIRECT_URL=$(node -e "process.stdout.write('postgresql://postgres:' + encodeURIComponent('N2f\$Tt@7spCB2ZT') + '@db.gepxzsnfqfzgnwucsucc.supabase.co:5432/postgres')") \
-DATABASE_URL=$(node -e "process.stdout.write('postgresql://postgres:' + encodeURIComponent('N2f\$Tt@7spCB2ZT') + '@db.gepxzsnfqfzgnwucsucc.supabase.co:5432/postgres')") \
+DIRECT_URL="$DEV_URL" \
+DATABASE_URL="$DEV_URL" \
 npx prisma migrate deploy
 ```
 
@@ -168,8 +168,8 @@ All migrations have been successfully applied.
 - [ ] **Step 2: Seed the dev Supabase**
 
 ```bash
-DIRECT_URL=$(node -e "process.stdout.write('postgresql://postgres:' + encodeURIComponent('N2f\$Tt@7spCB2ZT') + '@db.gepxzsnfqfzgnwucsucc.supabase.co:5432/postgres')") \
-DATABASE_URL=$(node -e "process.stdout.write('postgresql://postgres:' + encodeURIComponent('N2f\$Tt@7spCB2ZT') + '@db.gepxzsnfqfzgnwucsucc.supabase.co:5432/postgres')") \
+DIRECT_URL="$DEV_URL" \
+DATABASE_URL="$DEV_URL" \
 npx prisma db seed
 ```
 
@@ -591,7 +591,7 @@ Both CI jobs and the Vercel Production check must be green before the merge butt
 
 | Environment | Project ref | Host |
 |---|---|---|
-| Production | `pkefwtiskpajedprgigg` | `db.pkefwtiskpajedprgigg.supabase.co` |
-| Dev / Pre-prod | `gepxzsnfqfzgnwucsucc` | `db.gepxzsnfqfzgnwucsucc.supabase.co` |
+| Production | production Supabase project | production Supabase host |
+| Dev / Pre-prod | preview Supabase project | preview Supabase host |
 
 > **Security note:** Database passwords are stored only in Vercel environment variables. They are never committed to the repository. The `.env` file (local-only, gitignored) uses the local Docker Postgres for development.
