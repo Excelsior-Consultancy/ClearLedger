@@ -8,6 +8,10 @@ function appOrigin() {
     return `https://${vercelUrl}`;
   }
 
+  if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV) {
+    throw new Error("Unable to determine the app origin.");
+  }
+
   return process.env.NEXT_PUBLIC_APP_URL ?? "http://127.0.0.1:3000";
 }
 

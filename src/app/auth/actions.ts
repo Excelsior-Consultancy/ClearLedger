@@ -38,6 +38,11 @@ function roleFromString(value: string) {
 
 async function getRequestOrigin() {
   const headerStore = await headers();
+  const origin = headerStore.get("origin");
+  if (origin) {
+    return origin;
+  }
+
   const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
   const protocol = headerStore.get("x-forwarded-proto") ?? (process.env.NODE_ENV === "production" ? "https" : "http");
   if (host) {
@@ -47,6 +52,10 @@ async function getRequestOrigin() {
   const vercelUrl = process.env.VERCEL_URL?.trim();
   if (vercelUrl) {
     return `https://${vercelUrl}`;
+  }
+
+  if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV) {
+    throw new Error("Unable to determine the request origin for Google sign-in.");
   }
 
   return process.env.NEXT_PUBLIC_APP_URL ?? "http://127.0.0.1:3000";
