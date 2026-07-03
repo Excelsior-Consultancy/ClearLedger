@@ -31,6 +31,20 @@ export type ExpenseRow = ExpenseWithValidation & {
   bankAccountOwner: string;
 };
 
+export type ExpenseReportGroup = {
+  id: string;
+  label: string;
+  count: number;
+  grossCents: Cents;
+  gstCents: Cents;
+  netCents: Cents;
+  blockers: number;
+  warnings: number;
+  missingReceipts: number;
+  manualOverrides: number;
+  expenses: ExpenseRow[];
+};
+
 export type ExpenseWorkspace = {
   workspaceId: string;
   workspaceName: string;
@@ -38,8 +52,23 @@ export type ExpenseWorkspace = {
   bankAccounts: BankAccount[];
   categories: Category[];
   expenses: ExpenseRow[];
+  filteredExpenses: ExpenseRow[];
   summary: ExpenseSummary;
+  filteredSummary: ExpenseSummary;
   visibleIssues: ValidationIssue[];
+  reports: {
+    byBankAccount: ExpenseReportGroup[];
+    byCategory: ExpenseReportGroup[];
+    byPaymentState: ExpenseReportGroup[];
+    byGstTreatment: ExpenseReportGroup[];
+  };
+};
+
+export type ExpenseWorkspaceQuery = {
+  bankAccountId?: string;
+  categoryId?: string;
+  paymentState?: "all" | "paid" | "unpaid";
+  gstTreatment?: "all" | GstTreatment;
 };
 
 export type ExpenseInput = {
@@ -154,6 +183,73 @@ function filterExpenses(expenses: ExpenseRow[], filter: ExpenseFilter): ExpenseR
     );
   }
   return expenses;
+}
+
+export function buildExpenseReportGroups(
+  expenses: ExpenseRow[],
+  getGroupKey: (expense: ExpenseRow) => string,
+  getGroupLabel: (expense: ExpenseRow) => string
+): ExpenseReportGroup[] {
+  const groups = new Map<string, ExpenseReportGroup>();
+
+  for (const expense of expenses) {
+    const key = getGroupKey(expense);
+    const current = groups.get(key);
+    const status = expenseStatus(expense);
+    if (current) {
+      current.count += 1;
+      current.grossCents += expense.grossCents;
+      current.gstCents += expense.gstCents;
+      current.netCents += expense.netCents;
+      current.blockers += status === "blocker" ? 1 : 0;
+      current.warnings += status === "warning" ? 1 : 0;
+      current.missingReceipts += expense.issues.some((issue) => issue.code === "missing-receipt") ? 1 : 0;
+      current.manualOverrides += expense.gstTreatment === "manual-override" ? 1 : 0;
+      current.expenses.push(expense);
+      continue;
+    }
+
+    groups.set(key, {
+      id: key,
+      label: getGroupLabel(expense),
+      count: 1,
+      grossCents: expense.grossCents,
+      gstCents: expense.gstCents,
+      netCents: expense.netCents,
+      blockers: status === "blocker" ? 1 : 0,
+      warnings: status === "warning" ? 1 : 0,
+      missingReceipts: expense.issues.some((issue) => issue.code === "missing-receipt") ? 1 : 0,
+      manualOverrides: expense.gstTreatment === "manual-override" ? 1 : 0,
+      expenses: [expense]
+    });
+  }
+
+  return Array.from(groups.values()).sort(
+    (left, right) =>
+      right.grossCents - left.grossCents ||
+      right.count - left.count ||
+      left.label.localeCompare(right.label)
+  );
+}
+
+export function filterExpenseQuery(
+  expenses: ExpenseRow[],
+  query?: ExpenseWorkspaceQuery
+) {
+  let visible = expenses;
+  if (query?.bankAccountId) {
+    visible = visible.filter((expense) => expense.bankAccountId === query.bankAccountId);
+  }
+  if (query?.categoryId) {
+    visible = visible.filter((expense) => expense.categoryId === query.categoryId);
+  }
+  if (query?.paymentState && query.paymentState !== "all") {
+    visible = visible.filter((expense) => expense.paymentState === query.paymentState);
+  }
+  if (query?.gstTreatment && query.gstTreatment !== "all") {
+    visible = visible.filter((expense) => expense.gstTreatment === query.gstTreatment);
+  }
+  return visible;
 }
 
 export function expenseStatus(expense: ExpenseWithValidation): "blocker" | "warning" | "final" {
@@ -323,7 +419,11 @@ async function getCurrentWorkspaceId(): Promise<string> {
   return access.workspaceId;
 }
 
-export async function getExpenseWorkspace(filter: ExpenseFilter = "all", quarterId?: string): Promise<ExpenseWorkspace> {
+export async function getExpenseWorkspace(
+  filter: ExpenseFilter = "all",
+  quarterId?: string,
+  query?: ExpenseWorkspaceQuery
+): Promise<ExpenseWorkspace> {
   const currentWorkspaceId = await getCurrentWorkspaceId();
   const { selectedQuarter } = await resolveWorkspaceQuarter(currentWorkspaceId, quarterId);
   const quarterRange = quarterDateRange(selectedQuarter);
@@ -350,7 +450,8 @@ export async function getExpenseWorkspace(filter: ExpenseFilter = "all", quarter
   }
 
   const expenses = workspace.expenses.map(mapExpense);
-  const visibleExpenses = filterExpenses(expenses, filter);
+  const filteredByIssue = filterExpenses(expenses, filter);
+  const visibleExpenses = filterExpenseQuery(filteredByIssue, query);
   const visibleIssues = visibleExpenses.flatMap((expense) => expense.issues);
 
   return {
@@ -359,9 +460,41 @@ export async function getExpenseWorkspace(filter: ExpenseFilter = "all", quarter
     quarter: selectedQuarter,
     bankAccounts: workspace.bankAccounts.filter((account) => account.active),
     categories: workspace.categories.filter((category) => category.active && category.type === "EXPENSE"),
-    expenses: visibleExpenses,
+    expenses,
+    filteredExpenses: visibleExpenses,
     summary: summarizeExpenses(expenses),
-    visibleIssues
+    filteredSummary: summarizeExpenses(visibleExpenses),
+    visibleIssues,
+    reports: {
+      byBankAccount: buildExpenseReportGroups(
+        expenses,
+        (expense) => expense.bankAccountId,
+        (expense) => expense.bankAccountName
+      ),
+      byCategory: buildExpenseReportGroups(
+        expenses,
+        (expense) => expense.categoryId,
+        (expense) => expense.categoryName
+      ),
+      byPaymentState: buildExpenseReportGroups(
+        expenses,
+        (expense) => expense.paymentState,
+        (expense) => (expense.paymentState === "paid" ? "Paid" : "Unpaid")
+      ),
+      byGstTreatment: buildExpenseReportGroups(
+        expenses,
+        (expense) => expense.gstTreatment,
+        (expense) => {
+          const labels: Record<string, string> = {
+            "gst-included": "GST included",
+            "gst-free": "GST-free",
+            "no-gst-overseas": "No GST / overseas",
+            "manual-override": "Manual override"
+          };
+          return labels[expense.gstTreatment] ?? expense.gstTreatment;
+        }
+      )
+    }
   };
 }
 

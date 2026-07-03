@@ -1,14 +1,43 @@
 import { describe, expect, it } from "vitest";
 import { dollars } from "@/modules/shared/money";
 import {
+  buildExpenseReportGroups,
   expenseStatus,
+  filterExpenseQuery,
   mapPrismaGstTreatment,
   normalizeExpenseGstTreatment,
   referenceIntegrityIssues,
+  type ExpenseRow,
   validateExpenseInput
 } from "./service";
 
 describe("expense service rules", () => {
+  function makeExpenseRow(overrides: Partial<ExpenseRow> = {}) {
+    const base: ExpenseRow = {
+      id: "expense-1",
+      workspaceId: "workspace-a",
+      date: "2026-06-07",
+      supplier: "Supplier",
+      categoryId: "cat-1",
+      categoryName: "Software",
+      bankAccountId: "bank-1",
+      bankAccountName: "Operating account",
+      bankAccountOwner: "Company",
+      grossCents: dollars(110),
+      gstCents: dollars(10),
+      netCents: dollars(100),
+      gstTreatment: "gst-included",
+      userEnteredGstCents: undefined,
+      receiptUrl: undefined,
+      notes: undefined,
+      overrideReason: undefined,
+      paymentState: "paid",
+      issues: [],
+    };
+
+    return { ...base, ...overrides };
+  }
+
   it("maps persisted GST enum values into the shared validation model", () => {
     expect(mapPrismaGstTreatment("GST_INCLUDED")).toBe("gst-included");
     expect(mapPrismaGstTreatment("GST_FREE")).toBe("gst-free");
@@ -140,5 +169,94 @@ describe("expense service rules", () => {
         applyDefault: true
       }).gstTreatment
     ).toBe("GST_FREE");
+  });
+
+  it("groups quarter expenses into bank account, category, payment, and GST report slices", () => {
+    const expenses = [
+      makeExpenseRow({
+        id: "one",
+        bankAccountId: "bank-1",
+        bankAccountName: "Operating account",
+        categoryId: "cat-1",
+        categoryName: "Software",
+        paymentState: "paid",
+        gstTreatment: "gst-included",
+        grossCents: dollars(110),
+        gstCents: dollars(10),
+        netCents: dollars(100)
+      }),
+      makeExpenseRow({
+        id: "two",
+        bankAccountId: "bank-2",
+        bankAccountName: "Savings account",
+        categoryId: "cat-1",
+        categoryName: "Software",
+        paymentState: "unpaid",
+        gstTreatment: "gst-free",
+        grossCents: dollars(55),
+        gstCents: 0,
+        netCents: dollars(55),
+        issues: [{ severity: "warning", code: "missing-receipt", message: "Receipt link is missing." }]
+      }),
+      makeExpenseRow({
+        id: "three",
+        bankAccountId: "bank-1",
+        bankAccountName: "Operating account",
+        categoryId: "cat-2",
+        categoryName: "Travel",
+        paymentState: "paid",
+        gstTreatment: "manual-override",
+        grossCents: dollars(220),
+        gstCents: dollars(20),
+        netCents: dollars(200),
+        issues: [{ severity: "blocker", code: "gst-impossible", message: "GST cannot exceed gross amount." }]
+      })
+    ];
+
+    const byBankAccount = buildExpenseReportGroups(
+      expenses,
+      (expense) => expense.bankAccountId,
+      (expense) => expense.bankAccountName
+    );
+
+    expect(byBankAccount).toHaveLength(2);
+    expect(byBankAccount[0]).toMatchObject({
+      id: "bank-1",
+      label: "Operating account",
+      count: 2,
+      grossCents: dollars(330),
+      blockers: 1,
+      warnings: 0,
+      missingReceipts: 0,
+      manualOverrides: 1
+    });
+
+    const byCategory = buildExpenseReportGroups(
+      expenses,
+      (expense) => expense.categoryId,
+      (expense) => expense.categoryName
+    );
+    expect(byCategory[0]).toMatchObject({
+      id: "cat-2",
+      label: "Travel",
+      count: 1,
+      grossCents: dollars(220)
+    });
+    expect(byCategory.find((group) => group.id === "cat-1")).toMatchObject({
+      id: "cat-1",
+      label: "Software",
+      count: 2,
+      grossCents: dollars(165)
+    });
+
+    const filtered = filterExpenseQuery(expenses, {
+      bankAccountId: "bank-1",
+      categoryId: "cat-2",
+      paymentState: "paid",
+      gstTreatment: "manual-override"
+    });
+
+    expect(filtered).toHaveLength(1);
+    expect(filtered[0].id).toBe("three");
   });
 });
