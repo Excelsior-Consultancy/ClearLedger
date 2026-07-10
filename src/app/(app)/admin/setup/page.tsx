@@ -76,19 +76,19 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
   return (
     <>
       {/* Top bar */}
-      <header className="flex items-center gap-3 px-6 py-3 bg-white border-b border-zinc-200 sticky top-0 z-10">
-        <select className="text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-700" aria-label="Workspace">
+      <header className="sticky top-0 z-10 flex flex-col gap-3 border-b border-zinc-200 bg-white px-4 py-4 sm:flex-row sm:items-center sm:px-6">
+        <select className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 sm:w-auto" aria-label="Workspace">
           <option value={workspace.id}>{workspace.name || "New workspace"}</option>
         </select>
         <input
-          className="ml-auto text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 w-56"
+          className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm sm:ml-auto sm:w-56"
           placeholder="Search setup records"
           aria-label="Search"
         />
         <Chip color="accent" variant="soft" size="sm">{getRoleLabel(access.role)}</Chip>
       </header>
 
-      <div className="p-6 space-y-6">
+      <div className="space-y-6 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <ReportingPeriodSwitcher
           quarters={quarterContext.quarters}
           selectedQuarterId={selectedQuarterId}
@@ -107,7 +107,7 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
         )}
 
         {/* Page header */}
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-zinc-900">Company setup</h1>
             <p className="text-sm text-zinc-500 mt-0.5">
@@ -117,7 +117,7 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
           <Link href={withQuarterQuery("/", selectedQuarterId)}><Button variant="outline" size="sm">← Back to dashboard</Button></Link>
         </div>
 
-        <div className="grid grid-cols-[1fr_300px] gap-4">
+        <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
           <div className="space-y-6">
             <Card data-testid="setup-quarter-lock">
               <CardContent className="p-5">
@@ -184,7 +184,7 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                     {readiness.complete ? "Setup ready" : "Setup incomplete"}
                   </Chip>
                 </div>
-                <form action={updateCompanySetup} className="grid grid-cols-2 gap-3">
+                <form action={updateCompanySetup} className="grid gap-3 sm:grid-cols-2">
                   <input type="hidden" name="workspaceId" value={workspace.id} />
                   <div className={fieldCls}>
                     <label className={labelCls} htmlFor="name">Company name</label>
@@ -234,14 +234,14 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                     <label className={labelCls} htmlFor="invoicePrefix">Invoice prefix</label>
                     <input id="invoicePrefix" name="invoicePrefix" defaultValue={workspace.invoicePrefix ?? ""} className={inputCls} />
                   </div>
-                  <div className="col-span-2 flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 sm:col-span-2">
                     <label className={labelCls} htmlFor="address">Address</label>
                     <textarea id="address" name="address" defaultValue={workspace.address ?? ""} rows={2} className={`${inputCls} resize-none`} />
                   </div>
-                  <div className="col-span-2">
-                    <button type="submit" className="rounded-lg bg-zinc-900 text-white text-sm font-medium px-4 py-2 hover:bg-zinc-700 transition-colors">
+                  <div className="sm:col-span-2">
+                    <Button type="submit" className="rounded-lg bg-zinc-900 text-white text-sm font-medium px-4 py-2 hover:bg-zinc-700 transition-colors">
                       Save company setup
-                    </button>
+                    </Button>
                   </div>
                 </form>
               </CardContent>
@@ -279,9 +279,9 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                             <form action={setBankAccountActive}>
                               <input type="hidden" name="id" value={account.id} />
                               <input type="hidden" name="active" value={String(!account.active)} />
-                              <button type="submit" className="text-xs text-zinc-500 border border-zinc-200 rounded-md px-2.5 py-1 hover:bg-zinc-50 transition-colors">
+                              <Button type="submit" className="text-xs text-zinc-500 border border-zinc-200 rounded-md px-2.5 py-1 hover:bg-zinc-50 transition-colors">
                                 {account.active ? "Deactivate" : "Reactivate"}
-                              </button>
+                              </Button>
                             </form>
                           </td>
                         </tr>
@@ -289,17 +289,17 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                     </tbody>
                   </table>
                 </div>
-                <form action={addBankAccount} className="grid grid-cols-2 gap-3">
+                <form action={addBankAccount} className="grid gap-3 sm:grid-cols-2">
                   <input type="hidden" name="workspaceId" value={workspace.id} />
                   <div className={fieldCls}><label className={labelCls}>Name</label><input name="name" placeholder="Savings / Expense account" required className={inputCls} /></div>
                   <div className={fieldCls}><label className={labelCls}>Bank</label><input name="bank" placeholder="NAB" required className={inputCls} /></div>
                   <div className={fieldCls}><label className={labelCls}>Label</label><input name="label" placeholder="Operating" required className={inputCls} /></div>
                   <div className={fieldCls}><label className={labelCls}>Owner/label</label><input name="ownerLabel" placeholder="Company / Raja / Charchit" className={inputCls} /></div>
-                  <div className="col-span-2">
-                    <button type="submit" className="rounded-lg bg-zinc-900 text-white text-sm font-medium px-4 py-2 hover:bg-zinc-700 transition-colors">
+                <div className="sm:col-span-2">
+                    <Button type="submit" className="rounded-lg bg-zinc-900 text-white text-sm font-medium px-4 py-2 hover:bg-zinc-700 transition-colors">
                       Add bank account
-                    </button>
-                  </div>
+                    </Button>
+                </div>
                 </form>
               </CardContent>
             </Card>
@@ -348,9 +348,9 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                             <form action={setPersonActive}>
                               <input type="hidden" name="id" value={person.id} />
                               <input type="hidden" name="active" value={String(!person.active)} />
-                              <button type="submit" className="text-xs text-zinc-500 border border-zinc-200 rounded-md px-2.5 py-1 hover:bg-zinc-50 transition-colors">
+                              <Button type="submit" className="text-xs text-zinc-500 border border-zinc-200 rounded-md px-2.5 py-1 hover:bg-zinc-50 transition-colors">
                                 {person.active ? "Deactivate" : "Reactivate"}
-                              </button>
+                              </Button>
                             </form>
                           </td>
                         </tr>
@@ -358,7 +358,7 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                     </tbody>
                   </table>
                 </div>
-                <form action={addPerson} className="grid grid-cols-2 gap-3">
+                <form action={addPerson} className="grid gap-3 sm:grid-cols-2">
                   <input type="hidden" name="workspaceId" value={workspace.id} />
                   <div className={fieldCls}><label className={labelCls}>Name</label><input name="name" placeholder="Person name" required className={inputCls} /></div>
                   <div className={fieldCls}><label className={labelCls}>Email</label><input name="email" placeholder="person@example.com" className={inputCls} /></div>
@@ -414,11 +414,11 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                     <label className={labelCls}>Employment start</label>
                     <input name="employmentStartDate" type="date" className={inputCls} />
                   </div>
-                  <div className="flex items-end">
-                    <button type="submit" className="rounded-lg bg-zinc-900 text-white text-sm font-medium px-4 py-2 hover:bg-zinc-700 transition-colors">
+                <div className="sm:col-span-2 flex items-end">
+                    <Button type="submit" className="rounded-lg bg-zinc-900 text-white text-sm font-medium px-4 py-2 hover:bg-zinc-700 transition-colors">
                       Add person
-                    </button>
-                  </div>
+                    </Button>
+                </div>
                 </form>
               </CardContent>
             </Card>
@@ -455,9 +455,9 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                             <form action={setCategoryActive}>
                               <input type="hidden" name="id" value={category.id} />
                               <input type="hidden" name="active" value={String(!category.active)} />
-                              <button type="submit" className="text-xs text-zinc-500 border border-zinc-200 rounded-md px-2.5 py-1 hover:bg-zinc-50 transition-colors">
+                              <Button type="submit" className="text-xs text-zinc-500 border border-zinc-200 rounded-md px-2.5 py-1 hover:bg-zinc-50 transition-colors">
                                 {category.active ? "Deactivate" : "Reactivate"}
-                              </button>
+                              </Button>
                             </form>
                           </td>
                         </tr>
@@ -465,7 +465,7 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                     </tbody>
                   </table>
                 </div>
-                <form action={addCategory} className="grid grid-cols-2 gap-3">
+                <form action={addCategory} className="grid gap-3 sm:grid-cols-2">
                   <input type="hidden" name="workspaceId" value={workspace.id} />
                   <div className={fieldCls}><label className={labelCls}>Name</label><input name="name" placeholder="Category name" required className={inputCls} /></div>
                   <div className={fieldCls}>
@@ -487,10 +487,10 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                       {basTreatmentOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                     </select>
                   </div>
-                  <div className="col-span-2">
-                    <button type="submit" className="rounded-lg bg-zinc-900 text-white text-sm font-medium px-4 py-2 hover:bg-zinc-700 transition-colors">
+                  <div className="sm:col-span-2">
+                    <Button type="submit" className="rounded-lg bg-zinc-900 text-white text-sm font-medium px-4 py-2 hover:bg-zinc-700 transition-colors">
                       Add category
-                    </button>
+                    </Button>
                   </div>
                 </form>
               </CardContent>

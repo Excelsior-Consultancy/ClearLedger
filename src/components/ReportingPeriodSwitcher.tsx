@@ -71,20 +71,20 @@ export function ReportingPeriodSwitcher({
 
   return (
     <div className={`rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm ${className ?? ""}`.trim()}>
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="min-w-[180px]">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+        <div className="min-w-0 flex-1 sm:min-w-[180px]">
           <label className="mb-1 block text-[11px] uppercase tracking-[0.16em] text-zinc-400">Financial year</label>
           <select
             value={selectedFinancialYear}
-          onChange={(event) => {
-            const nextYear = event.target.value;
-            const nextGroup = groupedYears.find((group) => group.value === nextYear);
-            const nextQuarter = nextGroup?.quarters[0];
-            const nextQuarterId = nextQuarter?.id ?? nextQuarter?.startDate;
-            if (nextQuarterId) {
-              navigateToQuarter(nextQuarterId);
-            }
-          }}
+            onChange={(event) => {
+              const nextYear = event.target.value;
+              const nextGroup = groupedYears.find((group) => group.value === nextYear);
+              const nextQuarter = nextGroup?.quarters[0];
+              const nextQuarterId = nextQuarter?.id ?? nextQuarter?.startDate;
+              if (nextQuarterId) {
+                navigateToQuarter(nextQuarterId);
+              }
+            }}
             className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-800"
             aria-label="Financial year"
             data-testid="financial-year-select"
@@ -97,7 +97,7 @@ export function ReportingPeriodSwitcher({
           </select>
         </div>
 
-        <div className="min-w-[220px] flex-1">
+        <div className="min-w-0 flex-1 sm:min-w-[220px]">
           <label className="mb-1 block text-[11px] uppercase tracking-[0.16em] text-zinc-400">Quarter</label>
           <select
             value={selectedQuarter?.id ?? selectedQuarterId}
@@ -114,7 +114,7 @@ export function ReportingPeriodSwitcher({
           </select>
         </div>
 
-        <div className="ml-auto">
+        <div className="sm:ml-auto">
           <Chip color={selectedQuarter?.locked ? "success" : "warning"} variant="soft" size="sm">
             {selectedQuarter?.label ?? "Quarter"}
           </Chip>

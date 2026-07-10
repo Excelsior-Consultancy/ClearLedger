@@ -43,14 +43,14 @@ export default async function IncomePage({ searchParams }: { searchParams?: Sear
   const nextInvoiceNumber = `${invoiceNumberPrefix}-${String(workspace.invoiceCount + 1).padStart(3, "0")}`;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
       <ReportingPeriodSwitcher
         quarters={quarterContext.quarters}
         selectedQuarterId={selectedQuarterId}
         className="mb-6"
       />
 
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.18em] text-zinc-400">Income / invoicing</p>
           <h1 className="text-3xl font-semibold text-zinc-900">{workspace.workspaceName}</h1>
@@ -74,14 +74,14 @@ export default async function IncomePage({ searchParams }: { searchParams?: Sear
         </div>
       )}
 
-      <section className="grid gap-4 md:grid-cols-4 mb-6">
+      <section className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <SummaryCard title="Gross income" value={formatMoney(views.quarter.grossCents)} />
         <SummaryCard title="GST collected" value={formatMoney(views.quarter.gstCents)} />
         <SummaryCard title="Paid invoices" value={String(workspace.summary.paidInvoices)} />
         <SummaryCard title="Unpaid invoices" value={String(workspace.summary.unpaidInvoices)} />
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr] mb-6">
+      <section className="mb-6 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
         <Card data-testid="income-clients">
           <CardContent className="p-5 space-y-4">
             <div className="flex items-center justify-between">
@@ -127,9 +127,9 @@ export default async function IncomePage({ searchParams }: { searchParams?: Sear
               </table>
             </div>
 
-            <form action={addClient} className="grid grid-cols-2 gap-3" data-testid="create-client-form">
+            <form action={addClient} className="grid gap-3 sm:grid-cols-2" data-testid="create-client-form">
               <input type="hidden" name="quarterId" value={selectedQuarterId} />
-              <div className="col-span-2 flex flex-col gap-1">
+              <div className="flex flex-col gap-1 sm:col-span-2">
                 <label className="text-xs text-zinc-500" htmlFor="client-name">Client name</label>
                 <input id="client-name" name="name" required className="border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white" />
               </div>
@@ -141,16 +141,18 @@ export default async function IncomePage({ searchParams }: { searchParams?: Sear
                 <label className="text-xs text-zinc-500" htmlFor="client-abn">ABN</label>
                 <input id="client-abn" name="abn" className="border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white" />
               </div>
-              <div className="col-span-2 flex flex-col gap-1">
+              <div className="flex flex-col gap-1 sm:col-span-2">
                 <label className="text-xs text-zinc-500" htmlFor="client-address">Billing address</label>
                 <textarea id="client-address" name="billingAddress" rows={2} className="border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white resize-none" />
               </div>
-              <div className="col-span-2 flex flex-col gap-1">
+              <div className="flex flex-col gap-1 sm:col-span-2">
                 <label className="text-xs text-zinc-500" htmlFor="client-notes">Notes</label>
                 <textarea id="client-notes" name="notes" rows={2} className="border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white resize-none" />
               </div>
-              <div className="col-span-2">
-                <Button type="submit" variant="outline" size="sm">Add client</Button>
+              <div className="sm:col-span-2">
+                <Button type="submit" variant="outline" size="sm">
+                  Add client
+                </Button>
               </div>
             </form>
           </CardContent>
@@ -166,8 +168,8 @@ export default async function IncomePage({ searchParams }: { searchParams?: Sear
               <Chip color="accent" variant="soft" size="sm">Draft issue</Chip>
             </div>
 
-            <form action={createInvoice} className="grid grid-cols-2 gap-3">
-              <div className="col-span-2 flex flex-col gap-1">
+            <form action={createInvoice} className="grid gap-3 sm:grid-cols-2">
+              <div className="flex flex-col gap-1 sm:col-span-2">
                 <label className="text-xs text-zinc-500" htmlFor="clientId">Client</label>
                 <select id="clientId" name="clientId" defaultValue={defaultClientId} required disabled={!defaultClientId} className="border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white">
                   {workspace.clients.map((client) => (
@@ -203,15 +205,15 @@ export default async function IncomePage({ searchParams }: { searchParams?: Sear
                   <option value="MANUAL_OVERRIDE">Manual override</option>
                 </select>
               </div>
-              <div className="col-span-2 flex flex-col gap-1">
+              <div className="flex flex-col gap-1 sm:col-span-2">
                 <label className="text-xs text-zinc-500" htmlFor="invoiceEvidence">Evidence URL</label>
                 <input id="invoiceEvidence" name="evidenceUrl" placeholder="https://..." className="border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white" />
               </div>
-              <div className="col-span-2 flex flex-col gap-1">
+              <div className="flex flex-col gap-1 sm:col-span-2">
                 <label className="text-xs text-zinc-500" htmlFor="invoiceNotes">Notes</label>
                 <textarea id="invoiceNotes" name="notes" rows={3} className="border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white resize-none" />
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <Button type="submit" variant="primary" size="sm" isDisabled={!defaultClientId}>
                   Create invoice
                 </Button>
@@ -274,22 +276,24 @@ export default async function IncomePage({ searchParams }: { searchParams?: Sear
                           className="border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white"
                         />
                       </div>
-                      <button
+                      <Button
                         type="submit"
                         name="paymentState"
                         value="paid"
+                        size="sm"
                         className="rounded-lg border border-zinc-200 bg-zinc-900 text-white text-sm font-medium px-3 py-2 hover:bg-zinc-700 transition-colors"
                       >
                         Mark paid
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="submit"
                         name="paymentState"
                         value="partial"
+                        size="sm"
                         className="rounded-lg border border-zinc-200 bg-white text-sm font-medium px-3 py-2 text-zinc-700 hover:bg-zinc-50 transition-colors"
                       >
                         Mark partial
-                      </button>
+                      </Button>
                     </form>
                   </td>
                 </tr>

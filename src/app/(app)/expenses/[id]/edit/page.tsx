@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MembershipRole } from "@prisma/client";
+import { Button, Card, CardContent } from "@heroui/react";
 import { editExpense } from "../../actions";
 import { getExpenseForEdit, mapPrismaGstTreatment } from "@/modules/expenses/service";
 import { canEditCompany, getRoleLabel, getWorkspaceAccess } from "@/modules/auth/service";
@@ -47,71 +48,65 @@ export default async function EditExpensePage({
   const access = await getWorkspaceAccess();
   const canEdit = canEditCompany(access.role);
   const model = await getExpenseForEdit(id);
+
   if (!model) {
     notFound();
   }
+
   const quarterLocked = model.quarter.locked;
   const canMutateExpense = canEdit && !quarterLocked;
 
   return (
-    <div className="app-shell">
-      <aside className="side-nav">
-        <p className="brand">ClearLedger</p>
-        <nav className="nav-list" aria-label="Main navigation">
-          <Link className="nav-item" href={withQuarterQuery("/", quarterId)}>Dashboard</Link>
-          <Link className="nav-item active" href={withQuarterQuery("/expenses", quarterId)}>Expenses</Link>
-          <Link className="nav-item" href={withQuarterQuery("/admin/setup", quarterId)}>Admin</Link>
-        </nav>
-      </aside>
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-[0.18em] text-zinc-400">Expenses</p>
+          <h1 className="text-2xl font-semibold text-zinc-900">Edit expense</h1>
+          <p className="max-w-2xl text-sm text-zinc-500">
+            {model.expense.supplier ?? "Unnamed expense"} currently contributes {formatMoney(model.expense.gstCents)} GST paid.
+          </p>
+        </div>
+        <Link href={withQuarterQuery("/expenses", quarterId)}>
+          <Button variant="outline" size="sm" className="w-full sm:w-auto">
+            Back to expenses
+          </Button>
+        </Link>
+      </div>
 
-      <main className="main">
-        <header className="top-bar">
-          <select className="selector" aria-label="Workspace" defaultValue={model.workspaceId}>
-            <option value={model.workspaceId}>{model.workspaceName}</option>
-          </select>
-          <input className="search" aria-label="Search" placeholder="Search expenses" />
-          <span className="chip info">{getRoleLabel(access.role ?? MembershipRole.VIEWER)}</span>
-        </header>
+      {quarterLocked ? (
+        <section className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="status">
+          <strong>Quarter locked.</strong>
+          <p className="mt-1">This expense is read-only until an admin unlocks the quarter.</p>
+        </section>
+      ) : null}
 
-        <div className="content">
-          <div className="page-header">
-            <div>
-              <h1>Edit expense</h1>
-              <p className="muted">{model.expense.supplier ?? "Unnamed expense"} currently contributes {formatMoney(model.expense.gstCents)} GST paid.</p>
-            </div>
-            <Link className="button secondary" href={withQuarterQuery("/expenses", quarterId)}>Back to expenses</Link>
-          </div>
+      {error ? (
+        <section className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert" data-testid="expense-edit-error">
+          <strong>Expense was not updated.</strong>
+          <p className="mt-1">{decodeURIComponent(error)}</p>
+        </section>
+      ) : null}
 
-          {quarterLocked ? (
-            <section className="banner blocker" role="status">
-              <strong>Quarter locked.</strong>
-              <p>This expense is read-only until an admin unlocks the quarter.</p>
-            </section>
-          ) : null}
-
-          {error ? (
-            <section className="banner blocker" role="alert" data-testid="expense-edit-error">
-              <strong>Expense was not updated.</strong>
-              <p>{decodeURIComponent(error)}</p>
-            </section>
-          ) : null}
-
-          <section className="panel" data-testid="expense-edit-form">
-            {canMutateExpense ? (
-              <form action={editExpense} className="form-grid">
+      <Card data-testid="expense-edit-form">
+        <CardContent className="p-5 sm:p-6">
+          {canMutateExpense ? (
+            <form action={editExpense} className="grid gap-4 sm:grid-cols-2">
               <input type="hidden" name="expenseId" value={model.expense.id} />
               <input type="hidden" name="workspaceId" value={model.workspaceId} />
-              <div className="field">
-                <label htmlFor="date">Date</label>
-                <input id="date" name="date" type="date" defaultValue={model.expense.date} required />
+
+              <div className="flex flex-col gap-1">
+                <label htmlFor="date" className="text-xs font-medium text-zinc-500">Date</label>
+                <input id="date" name="date" type="date" defaultValue={model.expense.date} required className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800" />
               </div>
-              <div className="field">
-                <label htmlFor="supplier">Supplier</label>
-                <input id="supplier" name="supplier" defaultValue={model.expense.supplier ?? ""} />
+
+              <div className="flex flex-col gap-1">
+                <label htmlFor="supplier" className="text-xs font-medium text-zinc-500">Supplier</label>
+                <input id="supplier" name="supplier" defaultValue={model.expense.supplier ?? ""} className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800" />
               </div>
-              <div className="field">
-                <label htmlFor="categoryId">Category</label>
-                <select id="categoryId" name="categoryId" defaultValue={model.expense.categoryId} required>
+
+              <div className="flex flex-col gap-1 sm:col-span-1">
+                <label htmlFor="categoryId" className="text-xs font-medium text-zinc-500">Category</label>
+                <select id="categoryId" name="categoryId" defaultValue={model.expense.categoryId} required className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800">
                   {model.categories.map((category) => (
                     <option key={category.id} value={category.id}>
                       {category.name} - default {defaultGstLabel(mapPrismaGstTreatment(category.defaultGstTreatment))}
@@ -119,61 +114,87 @@ export default async function EditExpensePage({
                   ))}
                 </select>
               </div>
-              <div className="field">
-                <label htmlFor="bankAccountId">Bank account</label>
-                <select id="bankAccountId" name="bankAccountId" defaultValue={model.expense.bankAccountId} required>
+
+              <div className="flex flex-col gap-1 sm:col-span-1">
+                <label htmlFor="bankAccountId" className="text-xs font-medium text-zinc-500">Bank account</label>
+                <select id="bankAccountId" name="bankAccountId" defaultValue={model.expense.bankAccountId} required className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800">
                   {model.bankAccounts.map((account) => (
-                    <option key={account.id} value={account.id}>{account.name} ({account.ownerLabel ?? "Company"})</option>
+                    <option key={account.id} value={account.id}>
+                      {account.name} ({account.ownerLabel ?? "Company"})
+                    </option>
                   ))}
                 </select>
               </div>
-              <div className="field">
-                <label htmlFor="grossAmount">Gross amount</label>
-                <input id="grossAmount" name="grossAmount" inputMode="decimal" defaultValue={(model.expense.grossCents / 100).toFixed(2)} required />
+
+              <div className="flex flex-col gap-1">
+                <label htmlFor="grossAmount" className="text-xs font-medium text-zinc-500">Gross amount</label>
+                <input id="grossAmount" name="grossAmount" inputMode="decimal" defaultValue={(model.expense.grossCents / 100).toFixed(2)} required className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800" />
               </div>
-              <div className="field">
-                <label htmlFor="gstTreatment">GST treatment</label>
-                <select id="gstTreatment" name="gstTreatment" defaultValue={model.rawGstTreatment}>
-                  {gstTreatmentOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+
+              <div className="flex flex-col gap-1">
+                <label htmlFor="gstTreatment" className="text-xs font-medium text-zinc-500">GST treatment</label>
+                <select id="gstTreatment" name="gstTreatment" defaultValue={model.rawGstTreatment} className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800">
+                  {gstTreatmentOptions.map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
                 </select>
-                <p className="muted">Category default applies unless this is a manual override.</p>
+                <p className="text-xs text-zinc-400">Category default applies unless this is a manual override.</p>
               </div>
-              <div className="field">
-                <label htmlFor="paymentState">Payment state</label>
-                <select id="paymentState" name="paymentState" defaultValue={model.expense.paymentState === "paid" ? "PAID" : "UNPAID"}>
+
+              <div className="flex flex-col gap-1">
+                <label htmlFor="paymentState" className="text-xs font-medium text-zinc-500">Payment state</label>
+                <select id="paymentState" name="paymentState" defaultValue={model.expense.paymentState === "paid" ? "PAID" : "UNPAID"} className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800">
                   <option value="UNPAID">Unpaid</option>
                   <option value="PAID">Paid</option>
                 </select>
               </div>
-              <div className="field">
-                <label htmlFor="userEnteredGst">Manual GST amount</label>
-                <input id="userEnteredGst" name="userEnteredGst" inputMode="decimal" defaultValue={model.expense.userEnteredGstCents ? (model.expense.userEnteredGstCents / 100).toFixed(2) : ""} />
+
+              <div className="flex flex-col gap-1">
+                <label htmlFor="userEnteredGst" className="text-xs font-medium text-zinc-500">Manual GST amount</label>
+                <input
+                  id="userEnteredGst"
+                  name="userEnteredGst"
+                  inputMode="decimal"
+                  defaultValue={model.expense.userEnteredGstCents ? (model.expense.userEnteredGstCents / 100).toFixed(2) : ""}
+                  className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800"
+                />
               </div>
-              <div className="field">
-                <label htmlFor="overrideReason">Override reason</label>
-                <input id="overrideReason" name="overrideReason" defaultValue={model.expense.overrideReason ?? ""} />
+
+              <div className="flex flex-col gap-1">
+                <label htmlFor="overrideReason" className="text-xs font-medium text-zinc-500">Override reason</label>
+                <input id="overrideReason" name="overrideReason" defaultValue={model.expense.overrideReason ?? ""} className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800" />
               </div>
-              <div className="field full">
-                <label htmlFor="receiptUrl">Receipt link</label>
-                <input id="receiptUrl" name="receiptUrl" defaultValue={model.expense.receiptUrl ?? ""} />
+
+              <div className="flex flex-col gap-1 sm:col-span-2">
+                <label htmlFor="receiptUrl" className="text-xs font-medium text-zinc-500">Receipt link</label>
+                <input id="receiptUrl" name="receiptUrl" defaultValue={model.expense.receiptUrl ?? ""} className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800" />
               </div>
-              <div className="field full">
-                <label htmlFor="notes">Notes</label>
-                <textarea id="notes" name="notes" rows={2} defaultValue={model.expense.notes ?? ""} />
+
+              <div className="flex flex-col gap-1 sm:col-span-2">
+                <label htmlFor="notes" className="text-xs font-medium text-zinc-500">Notes</label>
+                <textarea id="notes" name="notes" rows={3} defaultValue={model.expense.notes ?? ""} className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 resize-none" />
               </div>
-                <div className="field full">
-                  <button className="button" type="submit">Update expense</button>
-                </div>
-              </form>
-            ) : (
-              <div className="banner info" role="status">
-                <strong>Read-only access.</strong>
-                <p>{quarterLocked ? "The quarter is locked, so this source record cannot be edited." : "Only admins and editors can modify expenses. You can still review the source record."}</p>
+
+              <div className="sm:col-span-2">
+                <Button type="submit" variant="primary" size="sm" className="w-full sm:w-auto">
+                  Update expense
+                </Button>
               </div>
-            )}
-          </section>
-        </div>
-      </main>
+            </form>
+          ) : (
+            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-600" role="status">
+              <strong>Read-only access.</strong>
+              <p className="mt-1">
+                {quarterLocked
+                  ? "The quarter is locked, so this source record cannot be edited."
+                  : "Only admins and editors can modify expenses. You can still review the source record."}
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

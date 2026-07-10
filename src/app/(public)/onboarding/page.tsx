@@ -1,10 +1,11 @@
-import { Button, Card, CardContent } from "@heroui/react";
+import { Card, CardContent } from "@heroui/react";
 import { redirect } from "next/navigation";
 import { canManageCompany, getWorkspaceAccess } from "@/modules/auth/service";
 import { prisma } from "@/modules/db/prisma";
 import { getOnboardingReadiness } from "@/modules/setup/readiness";
 import { completeOnboardingAction } from "./actions";
 import { formatAbn } from "@/modules/company/profile";
+import { Button } from "@heroui/react";
 
 export const dynamic = "force-dynamic";
 

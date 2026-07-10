@@ -63,27 +63,27 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
 
   return (
     <>
-      <header className="flex items-center gap-3 px-6 py-3 bg-white border-b border-zinc-200 sticky top-0 z-10">
-        <select className="text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-700" aria-label="Workspace">
+      <header className="sticky top-0 z-10 flex flex-col gap-3 border-b border-zinc-200 bg-white px-4 py-4 sm:flex-row sm:items-center sm:px-6">
+        <select className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 sm:w-auto" aria-label="Workspace">
           <option value={payrollWorkspace.workspaceId}>{payrollWorkspace.workspaceName}</option>
         </select>
         <Chip color="warning" variant="soft" size="sm">{payrollWorkspace.quarter.label}</Chip>
         <input
-          className="ml-auto text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 w-56"
+          className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm sm:ml-auto sm:w-56"
           placeholder="Search payroll"
           aria-label="Search"
         />
         <Chip color="accent" variant="soft" size="sm">{getRoleLabel(access.role)}</Chip>
       </header>
 
-      <div className="p-6 space-y-6">
+      <div className="space-y-6 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <ReportingPeriodSwitcher
           quarters={quarterContext.quarters}
           selectedQuarterId={selectedQuarterId}
           className="mb-2"
         />
 
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-zinc-900">Payroll Lite</h1>
             <p className="text-sm text-zinc-500 mt-0.5">
@@ -91,7 +91,7 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
             </p>
           </div>
           <Link href={withQuarterQuery("/", selectedQuarterId)}>
-            <Button variant="outline" size="sm">Back to dashboard</Button>
+            <Button variant="outline" size="sm" className="w-full sm:w-auto">Back to dashboard</Button>
           </Link>
         </div>
 
@@ -106,7 +106,7 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
           </div>
         )}
 
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <Card><CardContent className="p-4"><p className="text-xs text-zinc-500 mb-1">Wages this quarter</p><p className="text-xl font-bold text-zinc-900">{formatMoney(payrollSummary.wagesCents)}</p></CardContent></Card>
           <Card><CardContent className="p-4"><p className="text-xs text-zinc-500 mb-1">PAYG withholding</p><p className="text-xl font-bold text-zinc-900">{formatMoney(payrollSummary.paygCents)}</p></CardContent></Card>
           <Card><CardContent className="p-4"><p className="text-xs text-zinc-500 mb-1">Super accrued</p><p className="text-xl font-bold text-zinc-900">{formatMoney(payrollSummary.superCents)}</p></CardContent></Card>
@@ -119,7 +119,7 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
           </Card>
         </div>
 
-        <div className="grid grid-cols-[1.1fr_1fr] gap-4">
+        <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
           <Card>
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-4">
@@ -174,8 +174,8 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
                 <Chip color="accent" variant="soft" size="sm">Draft only</Chip>
               </div>
               {canEdit ? (
-                <form action={addPayRun} className="grid grid-cols-2 gap-3" data-testid="create-pay-run-form">
-                  <div className="flex flex-col gap-1 col-span-2">
+                <form action={addPayRun} className="grid gap-3 sm:grid-cols-2" data-testid="create-pay-run-form">
+                  <div className="flex flex-col gap-1 sm:col-span-2">
                     <label className="text-xs text-zinc-500" htmlFor="personId">Employee</label>
                     <select id="personId" name="personId" defaultValue={defaultEmployee?.id} required className="border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-800 bg-white">
                       {payrollWorkspace.employees.map((person) => (
@@ -211,16 +211,18 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
                     <label className="text-xs text-zinc-500" htmlFor="superAmount">Super</label>
                     <input id="superAmount" name="superAmount" inputMode="decimal" placeholder="Auto-calculated" className="border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-800 bg-white" />
                   </div>
-                  <div className="col-span-2 flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 sm:col-span-2">
                     <label className="text-xs text-zinc-500" htmlFor="notes">Notes</label>
                     <textarea id="notes" name="notes" rows={2} className="border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-800 bg-white resize-none" />
                   </div>
-                  <div className="col-span-2 flex flex-col gap-1">
+                  <div className="flex flex-col gap-1 sm:col-span-2">
                     <label className="text-xs text-zinc-500" htmlFor="overrideReason">Override reason</label>
                     <input id="overrideReason" name="overrideReason" placeholder="Why the draft was manually adjusted" className="border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-800 bg-white" />
                   </div>
-                  <div className="col-span-2">
-                    <Button type="submit" variant="primary" size="sm">Create draft pay run</Button>
+                  <div className="sm:col-span-2">
+                    <Button type="submit" variant="primary" size="sm">
+                      Create draft pay run
+                    </Button>
                   </div>
                 </form>
               ) : (
@@ -289,13 +291,17 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
                           {!payRun.finalized && canEdit && (
                             <form action={finalizePayRun}>
                               <input type="hidden" name="payRunId" value={payRun.id} />
-                              <Button type="submit" variant="outline" size="sm">Finalize</Button>
+                              <Button type="submit" variant="outline" size="sm">
+                                Finalize
+                              </Button>
                             </form>
                           )}
                           {payRun.status === "finalized" && canEdit && (
                             <form action={submitTestPayroll}>
                               <input type="hidden" name="payRunId" value={payRun.id} />
-                              <Button type="submit" variant="primary" size="sm">Store STP test submission</Button>
+                              <Button type="submit" variant="primary" size="sm">
+                                Store STP test submission
+                              </Button>
                             </form>
                           )}
                         </div>
@@ -311,7 +317,7 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-[1fr_340px] gap-4">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
           <Card>
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-4">
@@ -331,10 +337,10 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
                   No pay run selected yet.
                 </div>
               ) : (
-                <div className="grid grid-cols-[1.1fr_0.9fr] gap-4">
+                <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
                   <div className="space-y-4">
                     <div className="rounded-lg border border-zinc-200 bg-white p-4">
-                      <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="grid gap-3 sm:grid-cols-2 text-sm">
                         <div>
                           <p className="text-xs text-zinc-500">Employee</p>
                           <p className="text-zinc-800">{selectedPayRun.employeeName}</p>
@@ -364,7 +370,7 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
                         <h3 className="text-sm font-semibold text-zinc-700">Payslip summary</h3>
                         <Chip color="accent" variant="soft" size="sm">Calculated</Chip>
                       </div>
-                      <div className="grid grid-cols-2 gap-3 text-sm mb-3">
+                      <div className="mb-3 grid gap-3 sm:grid-cols-2 text-sm">
                         <div>
                           <p className="text-xs text-zinc-500">Employee</p>
                           <p className="text-zinc-800">{selectedPayRun.employeeName}</p>
@@ -374,7 +380,7 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
                           <p className="text-zinc-800">{selectedPayRun.periodStart} to {selectedPayRun.periodEnd}</p>
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
+                      <div className="grid grid-cols-1 gap-y-2 gap-x-4 text-sm sm:grid-cols-2">
                         <div className="text-zinc-500">Gross pay</div>
                         <div className="text-right font-medium text-zinc-800">{formatMoney(selectedPayRun.calculatedGrossCents)}</div>
                         <div className="text-zinc-500">PAYG withholding</div>
@@ -387,7 +393,7 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
                     </div>
 
                     {canEdit && selectedPayRun.status !== "reversed" && selectedPayRun.status !== "corrected" ? (
-                      <form action={updatePayRun} className="grid grid-cols-2 gap-3 rounded-lg border border-zinc-200 bg-white p-4">
+                      <form action={updatePayRun} className="grid gap-3 rounded-lg border border-zinc-200 bg-white p-4 sm:grid-cols-2">
                         <input type="hidden" name="payRunId" value={selectedPayRun.id} />
                         <div className="flex flex-col gap-1">
                           <label className="text-xs text-zinc-500" htmlFor="selected-pay-date">Pay date</label>
@@ -413,12 +419,14 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
                           <label className="text-xs text-zinc-500" htmlFor="selected-override">Override reason</label>
                           <input id="selected-override" name="overrideReason" defaultValue={selectedPayRun.overrideReason ?? ""} className="border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white" />
                         </div>
-                        <div className="col-span-2 flex flex-col gap-1">
+                        <div className="flex flex-col gap-1 sm:col-span-2">
                           <label className="text-xs text-zinc-500" htmlFor="selected-notes">Notes</label>
                           <textarea id="selected-notes" name="notes" rows={2} defaultValue={selectedPayRun.notes ?? ""} className="border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white resize-none" />
                         </div>
-                        <div className="col-span-2 flex flex-wrap gap-2">
-                          <Button type="submit" variant="primary" size="sm">Save edits</Button>
+                        <div className="sm:col-span-2 flex flex-wrap gap-2">
+                          <Button type="submit" variant="primary" size="sm">
+                            Save edits
+                          </Button>
                         </div>
                       </form>
                     ) : (
@@ -431,33 +439,43 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
                       {canEdit && selectedPayRun.status === "draft" && !selectedPayRun.finalized && (
                         <form action={markReadyForReview}>
                           <input type="hidden" name="payRunId" value={selectedPayRun.id} />
-                          <Button type="submit" variant="outline" size="sm">Mark ready for review</Button>
+                          <Button type="submit" variant="outline" size="sm">
+                            Mark ready for review
+                          </Button>
                         </form>
                       )}
                       {canEdit && (selectedPayRun.status === "draft" || selectedPayRun.status === "ready_for_review") && (
                         <form action={finalizePayRun}>
                           <input type="hidden" name="payRunId" value={selectedPayRun.id} />
-                          <Button type="submit" variant="outline" size="sm">Finalize</Button>
+                          <Button type="submit" variant="outline" size="sm">
+                            Finalize
+                          </Button>
                         </form>
                       )}
                       {canEdit && selectedPayRun.status === "finalized" && (
                         <form action={submitTestPayroll}>
                           <input type="hidden" name="payRunId" value={selectedPayRun.id} />
-                          <Button type="submit" variant="primary" size="sm">Store STP test submission</Button>
+                          <Button type="submit" variant="primary" size="sm">
+                            Store STP test submission
+                          </Button>
                         </form>
                       )}
                       {canEdit && selectedPayRun.status === "finalized" && (
                         <form action={createCorrection}>
                           <input type="hidden" name="payRunId" value={selectedPayRun.id} />
                           <input type="hidden" name="reason" value={`Correction for ${selectedPayRun.employeeName}`} />
-                          <Button type="submit" variant="outline" size="sm">Create correction draft</Button>
+                          <Button type="submit" variant="outline" size="sm">
+                            Create correction draft
+                          </Button>
                         </form>
                       )}
                       {canEdit && selectedPayRun.status === "finalized" && (
                         <form action={createReversal}>
                           <input type="hidden" name="payRunId" value={selectedPayRun.id} />
                           <input type="hidden" name="reason" value={`Reversal for ${selectedPayRun.employeeName}`} />
-                          <Button type="submit" variant="outline" size="sm">Create reversal</Button>
+                          <Button type="submit" variant="outline" size="sm">
+                            Create reversal
+                          </Button>
                         </form>
                       )}
                     </div>

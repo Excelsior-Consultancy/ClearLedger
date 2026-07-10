@@ -21,6 +21,7 @@ import { createBasFilingPayload, upsertBasFiling } from "@/modules/bas/filing";
 import { getInvoiceWorkspace } from "@/modules/income/invoiceRecords";
 import { getPayrollWorkspace } from "@/modules/payroll/service";
 import { getWorkspaceQuarterContext } from "@/modules/quarters/service";
+import { withQuarterQuery } from "@/modules/quarters/navigation";
 import { saveWorkspaceProfile } from "@/modules/setup/service";
 
 function text(formData: FormData, key: string): string {
@@ -334,4 +335,6 @@ export async function toggleQuarterLock(formData: FormData) {
   revalidatePath("/admin/setup");
   revalidatePath("/");
   revalidatePath("/expenses");
+
+  redirect(withQuarterQuery("/admin/setup", quarterId));
 }

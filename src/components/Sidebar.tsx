@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { MembershipRole } from "@prisma/client";
+import { Button } from "@heroui/react";
 import { selectWorkspaceAction, signOutAction } from "@/app/auth/actions";
 import { withQuarterQuery } from "@/modules/quarters/navigation";
 
@@ -37,19 +38,23 @@ export function Sidebar({ currentRole, userName, memberships, selectedWorkspaceI
   const withSelection = (href: string) => withQuarterQuery(href, quarterId);
 
   return (
-    <aside className="w-56 min-h-screen bg-[#111827] text-[#e5e7eb] flex flex-col p-4 shrink-0">
-      <div className="mb-5 px-1">
-        <p className="text-white font-bold text-lg">ClearLedger</p>
-        <p className="text-xs text-[#94a3b8] mt-1">{userName} · {roleLabel(currentRole)}</p>
+    <aside className="shrink-0 border-b border-[#1f2937] bg-[#111827] px-4 py-4 text-[#e5e7eb] lg:sticky lg:top-0 lg:flex lg:min-h-screen lg:w-56 lg:flex-col lg:border-b-0 lg:border-r">
+      <div className="mb-4 flex items-start justify-between gap-3 lg:block lg:px-1">
+        <div>
+          <p className="text-base font-bold text-white sm:text-lg">ClearLedger</p>
+          <p className="mt-1 text-xs text-[#94a3b8]">
+            {userName} · {roleLabel(currentRole)}
+          </p>
+        </div>
       </div>
 
       {memberships.length > 1 && (
         <form action={selectWorkspaceAction} className="mb-4">
-          <label className="block text-[11px] uppercase tracking-[0.16em] text-[#94a3b8] mb-2">Company</label>
+          <label className="mb-2 block text-[11px] uppercase tracking-[0.16em] text-[#94a3b8]">Company</label>
           <select
             name="workspaceId"
             defaultValue={selectedWorkspaceId}
-            className="w-full rounded-md bg-[#0f172a] border border-[#334155] px-3 py-2 text-sm text-white"
+            className="w-full rounded-md border border-[#334155] bg-[#0f172a] px-3 py-2 text-sm text-white"
             onChange={(event) => {
               startTransition(() => {
                 event.currentTarget.form?.requestSubmit();
@@ -68,7 +73,7 @@ export function Sidebar({ currentRole, userName, memberships, selectedWorkspaceI
         </form>
       )}
 
-      <nav className="flex flex-col gap-0.5">
+      <nav className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:flex lg:flex-1 lg:flex-col lg:gap-0.5">
         {NAV_ITEMS.map(({ href, label, badge }) => {
           const isActive =
             pathname === href || (href !== "/" && pathname.startsWith(href));
@@ -76,7 +81,7 @@ export function Sidebar({ currentRole, userName, memberships, selectedWorkspaceI
             <Link
               key={href}
               href={withSelection(href)}
-              className={`flex justify-between items-center px-3 py-2.5 rounded-md text-sm transition-colors ${
+              className={`flex items-center justify-between rounded-md px-3 py-2 text-xs transition-colors sm:text-sm ${
                 isActive
                   ? "bg-[#1f2937] text-white"
                   : "text-[#cbd5e1] hover:bg-[#1f2937]/60 hover:text-white"
@@ -91,13 +96,14 @@ export function Sidebar({ currentRole, userName, memberships, selectedWorkspaceI
         })}
       </nav>
 
-      <form action={signOutAction} className="mt-auto pt-4">
-        <button
+      <form action={signOutAction} className="mt-4 pt-2 lg:mt-auto lg:pt-4">
+        <Button
           type="submit"
-          className="w-full text-left text-sm text-[#cbd5e1] hover:bg-[#1f2937]/60 hover:text-white px-3 py-2.5 rounded-md transition-colors"
+          variant="ghost"
+          className="w-full rounded-md px-3 py-2.5 text-left text-sm text-[#cbd5e1] transition-colors hover:bg-[#1f2937]/60 hover:text-white"
         >
           Sign out
-        </button>
+        </Button>
       </form>
     </aside>
   );

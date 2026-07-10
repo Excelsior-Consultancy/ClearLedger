@@ -40,14 +40,14 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-zinc-50">
+    <div className="flex min-h-screen flex-col bg-zinc-50 lg:flex-row">
       <Sidebar
         currentRole={auth.currentMembership.role}
         memberships={auth.memberships}
         selectedWorkspaceId={auth.currentMembership.workspaceId}
         userName={auth.user.name}
       />
-      <main className="flex-1 min-w-0">{children}</main>
+      <main className="min-w-0 flex-1">{children}</main>
     </div>
   );
 }

@@ -86,8 +86,8 @@ export default async function UsersPage({ searchParams }: { searchParams?: Searc
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-start justify-between gap-4">
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.18em] text-zinc-400">Company access</p>
           <h1 className="text-3xl font-semibold text-zinc-900">{access.workspaceName} users</h1>
@@ -95,7 +95,7 @@ export default async function UsersPage({ searchParams }: { searchParams?: Searc
             Manage who can access this company. Roles are company-level only in the MVP.
           </p>
         </div>
-        <Link href="/"><Button variant="outline" size="sm">Back to dashboard</Button></Link>
+        <Link href="/"><Button variant="outline" size="sm" className="w-full sm:w-auto">Back to dashboard</Button></Link>
       </div>
 
       {inviteLink && (
@@ -164,14 +164,14 @@ export default async function UsersPage({ searchParams }: { searchParams?: Searc
                                   <option key={role} value={role}>{getRoleLabel(role)}</option>
                                 ))}
                               </select>
-                              <Button type="submit" size="sm" variant="ghost">
+                              <Button size="sm" variant="ghost">
                                 Save
                               </Button>
                             </form>
                             <form action={toggleMembershipAction}>
                               <input type="hidden" name="membershipId" value={membership.id} />
                               <input type="hidden" name="active" value={String(!membership.active)} />
-                              <Button type="submit" size="sm" variant="outline">
+                              <Button size="sm" variant="outline">
                                 {membership.active ? "Deactivate" : "Reactivate"}
                               </Button>
                             </form>

@@ -213,19 +213,19 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
   return (
     <>
       {/* Top bar */}
-      <header className="flex items-center gap-3 px-6 py-3 bg-white border-b border-zinc-200 sticky top-0 z-10">
-        <select className="text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-700">
+      <header className="sticky top-0 z-10 flex flex-col gap-3 border-b border-zinc-200 bg-white px-4 py-4 sm:flex-row sm:items-center sm:px-6">
+        <select className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 sm:w-auto">
           <option>{workspaceName}</option>
         </select>
         <input
-          className="ml-auto text-sm bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-1.5 w-56"
+          className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm sm:ml-auto sm:w-56"
           placeholder="Search source records"
           aria-label="Search"
         />
         <Chip color="accent" variant="soft" size="sm">{getRoleLabel(access.role)}</Chip>
       </header>
 
-      <div className="p-6 space-y-8">
+      <div className="space-y-8 px-4 py-4 sm:px-6 lg:px-8">
         <ReportingPeriodSwitcher
           quarters={quarterContext.quarters}
           selectedQuarterId={selectedQuarterId}
@@ -233,12 +233,12 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
         />
 
         {/* Page header */}
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-zinc-900">Dashboard</h1>
             <p className="text-sm text-zinc-500 mt-0.5">BAS readiness cockpit for {workspaceName}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Link href={withQuarterQuery("/expenses", selectedQuarterId)}><Button variant="primary" size="sm">Add expense</Button></Link>
             <Link href="#bas"><Button variant="outline" size="sm">Review BAS</Button></Link>
             <Link href="#ca-pack"><Button variant="outline" size="sm">Prepare CA Pack</Button></Link>
@@ -248,7 +248,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
         {/* KAN-6 Dashboard */}
         <section id="dashboard" data-testid="dashboard-section">
           <SectionHeader title="Overview" />
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <KpiCard title="BAS estimate" value={formatMoney(basReport.netGstCents)} />
             <KpiCard
               title="Quarter status"
@@ -262,7 +262,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
             />
             <KpiCard title="Last updated" value="Today" />
           </div>
-          <div className="grid grid-cols-3 gap-3 mt-3">
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {dashboardIssues.map((issue) => (
               <Card key={issue.label}>
                 <CardContent className="p-4">
@@ -280,8 +280,8 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
         {/* KAN-8 Admin */}
         <section id="admin" data-testid="admin-section">
           <SectionHeader title="Admin / Company setup" />
-          <div className="grid grid-cols-3 gap-4">
-            <Card className="col-span-2">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.6fr)]">
+            <Card>
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-sm font-medium text-zinc-700">Company profile</p>
@@ -289,7 +289,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                     {setup.readiness.complete ? "Setup ready" : "Setup incomplete"}
                   </Chip>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-3 sm:grid-cols-2">
                   {[["Company name", workspaceName], ["GST basis", setup.workspace.gstAccountingBasis === "accrual" ? "Accrual" : setup.workspace.gstAccountingBasis === "cash" ? "Cash" : "Not set"], ["BAS frequency", setup.workspace.basFrequency ?? "Quarterly"]].map(([label, value]) => (
                     <div key={label}>
                       <p className="text-xs text-zinc-400 mb-0.5">{label}</p>
@@ -317,7 +317,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
         {/* KAN-3 Expenses */}
         <section id="expenses" data-testid="expenses-section">
           <SectionHeader title="Expenses" />
-          <div className="grid grid-cols-4 gap-3 mb-4">
+          <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <KpiCard title="Total expenses" value={formatMoney(expenseSummary.totalExpensesCents)} />
             <KpiCard title="GST paid" value={formatMoney(expenseSummary.gstPaidCents)} />
             <KpiCard title="Missing receipts" value={String(expenseSummary.missingReceipts)} chip={<Chip color="warning" variant="soft" size="sm">Warning only</Chip>} />
@@ -370,7 +370,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
         {/* KAN-2 Income */}
         <section id="income" data-testid="income-section">
           <SectionHeader title="Income" />
-          <div className="grid grid-cols-4 gap-3 mb-4">
+          <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <KpiCard title="GST collected" value={formatMoney(incomeSummary.gstCollectedCents)} />
             <KpiCard title="Paid invoices" value={String(incomeSummary.paidInvoices)} />
             <KpiCard title="Unpaid invoices" value={String(incomeSummary.unpaidInvoices)} chip={<Chip color="warning" variant="soft" size="sm">Needs attention</Chip>} />
@@ -420,7 +420,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
               <Button variant="outline" size="sm">Open payroll workspace</Button>
             </Link>
           </div>
-          <div className="grid grid-cols-4 gap-3 mb-4">
+          <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <KpiCard title="Wages this quarter" value={formatMoney(payrollSummary.wagesCents)} />
             <KpiCard title="PAYG withholding" value={formatMoney(payrollSummary.paygCents)} />
             <KpiCard title="Super accrued" value={formatMoney(payrollSummary.superCents)} />
@@ -462,7 +462,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
         {/* KAN-5 BAS */}
         <section id="bas" data-testid="bas-section">
           <SectionHeader title="BAS Quarter Reporting" />
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <KpiCard title="GST collected" value={formatMoney(basReport.gstCollectedCents)} chip={<p className="text-xs text-zinc-400">Income source records</p>} />
             <KpiCard title="GST paid" value={formatMoney(basReport.gstPaidCents)} chip={<p className="text-xs text-zinc-400">Expense source records</p>} />
             <KpiCard title="Net GST" value={formatMoney(basReport.netGstCents)} />
@@ -498,14 +498,14 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
         {/* KAN-7 CA Pack */}
         <section id="ca-pack" data-testid="ca-pack-section">
           <SectionHeader title="CA Pack Export" />
-          <div className="grid grid-cols-3 gap-4">
-            <Card className="col-span-2">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,0.9fr)]">
+            <Card>
               <CardContent className="p-5">
                 <div className={`rounded-lg p-3 text-sm mb-4 ${caPack.state === "blocked" ? "bg-red-50 border border-red-200 text-red-800" : "bg-amber-50 border border-amber-200 text-amber-800"}`}>
                   <strong>{caPack.state === "blocked" ? "Export blocked" : "Draft export"}</strong>
                   {" — "}{expenseWorkspace.quarter.locked ? "Quarter is locked." : "Quarter is unlocked. Warnings included in CA Pack notes."}
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                   {caPack.sections.map((section) => (
                     <div key={section} className="rounded-md bg-zinc-50 border border-zinc-200 px-3 py-2">
                       <p className="text-xs font-medium text-zinc-600">{section}</p>
@@ -550,7 +550,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
                 </Chip>
               </div>
 
-              <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="space-y-3">
                   {comments.length === 0 ? (
                     <p className="text-sm text-zinc-500">No comments yet.</p>

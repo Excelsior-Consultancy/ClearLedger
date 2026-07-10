@@ -168,6 +168,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
   const selectedCategoryLabel = selectedCategoryGroup?.label ?? selectedCategoryRecord?.name;
   const selectedPaymentState = paymentStateFilters.find((option) => option.value === paymentStateParam);
   const selectedGstTreatment = gstTreatmentFilters.find((option) => option.value === gstTreatmentParam);
+  const receiptCount = model.expenses.filter((expense) => Boolean(expense.receiptUrl)).length;
   const hasViewFilters =
     activeFilter !== "all" ||
     Boolean(bankAccountId || categoryId || (paymentStateParam && paymentStateParam !== "all") || (gstTreatmentParam && gstTreatmentParam !== "all"));
@@ -176,7 +177,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
   const defaultBankAccount = model.bankAccounts[0];
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
       <ReportingPeriodSwitcher
         quarters={quarterContext.quarters}
         selectedQuarterId={selectedQuarterId}
@@ -281,6 +282,32 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                     {selectedGstTreatment && selectedGstTreatment.value !== "all" && <Chip color="accent" variant="soft" size="sm">GST: {selectedGstTreatment.label}</Chip>}
                   </div>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card data-testid="expense-source-detail">
+            <CardContent className="p-5 space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-semibold text-zinc-900">Source detail</h2>
+                  <p className="text-sm text-zinc-500">The quarter total traces back to BAS output and CA Pack evidence.</p>
+                </div>
+                <Chip color="accent" variant="soft" size="sm">
+                  Traceable
+                </Chip>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-zinc-400">BAS GST paid:</p>
+                  <p className="mt-1 text-lg font-semibold text-zinc-900">{formatMoney(model.summary.gstPaidCents)}</p>
+                </div>
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-zinc-400">CA Pack evidence:</p>
+                  <p className="mt-1 text-sm font-medium text-zinc-900">{receiptCount} attached</p>
+                  <p className="text-xs text-zinc-500">{model.summary.missingReceipts} missing receipts</p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -643,7 +670,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                     </div>
                   </div>
 
-                  <details className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                  <details open className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
                     <summary className="cursor-pointer text-sm font-medium text-zinc-700">
                       Advanced fields
                     </summary>
