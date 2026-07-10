@@ -14,6 +14,7 @@ import { formatGstAccountingBasis } from "@/modules/company/profile";
 import { getPrimaryWorkspaceSetup } from "@/modules/setup/service";
 import { canManageCompany, getRoleLabel, getWorkspaceAccess } from "@/modules/auth/service";
 import { Button, Card, CardContent, Chip } from "@heroui/react";
+import { FormSubmitButton } from "@/components/FormSubmitButton";
 import { getWorkspaceQuarterContext } from "@/modules/quarters/service";
 import { ReportingPeriodSwitcher } from "@/components/ReportingPeriodSwitcher";
 import { withQuarterQuery } from "@/modules/quarters/navigation";
@@ -197,6 +198,7 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                   <div className={fieldCls}>
                     <label className={labelCls} htmlFor="abn">ABN</label>
                     <input id="abn" name="abn" defaultValue={workspace.abn ?? ""} className={inputCls} />
+                    <p className="mt-1 text-xs text-zinc-500">Use the 11-digit ABN, for example 51 824 753 556.</p>
                   </div>
                   <div className={fieldCls}>
                     <label className={labelCls} htmlFor="contactEmail">Contact email</label>
@@ -239,9 +241,12 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                     <textarea id="address" name="address" defaultValue={workspace.address ?? ""} rows={2} className={`${inputCls} resize-none`} />
                   </div>
                   <div className="sm:col-span-2">
-                    <Button type="submit" className="rounded-lg bg-zinc-900 text-white text-sm font-medium px-4 py-2 hover:bg-zinc-700 transition-colors">
+                    <FormSubmitButton
+                      className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
+                      pendingLabel="Saving company setup..."
+                    >
                       Save company setup
-                    </Button>
+                    </FormSubmitButton>
                   </div>
                 </form>
               </CardContent>

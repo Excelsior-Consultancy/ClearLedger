@@ -98,12 +98,14 @@ ClearLedger is set up for two environments:
 
 The app reads the Supabase URL + anon key from the current Vercel environment. It supports the current repo convention (`NEXT_PUBLIC_DEV_SUPABASE_*` for Preview, `NEXT_PUBLIC_PROD_SUPABASE_*` for Production) and the canonical `NEXT_PUBLIC_SUPABASE_*` names.
 
+Set `NEXT_PUBLIC_SITE_URL` in Vercel Production to the canonical app URL. Preview deployments fall back to the deployment URL automatically.
+
 - Preview: non-production Supabase project
 - Production: production Supabase project
 
 Do not reuse production auth/database env vars in Preview. Keep real secrets in Vercel and Supabase only, not in git.
 
-For Prisma, the canonical env names are `POSTGRES_PRISMA_URL` and `POSTGRES_URL_NON_POOLING`. `DATABASE_URL` and `DIRECT_URL` are accepted as compatibility aliases at runtime.
+For Prisma, the canonical env names are `DATABASE_URL` and `DIRECT_URL`. `POSTGRES_PRISMA_URL` and `POSTGRES_URL_NON_POOLING` are accepted as compatibility aliases at runtime.
 
 GitHub Actions handles validation:
 

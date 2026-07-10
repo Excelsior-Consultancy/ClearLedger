@@ -1,18 +1,14 @@
 import { cookies } from "next/headers";
+import { resolveAppOrigin } from "@/modules/shared/appOrigin";
 
 export const GOOGLE_PENDING_INVITE_COOKIE = "clearledger_google_invite";
 
 function appOrigin() {
-  const vercelUrl = process.env.VERCEL_URL?.trim();
-  if (vercelUrl) {
-    return `https://${vercelUrl}`;
-  }
-
   if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV) {
-    throw new Error("Unable to determine the app origin.");
+    return resolveAppOrigin();
   }
 
-  return process.env.NEXT_PUBLIC_APP_URL ?? "http://127.0.0.1:3000";
+  return resolveAppOrigin();
 }
 
 export function getAppOrigin() {

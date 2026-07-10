@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { beginGoogleAuthAction, createCompanyAction } from "@/app/auth/actions";
+import { FormSubmitButton } from "@/components/FormSubmitButton";
 import { getAuthContext } from "@/modules/auth/service";
 import { Button, Card, CardContent } from "@heroui/react";
 
@@ -67,11 +68,13 @@ export default async function SignUpPage({ searchParams }: { searchParams?: Sear
                     className="w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm"
                     placeholder="12 345 678 901"
                     inputMode="numeric"
+                    autoComplete="off"
                   />
+                  <p className="mt-1 text-xs text-zinc-500">Use the 11-digit ABN, for example 51 824 753 556.</p>
                 </div>
-                <Button type="submit" className="w-full" variant="primary">
+                <FormSubmitButton className="w-full" pendingLabel="Creating workspace...">
                   Create workspace
-                </Button>
+                </FormSubmitButton>
               </form>
             ) : (
               <form action={beginGoogleAuthAction} className="space-y-4">

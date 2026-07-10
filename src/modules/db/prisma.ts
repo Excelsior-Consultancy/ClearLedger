@@ -10,16 +10,16 @@ function resolvedEnv(...names: string[]) {
   return null;
 }
 
-const postgresPrismaUrl = resolvedEnv("POSTGRES_PRISMA_URL", "DATABASE_URL");
+const postgresPrismaUrl = resolvedEnv("DATABASE_URL", "POSTGRES_PRISMA_URL");
 if (postgresPrismaUrl) {
-  process.env.POSTGRES_PRISMA_URL = postgresPrismaUrl;
   process.env.DATABASE_URL = postgresPrismaUrl;
+  process.env.POSTGRES_PRISMA_URL = postgresPrismaUrl;
 }
 
-const postgresDirectUrl = resolvedEnv("POSTGRES_URL_NON_POOLING", "DIRECT_URL");
+const postgresDirectUrl = resolvedEnv("DIRECT_URL", "POSTGRES_URL_NON_POOLING");
 if (postgresDirectUrl) {
-  process.env.POSTGRES_URL_NON_POOLING = postgresDirectUrl;
   process.env.DIRECT_URL = postgresDirectUrl;
+  process.env.POSTGRES_URL_NON_POOLING = postgresDirectUrl;
 }
 
 const globalForPrisma = globalThis as unknown as {

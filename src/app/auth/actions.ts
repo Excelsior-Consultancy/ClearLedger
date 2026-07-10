@@ -24,6 +24,7 @@ import {
   pendingGoogleAuthCookieOptions
 } from "@/modules/auth/google";
 import { getAuthProvider } from "@/modules/auth/provider";
+import { resolveAppOrigin } from "@/modules/shared/appOrigin";
 
 function text(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -49,16 +50,7 @@ async function getRequestOrigin() {
     return `${protocol}://${host}`;
   }
 
-  const vercelUrl = process.env.VERCEL_URL?.trim();
-  if (vercelUrl) {
-    return `https://${vercelUrl}`;
-  }
-
-  if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV) {
-    throw new Error("Unable to determine the request origin for Google sign-in.");
-  }
-
-  return process.env.NEXT_PUBLIC_APP_URL ?? "http://127.0.0.1:3000";
+  return resolveAppOrigin();
 }
 
 export async function beginGoogleAuthAction(formData: FormData) {

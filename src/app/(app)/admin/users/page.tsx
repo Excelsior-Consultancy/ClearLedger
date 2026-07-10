@@ -15,6 +15,7 @@ import {
   updateMembershipRoleAction
 } from "@/app/auth/actions";
 import { Button, Card, CardContent, Chip } from "@heroui/react";
+import { resolveAppOrigin } from "@/modules/shared/appOrigin";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -35,16 +36,7 @@ async function getRequestOrigin() {
     return `${protocol}://${host}`;
   }
 
-  const vercelUrl = process.env.VERCEL_URL?.trim();
-  if (vercelUrl) {
-    return `https://${vercelUrl}`;
-  }
-
-  if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV) {
-    throw new Error("Unable to determine the request origin.");
-  }
-
-  return process.env.NEXT_PUBLIC_APP_URL ?? "http://127.0.0.1:3000";
+  return resolveAppOrigin();
 }
 
 const roleOptions: MembershipRole[] = [

@@ -5,7 +5,7 @@ import { prisma } from "@/modules/db/prisma";
 import { getOnboardingReadiness } from "@/modules/setup/readiness";
 import { completeOnboardingAction } from "./actions";
 import { formatAbn } from "@/modules/company/profile";
-import { Button } from "@heroui/react";
+import { FormSubmitButton } from "@/components/FormSubmitButton";
 
 export const dynamic = "force-dynamic";
 
@@ -135,7 +135,9 @@ export default async function OnboardingPage({ searchParams }: { searchParams?: 
                     className="w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm"
                     placeholder="12 345 678 901"
                     inputMode="numeric"
+                    autoComplete="off"
                   />
+                  <p className="mt-1 text-xs text-zinc-500">Use the 11-digit ABN, for example 51 824 753 556.</p>
                 </div>
 
                 <div>
@@ -228,9 +230,9 @@ export default async function OnboardingPage({ searchParams }: { searchParams?: 
                 </div>
 
                 <div className="md:col-span-2">
-                  <Button type="submit" variant="primary" className="w-full">
+                  <FormSubmitButton className="w-full" pendingLabel="Saving company profile...">
                     Save company profile
-                  </Button>
+                  </FormSubmitButton>
                 </div>
               </form>
             )}

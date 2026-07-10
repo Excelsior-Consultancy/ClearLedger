@@ -224,7 +224,7 @@ export async function createWorkspaceForUser(
     throw new Error("Company name is required.");
   }
   if (!isValidAbn(normalizedAbn)) {
-    throw new Error("Enter a valid 11-digit ABN.");
+    throw new Error("Enter a valid Australian Business Number (11 digits).");
   }
 
   try {
