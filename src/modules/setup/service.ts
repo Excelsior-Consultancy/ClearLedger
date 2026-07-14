@@ -1,5 +1,5 @@
 import { prisma } from "@/modules/db/prisma";
-import { getSetupReadiness } from "./readiness";
+import { getSetupJourney, getSetupReadiness, type SetupJourney, type SetupReadiness } from "./readiness";
 import { getWorkspaceAccess } from "@/modules/auth/service";
 import { formatAbn, getCompanyProfileIssues, normalizeAbn } from "@/modules/company/profile";
 
@@ -69,9 +69,15 @@ type SetupWorkspaceRecord = {
   }>;
 };
 
-export async function getPrimaryWorkspaceSetup() {
+export type PrimaryWorkspaceSetup = {
+  workspace: SetupWorkspaceRecord & { setupComplete: boolean };
+  readiness: SetupReadiness;
+  journey: SetupJourney;
+};
+
+export async function getPrimaryWorkspaceSetup(): Promise<PrimaryWorkspaceSetup> {
   const access = await getWorkspaceAccess();
-  const workspace = ((await prisma.workspace.findUnique({
+  const workspace = (await prisma.workspace.findUnique({
     where: { id: access.workspaceId },
     include: {
       bankAccounts: { orderBy: { createdAt: "asc" } },
@@ -94,25 +100,11 @@ export async function getPrimaryWorkspaceSetup() {
         categories: true,
         people: true
       }
-  })) ?? (await prisma.workspace.create({
-    data: {
-      id: access.workspaceId,
-      name: access.workspaceName,
-      gstRegistered: null,
-      gstAccountingBasis: null,
-      basFrequency: null,
-      financialYearStartMonth: 7,
-      quarterLocked: false
-    },
-    include: {
-      bankAccounts: true,
-      categories: true,
-      people: true
-    }
-  }))) as unknown as SetupWorkspaceRecord;
+    })) as unknown as SetupWorkspaceRecord;
 
   const readiness = getSetupReadiness(workspace);
-  return { workspace: { ...workspace, setupComplete: readiness.complete }, readiness };
+  const journey = getSetupJourney(workspace);
+  return { workspace: { ...workspace, setupComplete: readiness.complete }, readiness, journey };
 }
 
 export async function saveWorkspaceProfile(workspaceId: string, input: WorkspaceProfileInput) {
