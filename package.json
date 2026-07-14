@@ -13,6 +13,7 @@
     "db:migrate": "prisma migrate dev",
     "db:import-workbook": "tsx scripts/import-company-expenses-workbook.ts",
     "db:seed": "prisma db seed",
+    "db:seed:workbook": "tsx prisma/seed.ts --workbook-only",
     "db:studio": "prisma studio",
     "test": "vitest run",
     "test:watch": "vitest",

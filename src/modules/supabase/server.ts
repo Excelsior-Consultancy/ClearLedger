@@ -15,33 +15,45 @@ type SupabaseCookieAdapter = {
   remove(name: string, options: any): void;
 };
 
+function createCookieAdapter(cookieStore: CookieStoreLike, cookieWriter?: SupabaseCookieWriter): SupabaseCookieAdapter {
+  return {
+    get(name) {
+      return cookieStore.get(name)?.value;
+    },
+    async set(name, value, options) {
+      try {
+        if (cookieWriter) {
+          await cookieWriter.set(name, value, options);
+          return;
+        }
+
+        await cookieStore.set({ name, value, ...options });
+      } catch {
+        // Read-only cookie stores are expected in Server Components.
+      }
+    },
+    async remove(name, options) {
+      try {
+        if (cookieWriter) {
+          await cookieWriter.remove(name, options);
+          return;
+        }
+
+        await cookieStore.delete(name);
+      } catch {
+        // Best-effort cleanup only.
+      }
+    }
+  };
+}
+
 export async function createSupabaseServerClient(options?: {
   cookieStore?: CookieStoreLike;
   cookieWriter?: SupabaseCookieWriter;
 }) {
   const cookieStore = (options?.cookieStore ?? (await cookies())) as any;
   const cookieWriter = options?.cookieWriter;
-  const adapter: SupabaseCookieAdapter = {
-    get(name) {
-      return cookieStore.get(name)?.value;
-    },
-    set(name, value, options) {
-      if (cookieWriter) {
-        cookieWriter.set(name, value, options);
-        return;
-      }
-
-      cookieStore.set({ name, value, ...options });
-    },
-    remove(name, options) {
-      if (cookieWriter) {
-        cookieWriter.remove(name, options);
-        return;
-      }
-
-      cookieStore.delete(name);
-    }
-  };
+  const adapter = createCookieAdapter(cookieStore, cookieWriter);
 
   const { supabaseUrl, supabaseAnonKey } = requireSupabaseConfig();
 

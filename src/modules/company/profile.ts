@@ -77,7 +77,7 @@ export function getCompanyProfileIssues(profile: CompanyProfileFields): CompanyP
   if (!profile.abn?.trim()) {
     issues.push({ field: "abn", message: "ABN is required." });
   } else if (!isValidAbn(profile.abn)) {
-    issues.push({ field: "abn", message: "Enter a valid Australian Business Number (11 digits)." });
+    issues.push({ field: "abn", message: "Enter a valid Australian Business Number (11 digits, spaces optional)." });
   }
   if (!profile.contactEmail?.trim()) {
     issues.push({ field: "contactEmail", message: "Contact email is required." });

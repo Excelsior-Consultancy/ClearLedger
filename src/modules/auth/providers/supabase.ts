@@ -3,22 +3,52 @@ import { cookies } from "next/headers";
 import { getSupabaseConfig, requireSupabaseConfig } from "@/modules/supabase/env";
 import type { AuthProvider, AuthIdentity, AuthStartInput } from "../provider";
 
+type CookieStoreLike = Awaited<ReturnType<typeof cookies>>;
+
+type CookieWriterLike = {
+  set(name: string, value: string, options: any): void;
+  remove(name: string, options: any): void;
+};
+
+function createCookieAdapter(cookieStore: CookieStoreLike, cookieWriter?: CookieWriterLike) {
+  return {
+    get(name: string) {
+      return cookieStore.get(name)?.value;
+    },
+    async set(name: string, value: string, options: any) {
+      try {
+        if (cookieWriter) {
+          await cookieWriter.set(name, value, options);
+          return;
+        }
+
+        await cookieStore.set({ name, value, ...options });
+      } catch {
+        // Server Component cookie stores are read-only in Next.js 16.
+        // Supabase may still attempt a silent refresh during render; ignore that write.
+      }
+    },
+    async remove(name: string, options: any) {
+      try {
+        if (cookieWriter) {
+          await cookieWriter.remove(name, options);
+          return;
+        }
+
+        await cookieStore.delete(name);
+      } catch {
+        // Best-effort cleanup only.
+      }
+    }
+  };
+}
+
 async function createClient() {
   const { supabaseUrl, supabaseAnonKey } = requireSupabaseConfig();
   const cookieStore = await cookies();
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      get(name) {
-        return cookieStore.get(name)?.value;
-      },
-      set(name, value, options) {
-        cookieStore.set({ name, value, ...options });
-      },
-      remove(name, options) {
-        cookieStore.delete(name);
-      }
-    }
+    cookies: createCookieAdapter(cookieStore)
   });
 }
 

@@ -1,0 +1,2473 @@
+{
+  "sourceFile": "Company Expenses 2025-2026.xlsx",
+  "expenseRows": [
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 2,
+      "categoryName": "Car service",
+      "supplier": "John Novak",
+      "bankAccountRaw": "CBA-Raja",
+      "date": "2025-07-29",
+      "grossCents": 5100,
+      "gstCents": 464
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 3,
+      "categoryName": "Car service",
+      "supplier": "IMO car",
+      "bankAccountRaw": "CBA-Raja",
+      "date": "2025-07-29",
+      "grossCents": 2338,
+      "gstCents": 213
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 4,
+      "categoryName": "Car Rego",
+      "supplier": "service nsw",
+      "bankAccountRaw": "westpac",
+      "date": "2025-07-29",
+      "grossCents": 46200,
+      "gstCents": 0
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 7,
+      "categoryName": "Mobile 30 pm",
+      "supplier": "Amaysim",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2025-12-23",
+      "grossCents": 3000,
+      "gstCents": 273,
+      "receiptReference": "25-12-2025 amaysim"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 8,
+      "categoryName": "Petrol",
+      "supplier": "Petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2025-12-26",
+      "grossCents": 5025,
+      "gstCents": 457,
+      "receiptReference": "27-12-2025 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 9,
+      "categoryName": "Petrol",
+      "supplier": "Petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2025-12-29",
+      "grossCents": 5001,
+      "gstCents": 455,
+      "receiptReference": "30-12-2025 Petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 12,
+      "categoryName": "Petrol",
+      "supplier": "Petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-01-03",
+      "grossCents": 5002,
+      "gstCents": 455,
+      "receiptReference": "4-01-2026 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 13,
+      "categoryName": "Petrol",
+      "supplier": "Petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-01-06",
+      "grossCents": 5018,
+      "gstCents": 456,
+      "receiptReference": "7-01-2026 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 14,
+      "categoryName": "Petrol",
+      "supplier": "Petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-01-09",
+      "grossCents": 5032,
+      "gstCents": 457,
+      "receiptReference": "10-01-2026 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 15,
+      "categoryName": "Home Office Expenses",
+      "supplier": "Internet Telstra 5G",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-01-09",
+      "grossCents": 8500,
+      "gstCents": 773,
+      "receiptReference": "10-01-2026 Internet"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 16,
+      "categoryName": "Petrol",
+      "supplier": "Petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-01-17",
+      "grossCents": 3000,
+      "gstCents": 273,
+      "receiptReference": "Forgot to get reciept"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 17,
+      "categoryName": "Petrol",
+      "supplier": "Costco Petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-01-18",
+      "grossCents": 4000,
+      "gstCents": 364,
+      "receiptReference": "Forgot to get reciept"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 18,
+      "categoryName": "Mobile 30 pm",
+      "supplier": "Amaysim",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-01-20",
+      "grossCents": 3000,
+      "gstCents": 273,
+      "receiptReference": "21-01-2026 amaysim"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 19,
+      "categoryName": "Home Office Expenses",
+      "supplier": "Aussie Broadband NBN",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-01-20",
+      "grossCents": 3500,
+      "gstCents": 182,
+      "receiptReference": "21-01-2026 Aussie broadband.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 20,
+      "categoryName": "Petrol",
+      "supplier": "Petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-01-23",
+      "grossCents": 5537,
+      "gstCents": 503,
+      "receiptReference": "24-01-2026 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 21,
+      "categoryName": "Car service",
+      "supplier": "Car service and w alignment",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-01-30",
+      "grossCents": 35200,
+      "gstCents": 3200,
+      "receiptReference": "31-01-2026 car service"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 22,
+      "categoryName": "Business travel expenses",
+      "supplier": "Transport NSW",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-01-30",
+      "grossCents": 1321,
+      "gstCents": 0,
+      "receiptReference": "31-01-2026 transport nsw"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 25,
+      "categoryName": "Petrol",
+      "supplier": "Petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-01-31",
+      "grossCents": 5152,
+      "gstCents": 468,
+      "receiptReference": "01-02-2026 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 26,
+      "categoryName": "Home Office Expenses",
+      "supplier": "Internet Telstra 5G",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-02-10",
+      "grossCents": 8500,
+      "gstCents": 773,
+      "receiptReference": "11-02-2026 telstra internet"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 27,
+      "categoryName": "Home Office Expenses",
+      "supplier": "Aussie Broadband",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-02-11",
+      "grossCents": 4500,
+      "gstCents": 409,
+      "receiptReference": "12-02-2026 Aussie broadband.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 28,
+      "categoryName": "Petrol",
+      "supplier": "Petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-02-13",
+      "grossCents": 4011,
+      "gstCents": 365,
+      "receiptReference": "14-02-2026 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 29,
+      "categoryName": "Car service",
+      "supplier": "Car detailing",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-02-15",
+      "grossCents": 23900,
+      "gstCents": 2173,
+      "receiptReference": "16-02-2026 car detailing"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 30,
+      "categoryName": "Business travel expenses",
+      "supplier": "Flight ticket to India",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-02-15",
+      "grossCents": 91200,
+      "gstCents": 0,
+      "receiptReference": "16-02-2026 flight ticket.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 31,
+      "categoryName": "Mobile 30 pm",
+      "supplier": "Amaysim",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-02-17",
+      "grossCents": 3000,
+      "gstCents": 273,
+      "receiptReference": "18-02-2026 amaysim.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 32,
+      "categoryName": "Petrol",
+      "supplier": "Petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-02-25",
+      "grossCents": 4953,
+      "gstCents": 428,
+      "receiptReference": "26-02-2026 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 33,
+      "categoryName": "Client meeting expenses",
+      "supplier": "restuarant",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-02-26",
+      "grossCents": 5257,
+      "gstCents": 478,
+      "receiptReference": "27-02-2026 client dinner"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 34,
+      "categoryName": "Business travel expenses",
+      "supplier": "transport nsw",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-02-27",
+      "grossCents": 12981,
+      "gstCents": 1180,
+      "receiptReference": "28-02-2026 transport nsw.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 37,
+      "categoryName": "Petrol",
+      "supplier": "petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-06",
+      "grossCents": 3025,
+      "gstCents": 275,
+      "receiptReference": "7-03-2026 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 38,
+      "categoryName": "Petrol",
+      "supplier": "petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-11",
+      "grossCents": 4555,
+      "gstCents": 414,
+      "receiptReference": "12-03-26 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 39,
+      "categoryName": "Client meeting expenses",
+      "supplier": "lunch",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-15",
+      "grossCents": 2538,
+      "gstCents": 231,
+      "receiptReference": "Forgot to take receipt"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 40,
+      "categoryName": "Mobile 30 pm",
+      "supplier": "amaysim",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-17",
+      "grossCents": 3000,
+      "gstCents": 273,
+      "receiptReference": "18-03-2026 amaysim.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 41,
+      "categoryName": "Business travel expenses",
+      "supplier": "parking",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-16",
+      "grossCents": 852,
+      "gstCents": 77,
+      "receiptReference": "Forgot to take receipt"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 42,
+      "categoryName": "Business travel expenses",
+      "supplier": "parking",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-17",
+      "grossCents": 877,
+      "gstCents": 80,
+      "receiptReference": "18-03-2026 parking"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 43,
+      "categoryName": "Petrol",
+      "supplier": "petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-17",
+      "grossCents": 4956,
+      "gstCents": 451,
+      "receiptReference": "18-03-2026 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 44,
+      "categoryName": "Client meeting expenses",
+      "supplier": "dinner",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-18",
+      "grossCents": 4496,
+      "gstCents": 158,
+      "receiptReference": "19-03-2026 client meeting"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 45,
+      "categoryName": "Home Office Expenses",
+      "supplier": "office chair",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-19",
+      "grossCents": 26800,
+      "gstCents": 2436,
+      "receiptReference": "20-03-2026 furniture"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 46,
+      "categoryName": "Business travel expenses",
+      "supplier": "parking",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-20",
+      "grossCents": 1576,
+      "gstCents": 143,
+      "receiptReference": "21-03-2026 Park'nPay Invoice.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 47,
+      "categoryName": "Business travel expenses",
+      "supplier": "parking",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-20",
+      "grossCents": 150,
+      "gstCents": 14,
+      "receiptReference": "21-03-2026 parking"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 48,
+      "categoryName": "Petrol",
+      "supplier": "petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-20",
+      "grossCents": 6633,
+      "gstCents": 603,
+      "receiptReference": "21-03-2026 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 49,
+      "categoryName": "General office expenses",
+      "supplier": "police check",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-23",
+      "grossCents": 5580,
+      "gstCents": 0,
+      "receiptReference": "24-03-2026 police check.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 50,
+      "categoryName": "Petrol",
+      "supplier": "petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-27",
+      "grossCents": 4017,
+      "gstCents": 365,
+      "receiptReference": "28-03-2026 petrol.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 51,
+      "categoryName": "Business travel expenses",
+      "supplier": "cab travel",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-28",
+      "grossCents": 6545,
+      "gstCents": 595,
+      "receiptReference": "29 Mar 2026 didi.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 52,
+      "categoryName": "Electronics - Gst",
+      "supplier": "car remote battery",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-28",
+      "grossCents": 1050,
+      "gstCents": 95,
+      "receiptReference": "29-03-2026 car remote battery"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 53,
+      "categoryName": "General office expenses",
+      "supplier": "pots for office",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-28",
+      "grossCents": 1200,
+      "gstCents": 109,
+      "receiptReference": "29-03-2026 plants"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 54,
+      "categoryName": "Electronics - Gst",
+      "supplier": "USB cable",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-28",
+      "grossCents": 1995,
+      "gstCents": 181,
+      "receiptReference": "29-03-2026 usb cable"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 55,
+      "categoryName": "General office expenses",
+      "supplier": "landscaping",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-29",
+      "grossCents": 1860,
+      "gstCents": 169,
+      "receiptReference": "30-03-2026 landscaping"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 56,
+      "categoryName": "Business travel expenses",
+      "supplier": "transport nsw",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-03-30",
+      "grossCents": 9608,
+      "gstCents": 873,
+      "receiptReference": "30-03-2026 opal.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 60,
+      "categoryName": "Petrol",
+      "supplier": "petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-04-01",
+      "grossCents": 1981,
+      "gstCents": 180,
+      "receiptReference": "2-04-2026 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 61,
+      "categoryName": "Petrol",
+      "supplier": "petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-04-02",
+      "grossCents": 9579,
+      "gstCents": 871,
+      "receiptReference": "03-04-2026 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 62,
+      "categoryName": "Petrol",
+      "supplier": "petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-04-03",
+      "grossCents": 6512,
+      "gstCents": 592,
+      "receiptReference": "04-04-2026 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 63,
+      "categoryName": "Petrol",
+      "supplier": "petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-04-05",
+      "grossCents": 4000,
+      "gstCents": 364,
+      "receiptReference": "06-04-2026 petrol"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 64,
+      "categoryName": "Client meeting expenses",
+      "supplier": "client dinner",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-04-07",
+      "grossCents": 6800,
+      "gstCents": 618,
+      "receiptReference": "08-04-2026 dinner"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 65,
+      "categoryName": "Home Office Expenses",
+      "supplier": "Aussie broadband",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-04-09",
+      "grossCents": 11000,
+      "gstCents": 1000,
+      "receiptReference": "10-04-2026 internet.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 66,
+      "categoryName": "Mobile 30 pm",
+      "supplier": "Amaysim",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-04-14",
+      "grossCents": 3000,
+      "gstCents": 273,
+      "receiptReference": "15-04-2026 amaysim.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 67,
+      "categoryName": "Business travel expenses",
+      "supplier": "Cab to airport",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-04-17",
+      "grossCents": 8637,
+      "gstCents": 785,
+      "receiptReference": "18-04-2026 cab.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 72,
+      "categoryName": "Business travel expenses",
+      "supplier": "Return Flight to Sydney",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-04-30",
+      "grossCents": 47390,
+      "gstCents": 0,
+      "receiptReference": "1-05-2026 Scoot Receipt Q76WTI.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 73,
+      "categoryName": "Business travel expenses",
+      "supplier": "Return Flight to Bkk",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-04-30",
+      "grossCents": 25920,
+      "gstCents": 0,
+      "receiptReference": "1-05-2026 Trip receipt air india.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 74,
+      "categoryName": "Business travel expenses",
+      "supplier": "Return Flight Bkk to Phnom",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-05-01",
+      "grossCents": 32680,
+      "gstCents": 0,
+      "receiptReference": "2-05-2026 Trip receipt bkk.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 75,
+      "categoryName": "Insurance CAR",
+      "supplier": "AAMI car insurance",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-05-03",
+      "grossCents": 10093,
+      "gstCents": 918,
+      "receiptReference": "AAMI Car Tax Invoice MPA169729259.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 76,
+      "categoryName": "Home Office Expenses",
+      "supplier": "Aussie broadband",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-05-10",
+      "grossCents": 11000,
+      "gstCents": 1000,
+      "receiptReference": "11-05-2026 Aussie Broadband Payment Receipt #60437510.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 77,
+      "categoryName": "Mobile 30 pm",
+      "supplier": "amaysim",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-05-12",
+      "grossCents": 3000,
+      "gstCents": 273,
+      "receiptReference": "13-05-2026 amaysim 129797775.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 78,
+      "categoryName": "Business travel expenses",
+      "supplier": "cab from airport",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-05-30",
+      "grossCents": 5524,
+      "gstCents": 502,
+      "receiptReference": "31-05-2026 DiDi – Trip Invoice - 1.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 83,
+      "categoryName": "Insurance CAR",
+      "supplier": "AAMI car insurance",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-06-01",
+      "grossCents": 10093,
+      "gstCents": 918,
+      "receiptReference": "AAMI Car Tax Invoice MPA169729259.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 84,
+      "categoryName": "Home Office Expenses",
+      "supplier": "Kmart heater",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-06-01",
+      "grossCents": 1500,
+      "gstCents": 136,
+      "receiptReference": "02-06-2026 heater.pdf"
+    },
+    {
+      "sheetName": "Charchit Expenses",
+      "rowNumber": 85,
+      "categoryName": "Petrol",
+      "supplier": "Petrol",
+      "bankAccountRaw": "westpac Charchit",
+      "date": "2026-06-01",
+      "grossCents": 5011,
+      "gstCents": 456,
+      "receiptReference": "2-06-2026 petrol"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 2,
+      "categoryName": "General office expenses",
+      "supplier": "Wool",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-01",
+      "grossCents": 5825,
+      "gstCents": 75,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 3,
+      "categoryName": "Business travel expenses",
+      "supplier": "Transport NSW",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-02",
+      "grossCents": 1044,
+      "gstCents": 95
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 4,
+      "categoryName": "Client meeting expenses",
+      "supplier": "guzman",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-02",
+      "grossCents": 1250,
+      "gstCents": 114
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 5,
+      "categoryName": "General office expenses",
+      "supplier": "Strathfield colors",
+      "bankAccountRaw": "Others",
+      "date": "2025-07-03",
+      "grossCents": 2000,
+      "gstCents": 182,
+      "receiptReference": "-"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 6,
+      "categoryName": "General office expenses",
+      "supplier": "KFC",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-03",
+      "grossCents": 800,
+      "gstCents": 73,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 7,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Urban CHak",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-03",
+      "grossCents": 1515,
+      "gstCents": 138
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 8,
+      "categoryName": "General office expenses",
+      "supplier": "wool",
+      "bankAccountRaw": "Other",
+      "date": "2025-07-04",
+      "grossCents": 250,
+      "gstCents": 0,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 9,
+      "categoryName": "Software Licence",
+      "supplier": "Leetcode - 35 USD",
+      "bankAccountRaw": "westpac- wise",
+      "date": "2025-07-04",
+      "grossCents": 5347,
+      "gstCents": 2
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 10,
+      "categoryName": "Petrol",
+      "supplier": "Enhance",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-04",
+      "grossCents": 2561,
+      "gstCents": 233
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 11,
+      "categoryName": "Business travel expenses",
+      "supplier": "Transport NSW",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-04",
+      "grossCents": 887,
+      "gstCents": 81
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 12,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Eatclub",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-04",
+      "grossCents": 1453,
+      "gstCents": 132
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 13,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Eden Bar & Restro",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-04",
+      "grossCents": 487,
+      "gstCents": 44
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 14,
+      "categoryName": "Business travel expenses",
+      "supplier": "Transport NSW",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-08",
+      "grossCents": 887,
+      "gstCents": 81
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 15,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Ritual",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-08",
+      "grossCents": 1382,
+      "gstCents": 126
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 16,
+      "categoryName": "Car service",
+      "supplier": "IMO Car wash",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-09",
+      "grossCents": 10165,
+      "gstCents": 924,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 17,
+      "categoryName": "General office expenses",
+      "supplier": "Oporto",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-09",
+      "grossCents": 1125,
+      "gstCents": 102
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 18,
+      "categoryName": "General office expenses",
+      "supplier": "Homebush deli",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-10",
+      "grossCents": 1167,
+      "gstCents": 106
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 19,
+      "categoryName": "General office expenses",
+      "supplier": "Homebush grocer",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-10",
+      "grossCents": 450,
+      "gstCents": 0,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 20,
+      "categoryName": "General office expenses",
+      "supplier": "Homebush indian grocer",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-10",
+      "grossCents": 199,
+      "gstCents": 0
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 21,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Lajabaj",
+      "bankAccountRaw": "Other",
+      "date": "2025-07-10",
+      "grossCents": 3040,
+      "gstCents": 276,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 22,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Master Jal",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-10",
+      "grossCents": 3040,
+      "gstCents": 0,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 23,
+      "categoryName": "General office expenses",
+      "supplier": "wool",
+      "bankAccountRaw": "Other",
+      "date": "2025-07-11",
+      "grossCents": 300,
+      "gstCents": 27,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 24,
+      "categoryName": "Business travel expenses",
+      "supplier": "Linkt",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-12",
+      "grossCents": 75,
+      "gstCents": 7
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 25,
+      "categoryName": "General office expenses",
+      "supplier": "Homebush deli",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-13",
+      "grossCents": 1015,
+      "gstCents": 92
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 26,
+      "categoryName": "General office expenses",
+      "supplier": "Homebush grocer",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-14",
+      "grossCents": 520,
+      "gstCents": 0,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 27,
+      "categoryName": "Business travel expenses",
+      "supplier": "Transport NSW",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-15",
+      "grossCents": 1076,
+      "gstCents": 98
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 28,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Eatclub",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-15",
+      "grossCents": 1300,
+      "gstCents": 118
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 29,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Eden Bar & Restro",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-15",
+      "grossCents": 994,
+      "gstCents": 90
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 30,
+      "categoryName": "Business travel expenses",
+      "supplier": "Transport NSW",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-16",
+      "grossCents": 1076,
+      "gstCents": 98
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 31,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Brew Col",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-16",
+      "grossCents": 458,
+      "gstCents": 42
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 32,
+      "categoryName": "General office expenses",
+      "supplier": "KFC",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-16",
+      "grossCents": 500,
+      "gstCents": 45,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 33,
+      "categoryName": "General office expenses",
+      "supplier": "wool",
+      "bankAccountRaw": "Other",
+      "date": "2025-07-19",
+      "grossCents": 860,
+      "gstCents": 0,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 34,
+      "categoryName": "Business travel expenses",
+      "supplier": "Transport NSW",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-20",
+      "grossCents": 1076,
+      "gstCents": 98
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 35,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Eatclub",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-20",
+      "grossCents": 1300,
+      "gstCents": 118
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 36,
+      "categoryName": "General office expenses",
+      "supplier": "wool",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-20",
+      "grossCents": 360,
+      "gstCents": 0,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 37,
+      "categoryName": "General office expenses",
+      "supplier": "wool",
+      "bankAccountRaw": "Other",
+      "date": "2025-07-21",
+      "grossCents": 487,
+      "gstCents": 0,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 38,
+      "categoryName": "Business travel expenses",
+      "supplier": "Transport NSW",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-23",
+      "grossCents": 1076,
+      "gstCents": 98
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 39,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Ritual",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-23",
+      "grossCents": 983,
+      "gstCents": 89
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 40,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Red Wok",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-23",
+      "grossCents": 1201,
+      "gstCents": 109,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 41,
+      "categoryName": "General office expenses",
+      "supplier": "wool",
+      "bankAccountRaw": "Other",
+      "date": "2025-07-23",
+      "grossCents": 1210,
+      "gstCents": 0
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 42,
+      "categoryName": "General office expenses",
+      "supplier": "KFC",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-24",
+      "grossCents": 1100,
+      "gstCents": 50,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 43,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Pullman",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-25",
+      "grossCents": 15210,
+      "gstCents": 1383,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 44,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Pullman",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-25",
+      "grossCents": 6997,
+      "gstCents": 636
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 45,
+      "categoryName": "Petrol",
+      "supplier": "Enhance",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-25",
+      "grossCents": 3022,
+      "gstCents": 275,
+      "receiptReference": "2025-26-Q1-1.pdf"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 46,
+      "categoryName": "Insurance PI / PL",
+      "supplier": "Express Insurance - 7 APR payment",
+      "bankAccountRaw": "Other",
+      "date": "2025-07-25",
+      "grossCents": 58685,
+      "gstCents": 5335
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 47,
+      "categoryName": "Business travel expenses",
+      "supplier": "Transport NSW",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-27",
+      "grossCents": 1604,
+      "gstCents": 146
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 48,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Little Kitchen",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-27",
+      "grossCents": 1213,
+      "gstCents": 110
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 49,
+      "categoryName": "General office expenses",
+      "supplier": "Woolworths",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-27",
+      "grossCents": 3742,
+      "gstCents": 59,
+      "receiptReference": "-"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 50,
+      "categoryName": "Software Licence",
+      "supplier": "Payroller",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-29",
+      "grossCents": 1760,
+      "gstCents": 160
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 51,
+      "categoryName": "Business travel expenses",
+      "supplier": "Linkt",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-29",
+      "grossCents": 863,
+      "gstCents": 78
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 52,
+      "categoryName": "Business travel expenses",
+      "supplier": "Transport NSW",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-30",
+      "grossCents": 231,
+      "gstCents": 21
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 53,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Oliver",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-31",
+      "grossCents": 1547,
+      "gstCents": 141
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 54,
+      "categoryName": "General office expenses",
+      "supplier": "Market",
+      "bankAccountRaw": "CBA",
+      "date": "2025-07-31",
+      "grossCents": 1600,
+      "gstCents": 145
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 55,
+      "categoryName": "General office expenses",
+      "supplier": "David",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-01",
+      "grossCents": 1698,
+      "gstCents": 154
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 56,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "Up",
+      "date": "2025-08-02",
+      "grossCents": 2647,
+      "gstCents": 241
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 57,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "Up",
+      "date": "2025-08-02",
+      "grossCents": 2209,
+      "gstCents": 201
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 58,
+      "categoryName": "Business travel expenses",
+      "supplier": "cheers travel",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-02",
+      "grossCents": 58404,
+      "gstCents": 0
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 59,
+      "categoryName": "Software Licence",
+      "supplier": "Facebook",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-02",
+      "grossCents": 300,
+      "gstCents": 27
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 60,
+      "categoryName": "Business travel expenses",
+      "supplier": "Transport NSW",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-03",
+      "grossCents": 376,
+      "gstCents": 34
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 61,
+      "categoryName": "Electronics - Gst",
+      "supplier": "apple store",
+      "bankAccountRaw": "CBA+Rewards",
+      "date": "2025-08-04",
+      "grossCents": 199900,
+      "gstCents": 18173
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 62,
+      "categoryName": "General office expenses",
+      "supplier": "kfc",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-04",
+      "grossCents": 1045,
+      "gstCents": 95
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 63,
+      "categoryName": "General office expenses",
+      "supplier": "office works",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-05",
+      "grossCents": 200,
+      "gstCents": 18
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 64,
+      "categoryName": "General office expenses",
+      "supplier": "oporto",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-05",
+      "grossCents": 2120,
+      "gstCents": 193
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 65,
+      "categoryName": "Business travel expenses",
+      "supplier": "Uber",
+      "bankAccountRaw": "Up",
+      "date": "2025-08-06",
+      "grossCents": 1945,
+      "gstCents": 177
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 66,
+      "categoryName": "General office expenses",
+      "supplier": "Strandbag",
+      "bankAccountRaw": "Other",
+      "date": "2025-08-06",
+      "grossCents": 12900,
+      "gstCents": 1173,
+      "receiptReference": "-"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 67,
+      "categoryName": "General office expenses",
+      "supplier": "Strandbag",
+      "bankAccountRaw": "Other",
+      "date": "2025-08-06",
+      "grossCents": 5499,
+      "gstCents": 500
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 68,
+      "categoryName": "Client meeting expenses",
+      "supplier": "food gallerie",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-06",
+      "grossCents": 1220,
+      "gstCents": 111
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 69,
+      "categoryName": "Client meeting expenses",
+      "supplier": "Li oro expresso",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-06",
+      "grossCents": 550,
+      "gstCents": 50
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 70,
+      "categoryName": "Business travel expenses",
+      "supplier": "linkt",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-06",
+      "grossCents": 325,
+      "gstCents": 30
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 71,
+      "categoryName": "Business travel expenses",
+      "supplier": "Transport NSW",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-06",
+      "grossCents": 376,
+      "gstCents": 34
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 72,
+      "categoryName": "General office expenses",
+      "supplier": "wool",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-07",
+      "grossCents": 525,
+      "gstCents": 0,
+      "receiptReference": "-"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 73,
+      "categoryName": "General office expenses",
+      "supplier": "wool",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-08",
+      "grossCents": 3500,
+      "gstCents": 318,
+      "receiptReference": "-"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 74,
+      "categoryName": "General office expenses",
+      "supplier": "wool",
+      "bankAccountRaw": "other",
+      "date": "2025-08-08",
+      "grossCents": 3300,
+      "gstCents": 272,
+      "receiptReference": "-"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 75,
+      "categoryName": "Petrol",
+      "supplier": "Enhance",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-08",
+      "grossCents": 1200,
+      "gstCents": 109
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 76,
+      "categoryName": "Business travel expenses",
+      "supplier": "macd",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-08",
+      "grossCents": 495,
+      "gstCents": 45
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 77,
+      "categoryName": "Business travel expenses",
+      "supplier": "business travel expense - cash",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-08",
+      "grossCents": 40000,
+      "gstCents": 0
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 78,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-08",
+      "grossCents": 70,
+      "gstCents": 6
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 79,
+      "categoryName": "Business travel expenses",
+      "supplier": "bank fee",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-08",
+      "grossCents": 2,
+      "gstCents": 0
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 80,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "up",
+      "date": "2025-08-12",
+      "grossCents": 1137,
+      "gstCents": 103
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 81,
+      "categoryName": "General office expenses",
+      "supplier": "big w",
+      "bankAccountRaw": "Other",
+      "date": "2025-08-15",
+      "grossCents": 6800,
+      "gstCents": 618,
+      "receiptReference": "-"
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 82,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "up",
+      "date": "2025-08-15",
+      "grossCents": 1037,
+      "gstCents": 94
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 83,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "Up",
+      "date": "2025-08-21",
+      "grossCents": 3044,
+      "gstCents": 277
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 84,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "Up",
+      "date": "2025-08-22",
+      "grossCents": 914,
+      "gstCents": 83
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 85,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "Up",
+      "date": "2025-08-22",
+      "grossCents": 2446,
+      "gstCents": 222
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 86,
+      "categoryName": "Software Licence",
+      "supplier": "Payroller",
+      "bankAccountRaw": "CBA",
+      "date": "2025-08-29",
+      "grossCents": 1760,
+      "gstCents": 160
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 87,
+      "categoryName": "General office expenses",
+      "supplier": "Kogan",
+      "bankAccountRaw": "Other",
+      "date": "2025-08-29",
+      "grossCents": 24900,
+      "gstCents": 2264
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 88,
+      "categoryName": "Software Licence",
+      "supplier": "Facebook",
+      "bankAccountRaw": "CBA",
+      "date": "2025-09-02",
+      "grossCents": 218,
+      "gstCents": 20
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 89,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "CBA",
+      "date": "2025-09-27",
+      "grossCents": 103,
+      "gstCents": 9
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 90,
+      "categoryName": "Business travel expenses",
+      "supplier": "bank fee",
+      "bankAccountRaw": "CBA",
+      "date": "2025-09-27",
+      "grossCents": 88,
+      "gstCents": 8
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 91,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "CBA",
+      "date": "2025-09-28",
+      "grossCents": 1340,
+      "gstCents": 122
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 92,
+      "categoryName": "Business travel expenses",
+      "supplier": "bank fee",
+      "bankAccountRaw": "CBA",
+      "date": "2025-09-29",
+      "grossCents": 4,
+      "gstCents": 0
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 93,
+      "categoryName": "Software Licence",
+      "supplier": "Payroller",
+      "bankAccountRaw": "CBA",
+      "date": "2025-09-29",
+      "grossCents": 1760,
+      "gstCents": 160
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 97,
+      "categoryName": "Business travel expenses",
+      "supplier": "bank fee",
+      "bankAccountRaw": "CBA",
+      "date": "2025-09-30",
+      "grossCents": 3,
+      "gstCents": 0
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 98,
+      "categoryName": "Business travel expenses",
+      "supplier": "bank fee",
+      "bankAccountRaw": "CBA",
+      "date": "2025-09-30",
+      "grossCents": 47,
+      "gstCents": 4
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 99,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "CBA",
+      "date": "2025-10-01",
+      "grossCents": 678,
+      "gstCents": 62
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 100,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "CBA",
+      "date": "2025-10-01",
+      "grossCents": 71,
+      "gstCents": 6
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 101,
+      "categoryName": "Business travel expenses",
+      "supplier": "bank fee",
+      "bankAccountRaw": "CBA",
+      "date": "2025-10-03",
+      "grossCents": 24,
+      "gstCents": 2
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 102,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "CBA",
+      "date": "2025-10-03",
+      "grossCents": 74,
+      "gstCents": 7
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 103,
+      "categoryName": "Business travel expenses",
+      "supplier": "bank fee",
+      "bankAccountRaw": "CBA",
+      "date": "2025-10-06",
+      "grossCents": 2,
+      "gstCents": 0
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 104,
+      "categoryName": "Business travel expenses",
+      "supplier": "bank fee",
+      "bankAccountRaw": "CBA",
+      "date": "2025-10-06",
+      "grossCents": 3,
+      "gstCents": 0
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 105,
+      "categoryName": "Mobile 30 pm",
+      "supplier": "Amaysim",
+      "bankAccountRaw": "CBA",
+      "date": "2025-10-07",
+      "grossCents": 2000,
+      "gstCents": 182
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 106,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "CBA",
+      "date": "2025-10-09",
+      "grossCents": 481,
+      "gstCents": 44
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 107,
+      "categoryName": "Business travel expenses",
+      "supplier": "uber",
+      "bankAccountRaw": "CBA",
+      "date": "2025-10-11",
+      "grossCents": 435,
+      "gstCents": 40
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 108,
+      "categoryName": "Business travel expenses",
+      "supplier": "bank fee",
+      "bankAccountRaw": "CBA",
+      "date": "2025-10-13",
+      "grossCents": 15,
+      "gstCents": 1
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 109,
+      "categoryName": "Business travel expenses",
+      "supplier": "bank fee",
+      "bankAccountRaw": "CBA",
+      "date": "2025-10-13",
+      "grossCents": 17,
+      "gstCents": 2
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 110,
+      "categoryName": "Insurance PI / PL",
+      "supplier": "express",
+      "bankAccountRaw": "Westpac",
+      "date": "2025-10-13",
+      "grossCents": 8686,
+      "gstCents": 790
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 111,
+      "categoryName": "Software Licence",
+      "supplier": "facebook",
+      "bankAccountRaw": "CBA",
+      "date": "2025-10-19",
+      "grossCents": 448,
+      "gstCents": 41
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 112,
+      "categoryName": "Software Licence",
+      "supplier": "facebook",
+      "bankAccountRaw": "CBA",
+      "date": "2025-10-19",
+      "grossCents": 448,
+      "gstCents": 41
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 113,
+      "categoryName": "Insurance PI / PL",
+      "supplier": "express",
+      "bankAccountRaw": "Westpac",
+      "date": "2025-10-27",
+      "grossCents": 12128,
+      "gstCents": 1103
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 114,
+      "categoryName": "Business travel expenses",
+      "supplier": "Booking.com upasana",
+      "bankAccountRaw": "Other",
+      "date": "2025-11-10",
+      "grossCents": 282699,
+      "gstCents": 1000
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 115,
+      "categoryName": "Business travel expenses",
+      "supplier": "Goto gate - CCU SYD",
+      "bankAccountRaw": "Other",
+      "date": "2025-11-23",
+      "grossCents": 64391,
+      "gstCents": 0
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 116,
+      "categoryName": "Business travel expenses",
+      "supplier": "Goto gate - CCU SYD Bank",
+      "bankAccountRaw": "Other",
+      "date": "2025-11-23",
+      "grossCents": 380,
+      "gstCents": 35
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 117,
+      "categoryName": "Business travel expenses",
+      "supplier": "Trip.com SYD CCU",
+      "bankAccountRaw": "Other",
+      "date": "2025-11-26",
+      "grossCents": 87010,
+      "gstCents": 0
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 118,
+      "categoryName": "Business travel expenses",
+      "supplier": "Trip.com SYD CCU Bank",
+      "bankAccountRaw": "Other",
+      "date": "2025-11-26",
+      "grossCents": 1500,
+      "gstCents": 136
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 119,
+      "categoryName": "Mobile 30 pm",
+      "supplier": "amaysim",
+      "bankAccountRaw": "CBA",
+      "date": "2025-11-19",
+      "grossCents": 2000,
+      "gstCents": 182
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 120,
+      "categoryName": "Software Licence",
+      "supplier": "payroller",
+      "bankAccountRaw": "CBA",
+      "date": "2025-11-19",
+      "grossCents": 1760,
+      "gstCents": 160
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 121,
+      "categoryName": "Mobile 30 pm",
+      "supplier": "amaysim",
+      "bankAccountRaw": "CBA",
+      "date": "2025-11-23",
+      "grossCents": 2000,
+      "gstCents": 182
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 122,
+      "categoryName": "General office expenses",
+      "supplier": "Oporto",
+      "bankAccountRaw": "CBA",
+      "date": "2025-11-24",
+      "grossCents": 1500,
+      "gstCents": 136
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 123,
+      "categoryName": "Business travel expenses",
+      "supplier": "transport",
+      "bankAccountRaw": "CBA",
+      "date": "2025-11-25",
+      "grossCents": 752,
+      "gstCents": 68
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 124,
+      "categoryName": "General office expenses",
+      "supplier": "woolworths",
+      "bankAccountRaw": "CBA",
+      "date": "2025-11-25",
+      "grossCents": 210,
+      "gstCents": 19
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 125,
+      "categoryName": "General office expenses",
+      "supplier": "biryani corner",
+      "bankAccountRaw": "CBA",
+      "date": "2025-11-25",
+      "grossCents": 1918,
+      "gstCents": 174
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 126,
+      "categoryName": "General office expenses",
+      "supplier": "woolworths",
+      "bankAccountRaw": "CBA",
+      "date": "2025-11-26",
+      "grossCents": 840,
+      "gstCents": 76
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 127,
+      "categoryName": "General office expenses",
+      "supplier": "sakti",
+      "bankAccountRaw": "CBA",
+      "date": "2025-11-26",
+      "grossCents": 1511,
+      "gstCents": 137
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 128,
+      "categoryName": "General office expenses",
+      "supplier": "kfc",
+      "bankAccountRaw": "cba",
+      "date": "2025-11-26",
+      "grossCents": 850,
+      "gstCents": 18
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 129,
+      "categoryName": "General office expenses",
+      "supplier": "david",
+      "bankAccountRaw": "cba",
+      "date": "2025-11-27",
+      "grossCents": 2998,
+      "gstCents": 273
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 130,
+      "categoryName": "Client meeting expenses",
+      "supplier": "oliver",
+      "bankAccountRaw": "cba",
+      "date": "2025-11-28",
+      "grossCents": 1466,
+      "gstCents": 133
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 131,
+      "categoryName": "Client meeting expenses",
+      "supplier": "sd&mt",
+      "bankAccountRaw": "cba",
+      "date": "2025-11-28",
+      "grossCents": 950,
+      "gstCents": 86
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 132,
+      "categoryName": "General office expenses",
+      "supplier": "chemist warehouse",
+      "bankAccountRaw": "cba",
+      "date": "2025-11-28",
+      "grossCents": 7198,
+      "gstCents": 654
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 133,
+      "categoryName": "General office expenses",
+      "supplier": "woolworths",
+      "bankAccountRaw": "cba",
+      "date": "2025-11-28",
+      "grossCents": 9505,
+      "gstCents": 864
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 134,
+      "categoryName": "General office expenses",
+      "supplier": "woolworths",
+      "bankAccountRaw": "cba",
+      "date": "2025-11-29",
+      "grossCents": 3715,
+      "gstCents": 338
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 135,
+      "categoryName": "General office expenses",
+      "supplier": "store purchase",
+      "bankAccountRaw": "Other",
+      "date": "2025-11-29",
+      "grossCents": 23715,
+      "gstCents": 2156
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 136,
+      "categoryName": "Business travel expenses",
+      "supplier": "didi",
+      "bankAccountRaw": "cba",
+      "date": "2025-11-29",
+      "grossCents": 1881,
+      "gstCents": 171
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 137,
+      "categoryName": "Business travel expenses",
+      "supplier": "didi",
+      "bankAccountRaw": "cba",
+      "date": "2025-11-29",
+      "grossCents": 3898,
+      "gstCents": 354
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 138,
+      "categoryName": "Business travel expenses",
+      "supplier": "didi",
+      "bankAccountRaw": "cba",
+      "date": "2025-11-29",
+      "grossCents": 240,
+      "gstCents": 22
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 139,
+      "categoryName": "Client meeting expenses",
+      "supplier": "campos airport",
+      "bankAccountRaw": "cba",
+      "date": "2025-11-29",
+      "grossCents": 1470,
+      "gstCents": 134
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 140,
+      "categoryName": "General office expenses",
+      "supplier": "EDIT X STUDIO 60000 INR",
+      "bankAccountRaw": "cba",
+      "date": "2025-11-04",
+      "grossCents": 101439,
+      "gstCents": 57
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 144,
+      "categoryName": "General office expenses",
+      "supplier": "bank fee",
+      "bankAccountRaw": "CBA",
+      "date": "2025-12-31",
+      "grossCents": 1,
+      "gstCents": 1
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 145,
+      "categoryName": "Software Licence",
+      "supplier": "software license fee",
+      "bankAccountRaw": "CBA",
+      "date": "2026-01-11",
+      "grossCents": 1760,
+      "gstCents": 160
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 146,
+      "categoryName": "Mobile 30 pm",
+      "supplier": "amaysim",
+      "bankAccountRaw": "CBA",
+      "date": "2026-01-26",
+      "grossCents": 14160,
+      "gstCents": 1287
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 147,
+      "categoryName": "Business travel expenses",
+      "supplier": "Uber - upasana",
+      "bankAccountRaw": "other",
+      "date": "2026-02-07",
+      "grossCents": 7120,
+      "gstCents": 647
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 148,
+      "categoryName": "Electronics - Gst",
+      "supplier": "jb electronics",
+      "bankAccountRaw": "other",
+      "date": "2026-02-08",
+      "grossCents": 48400,
+      "gstCents": 4400
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 149,
+      "categoryName": "Software Licence",
+      "supplier": "software license fee",
+      "bankAccountRaw": "CBA",
+      "date": "2026-02-11",
+      "grossCents": 1760,
+      "gstCents": 160
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 150,
+      "categoryName": "Software Licence",
+      "supplier": "EDIT X STUDIO 120000 INR",
+      "bankAccountRaw": "wise",
+      "date": "2026-02-13",
+      "grossCents": 188459,
+      "gstCents": 98
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 151,
+      "categoryName": "Software Licence",
+      "supplier": "software license fee 20USD",
+      "bankAccountRaw": "wise",
+      "date": "2026-03-02",
+      "grossCents": 2849,
+      "gstCents": 1
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 152,
+      "categoryName": "Software Licence",
+      "supplier": "EDIT X STUDIO 26000 INR",
+      "bankAccountRaw": "wise",
+      "date": "2026-03-05",
+      "grossCents": 40651,
+      "gstCents": 28
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 153,
+      "categoryName": "Mobile 30 pm",
+      "supplier": "amaysim",
+      "bankAccountRaw": "westpac",
+      "date": "2026-03-08",
+      "grossCents": 1999,
+      "gstCents": 182
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 154,
+      "categoryName": "Mobile 30 pm",
+      "supplier": "Phone bill - Upasana",
+      "bankAccountRaw": "Other",
+      "date": "2026-03-12",
+      "grossCents": 9900,
+      "gstCents": 900
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 155,
+      "categoryName": "Business travel expenses",
+      "supplier": "Uber - upasana",
+      "bankAccountRaw": "Other",
+      "date": "2026-03-28",
+      "grossCents": 2524,
+      "gstCents": 229
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 156,
+      "categoryName": "Business travel expenses",
+      "supplier": "Uber - upasana",
+      "bankAccountRaw": "Other",
+      "date": "2026-03-28",
+      "grossCents": 2540,
+      "gstCents": 231
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 157,
+      "categoryName": "General office expenses",
+      "supplier": "office expense",
+      "bankAccountRaw": "Other",
+      "date": "2026-01-13",
+      "grossCents": 11700,
+      "gstCents": 1064
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 162,
+      "categoryName": "Business travel expenses",
+      "supplier": "Didi Upasana",
+      "bankAccountRaw": "Other",
+      "date": "2026-04-30",
+      "grossCents": 3449,
+      "gstCents": 314
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 163,
+      "categoryName": "Business travel expenses",
+      "supplier": "Uber Upasana",
+      "bankAccountRaw": "Other",
+      "date": "2026-04-12",
+      "grossCents": 7134,
+      "gstCents": 649
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 164,
+      "categoryName": "Mobile 30 pm",
+      "supplier": "Uber JB hifi",
+      "bankAccountRaw": "Other",
+      "date": "2026-04-12",
+      "grossCents": 9900,
+      "gstCents": 900
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 165,
+      "categoryName": "Software Licence",
+      "supplier": "curser",
+      "bankAccountRaw": "Wise",
+      "date": "2026-05-25",
+      "grossCents": 2802,
+      "gstCents": 10
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 166,
+      "categoryName": "Insurance PI / PL",
+      "supplier": "insurance",
+      "bankAccountRaw": "westpac",
+      "date": "2026-05-24",
+      "grossCents": 85855,
+      "gstCents": 7805
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 167,
+      "categoryName": "Mobile 30 pm",
+      "supplier": "Amaysim",
+      "bankAccountRaw": "westpac",
+      "date": "2026-05-17",
+      "grossCents": 2000,
+      "gstCents": 182
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 168,
+      "categoryName": "General office expenses",
+      "supplier": "Aus post",
+      "bankAccountRaw": "westpac",
+      "date": "2026-05-17",
+      "grossCents": 600,
+      "gstCents": 55
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 169,
+      "categoryName": "Software Licence",
+      "supplier": "Payroller",
+      "bankAccountRaw": "westpac",
+      "date": "2026-05-17",
+      "grossCents": 1760,
+      "gstCents": 160
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 170,
+      "categoryName": "Insurance WC - Icare",
+      "supplier": "icare",
+      "bankAccountRaw": "westpac",
+      "date": "2026-04-30",
+      "grossCents": 37385,
+      "gstCents": 8
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 171,
+      "categoryName": "Software Licence",
+      "supplier": "Payroller",
+      "bankAccountRaw": "westpac",
+      "date": "2026-04-13",
+      "grossCents": 1760,
+      "gstCents": 160
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 172,
+      "categoryName": "Software Licence",
+      "supplier": "curser",
+      "bankAccountRaw": "Wise",
+      "date": "2026-04-13",
+      "grossCents": 2830,
+      "gstCents": 10
+    },
+    {
+      "sheetName": "Raja Expenses",
+      "rowNumber": 173,
+      "categoryName": "Software Licence",
+      "supplier": "Payroller",
+      "bankAccountRaw": "westpac",
+      "date": "2026-03-31",
+      "grossCents": 1760,
+      "gstCents": 160
+    }
+  ],
+  "invoiceRows": [
+    {
+      "clientName": "Charchit",
+      "quarterKey": "Q3",
+      "grossCents": 770000,
+      "gstCents": 70000
+    },
+    {
+      "clientName": "Charchit",
+      "quarterKey": "Q4",
+      "grossCents": 1870000,
+      "gstCents": 170000
+    },
+    {
+      "clientName": "Raja",
+      "quarterKey": "Q1",
+      "grossCents": 3256000,
+      "gstCents": 296000
+    },
+    {
+      "clientName": "Raja",
+      "quarterKey": "Q2",
+      "grossCents": 2376000,
+      "gstCents": 216000
+    },
+    {
+      "clientName": "Raja",
+      "quarterKey": "Q3",
+      "grossCents": 2920500,
+      "gstCents": 265500
+    },
+    {
+      "clientName": "Upasana",
+      "quarterKey": "Q1",
+      "grossCents": 4607900,
+      "gstCents": 418900
+    },
+    {
+      "clientName": "Upasana",
+      "quarterKey": "Q2",
+      "grossCents": 3919300,
+      "gstCents": 356300
+    },
+    {
+      "clientName": "Upasana",
+      "quarterKey": "Q3",
+      "grossCents": 2971100,
+      "gstCents": 270100
+    },
+    {
+      "clientName": "Upasana",
+      "quarterKey": "Q4",
+      "grossCents": 2890800,
+      "gstCents": 262800
+    },
+    {
+      "clientName": "Prithiraj",
+      "quarterKey": "Q4",
+      "grossCents": 2310000,
+      "gstCents": 210000
+    }
+  ],
+  "payRunRows": [
+    {
+      "employeeName": "Charchit",
+      "quarterKey": "Q4",
+      "grossCents": 0,
+      "reimbursementsCents": 0,
+      "paygCents": 402200,
+      "superCents": 208000
+    },
+    {
+      "employeeName": "Upasana",
+      "quarterKey": "Q1",
+      "grossCents": 3582480,
+      "reimbursementsCents": 0,
+      "paygCents": 900300,
+      "superCents": 429898
+    },
+    {
+      "employeeName": "Upasana",
+      "quarterKey": "Q2",
+      "grossCents": 2933580,
+      "reimbursementsCents": 88200,
+      "paygCents": 709900,
+      "superCents": 352118
+    },
+    {
+      "employeeName": "Upasana",
+      "quarterKey": "Q3",
+      "grossCents": 1614800,
+      "reimbursementsCents": 208819,
+      "paygCents": 417500,
+      "superCents": 193776
+    },
+    {
+      "employeeName": "Upasana",
+      "quarterKey": "Q4",
+      "grossCents": 1400000,
+      "reimbursementsCents": 17364,
+      "paygCents": 367000,
+      "superCents": 168000
+    },
+    {
+      "employeeName": "Raja",
+      "quarterKey": "Q2",
+      "grossCents": 408800,
+      "reimbursementsCents": 0,
+      "paygCents": 287700,
+      "superCents": 609056
+    }
+  ]
+}

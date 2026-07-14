@@ -67,10 +67,12 @@ export default async function SignUpPage({ searchParams }: { searchParams?: Sear
                     required
                     className="w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm"
                     placeholder="12 345 678 901"
-                    inputMode="numeric"
+                    inputMode="text"
                     autoComplete="off"
                   />
-                  <p className="mt-1 text-xs text-zinc-500">Use the 11-digit ABN, for example 51 824 753 556.</p>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Use the 11-digit ABN, with or without spaces, for example 51 824 753 556 or 51824753556.
+                  </p>
                 </div>
                 <FormSubmitButton className="w-full" pendingLabel="Creating workspace...">
                   Create workspace

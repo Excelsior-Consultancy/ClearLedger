@@ -1,145 +1,27 @@
 import { MembershipRole } from "@prisma/client";
 import { prisma } from "@/modules/db/prisma";
+import { seedWorkbookWorkspace } from "./workbookSeed";
 
-export async function seedDatabase() {
+export type SeedDatabaseOptions = {
+  includeDemoFixtures?: boolean;
+};
+
+function shouldIncludeDemoFixtures(includeDemoFixtures?: boolean) {
+  if (typeof includeDemoFixtures === "boolean") {
+    return includeDemoFixtures;
+  }
+
+  return !process.env.VERCEL_ENV;
+}
+
+export async function seedDatabase(options: SeedDatabaseOptions = {}) {
+  const includeDemoFixtures = shouldIncludeDemoFixtures(options.includeDemoFixtures);
+
   await prisma.comment.deleteMany();
   await prisma.invitation.deleteMany();
   await prisma.membership.deleteMany();
   await prisma.user.deleteMany();
   await prisma.workspace.deleteMany();
-
-  const excelsior = await prisma.workspace.create({
-    data: {
-      id: "excelsior",
-      name: "Excelsior Consulting",
-      legalName: "Excelsior Business Manager Pty Ltd",
-      abn: "51824753556",
-      address: "Sydney NSW",
-      contactEmail: "123@123.com",
-      gstRegistered: true,
-      gstAccountingBasis: "ACCRUAL",
-      basFrequency: "QUARTERLY",
-      financialYearStartMonth: 7,
-      invoicePrefix: "EXC",
-      quarterLocked: false,
-      bankAccounts: {
-        create: [
-          { name: "Main Business", bank: "NAB", label: "Operating", ownerLabel: "Company" },
-          { name: "Raja Expenses", bank: "Westpac", label: "Expense account", ownerLabel: "Raja" },
-          { name: "Charchit Expenses", bank: "CBA", label: "Expense account", ownerLabel: "Charchit" }
-        ]
-      },
-      categories: {
-        create: [
-          {
-            name: "Consulting income",
-            type: "INCOME",
-            defaultGstTreatment: "GST_INCLUDED",
-            basTreatment: "GST_COLLECTED"
-          },
-          {
-            name: "Software",
-            type: "EXPENSE",
-            defaultGstTreatment: "GST_INCLUDED",
-            basTreatment: "GST_PAID"
-          },
-          {
-            name: "Internet",
-            type: "EXPENSE",
-            defaultGstTreatment: "GST_INCLUDED",
-            basTreatment: "GST_PAID"
-          },
-          {
-            name: "Bank fees",
-            type: "EXPENSE",
-            defaultGstTreatment: "GST_FREE",
-            basTreatment: "NONE"
-          }
-        ]
-      },
-      people: {
-        create: [
-          {
-            name: "Business Owner",
-            email: "123@123.com",
-            personType: "DIRECTOR",
-            workspaceRole: "DIRECTOR",
-            payrollEnabled: true,
-            payrollBasis: "SALARY",
-            salaryPerPayPeriodCents: 300000,
-            superRateBps: 1100
-          },
-          {
-            name: "Accountant",
-            email: "234@234.com",
-            personType: "ACCOUNTANT",
-            workspaceRole: "ACCOUNTANT"
-          },
-          {
-            name: "Sample Employee",
-            email: "345@345.com",
-            personType: "EMPLOYEE",
-            workspaceRole: "EMPLOYEE",
-            payrollEnabled: true,
-            payrollBasis: "HOURLY",
-            hourlyRateCents: 4500,
-            ordinaryHoursPerPayPeriod: 60,
-            superRateBps: 1100
-          }
-        ]
-      }
-    }
-  });
-
-  const harbour = await prisma.workspace.create({
-    data: {
-      id: "harbour-advisory",
-      name: "Harbour Advisory",
-      legalName: "Harbour Advisory Pty Ltd",
-      abn: "53004085616",
-      address: "Melbourne VIC",
-      contactEmail: "456@456.com",
-      gstRegistered: true,
-      gstAccountingBasis: "ACCRUAL",
-      basFrequency: "QUARTERLY",
-      financialYearStartMonth: 7,
-      invoicePrefix: "HBR",
-      quarterLocked: false,
-      bankAccounts: {
-        create: [{ name: "Harbour Main", bank: "ANZ", label: "Operating", ownerLabel: "Company" }]
-      },
-      categories: {
-        create: [
-          {
-            name: "Advisory income",
-            type: "INCOME",
-            defaultGstTreatment: "GST_INCLUDED",
-            basTreatment: "GST_COLLECTED"
-          },
-          {
-            name: "Subscriptions",
-            type: "EXPENSE",
-            defaultGstTreatment: "GST_INCLUDED",
-            basTreatment: "GST_PAID"
-          }
-        ]
-      },
-      people: {
-        create: [
-          {
-            name: "Harbour Director",
-            email: "456@456.com",
-            personType: "DIRECTOR",
-            workspaceRole: "DIRECTOR",
-            payrollEnabled: true,
-            payrollBasis: "SALARY",
-            salaryPerPayPeriodCents: 320000,
-            superRateBps: 1100
-          }
-        ]
-      }
-    }
-  });
 
   const owner = await prisma.user.create({
     data: {
@@ -151,92 +33,226 @@ export async function seedDatabase() {
     }
   });
 
-  const accountant = await prisma.user.create({
-    data: {
-      id: "supabase:234@234.com",
-      authProvider: "supabase",
-      authProviderUserId: "234@234.com",
-      name: "Accountant",
-      email: "234@234.com"
-    }
-  });
+  if (includeDemoFixtures) {
+    const excelsior = await prisma.workspace.create({
+      data: {
+        id: "excelsior",
+        name: "Excelsior Consulting",
+        legalName: "Excelsior Business Manager Pty Ltd",
+        abn: "51824753556",
+        address: "Sydney NSW",
+        contactEmail: "123@123.com",
+        gstRegistered: true,
+        gstAccountingBasis: "ACCRUAL",
+        basFrequency: "QUARTERLY",
+        financialYearStartMonth: 7,
+        invoicePrefix: "EXC",
+        quarterLocked: false,
+        bankAccounts: {
+          create: [
+            { name: "Main Business", bank: "NAB", label: "Operating", ownerLabel: "Company" },
+            { name: "Raja Expenses", bank: "Westpac", label: "Expense account", ownerLabel: "Raja" },
+            { name: "Charchit Expenses", bank: "CBA", label: "Expense account", ownerLabel: "Charchit" }
+          ]
+        },
+        categories: {
+          create: [
+            {
+              name: "Consulting income",
+              type: "INCOME",
+              defaultGstTreatment: "GST_INCLUDED",
+              basTreatment: "GST_COLLECTED"
+            },
+            {
+              name: "Software",
+              type: "EXPENSE",
+              defaultGstTreatment: "GST_INCLUDED",
+              basTreatment: "GST_PAID"
+            },
+            {
+              name: "Internet",
+              type: "EXPENSE",
+              defaultGstTreatment: "GST_INCLUDED",
+              basTreatment: "GST_PAID"
+            },
+            {
+              name: "Bank fees",
+              type: "EXPENSE",
+              defaultGstTreatment: "GST_FREE",
+              basTreatment: "NONE"
+            }
+          ]
+        },
+        people: {
+          create: [
+            {
+              name: "Business Owner",
+              email: "123@123.com",
+              personType: "DIRECTOR",
+              workspaceRole: "DIRECTOR",
+              payrollEnabled: true,
+              payrollBasis: "SALARY",
+              salaryPerPayPeriodCents: 300000,
+              superRateBps: 1100
+            },
+            {
+              name: "Accountant",
+              email: "234@234.com",
+              personType: "ACCOUNTANT",
+              workspaceRole: "ACCOUNTANT"
+            },
+            {
+              name: "Sample Employee",
+              email: "345@345.com",
+              personType: "EMPLOYEE",
+              workspaceRole: "EMPLOYEE",
+              payrollEnabled: true,
+              payrollBasis: "HOURLY",
+              hourlyRateCents: 4500,
+              ordinaryHoursPerPayPeriod: 60,
+              superRateBps: 1100
+            }
+          ]
+        }
+      }
+    });
 
-  const multiCompany = await prisma.user.create({
-    data: {
-      id: "supabase:456@456.com",
-      authProvider: "supabase",
-      authProviderUserId: "456@456.com",
-      name: "Multi Company User",
-      email: "456@456.com"
-    }
-  });
+    const harbour = await prisma.workspace.create({
+      data: {
+        id: "harbour-advisory",
+        name: "Harbour Advisory",
+        legalName: "Harbour Advisory Pty Ltd",
+        abn: "53004085616",
+        address: "Melbourne VIC",
+        contactEmail: "456@456.com",
+        gstRegistered: true,
+        gstAccountingBasis: "ACCRUAL",
+        basFrequency: "QUARTERLY",
+        financialYearStartMonth: 7,
+        invoicePrefix: "HBR",
+        quarterLocked: false,
+        bankAccounts: {
+          create: [{ name: "Harbour Main", bank: "ANZ", label: "Operating", ownerLabel: "Company" }]
+        },
+        categories: {
+          create: [
+            {
+              name: "Advisory income",
+              type: "INCOME",
+              defaultGstTreatment: "GST_INCLUDED",
+              basTreatment: "GST_COLLECTED"
+            },
+            {
+              name: "Subscriptions",
+              type: "EXPENSE",
+              defaultGstTreatment: "GST_INCLUDED",
+              basTreatment: "GST_PAID"
+            }
+          ]
+        },
+        people: {
+          create: [
+            {
+              name: "Harbour Director",
+              email: "456@456.com",
+              personType: "DIRECTOR",
+              workspaceRole: "DIRECTOR",
+              payrollEnabled: true,
+              payrollBasis: "SALARY",
+              salaryPerPayPeriodCents: 320000,
+              superRateBps: 1100
+            }
+          ]
+        }
+      }
+    });
 
-  const viewer = await prisma.user.create({
-    data: {
-      id: "supabase:789@789.com",
-      authProvider: "supabase",
-      authProviderUserId: "789@789.com",
-      name: "Viewer User",
-      email: "789@789.com"
-    }
-  });
+    const accountant = await prisma.user.create({
+      data: {
+        id: "supabase:234@234.com",
+        authProvider: "supabase",
+        authProviderUserId: "234@234.com",
+        name: "Accountant",
+        email: "234@234.com"
+      }
+    });
 
-  await prisma.membership.createMany({
-    data: [
-      { userId: owner.id, workspaceId: excelsior.id, role: MembershipRole.ADMIN },
-      { userId: owner.id, workspaceId: harbour.id, role: MembershipRole.ADMIN },
-      { userId: accountant.id, workspaceId: excelsior.id, role: MembershipRole.ACCOUNTANT },
-      { userId: multiCompany.id, workspaceId: excelsior.id, role: MembershipRole.EDITOR },
-      { userId: multiCompany.id, workspaceId: harbour.id, role: MembershipRole.ACCOUNTANT },
-      { userId: viewer.id, workspaceId: harbour.id, role: MembershipRole.VIEWER }
-    ]
-  });
+    const multiCompany = await prisma.user.create({
+      data: {
+        id: "supabase:456@456.com",
+        authProvider: "supabase",
+        authProviderUserId: "456@456.com",
+        name: "Multi Company User",
+        email: "456@456.com"
+      }
+    });
 
-  const software = await prisma.category.findFirstOrThrow({
-    where: { workspaceId: excelsior.id, name: "Software" }
-  });
-  const internet = await prisma.category.findFirstOrThrow({
-    where: { workspaceId: excelsior.id, name: "Internet" }
-  });
-  const bankFees = await prisma.category.findFirstOrThrow({
-    where: { workspaceId: excelsior.id, name: "Bank fees" }
-  });
-  const raja = await prisma.bankAccount.findFirstOrThrow({
-    where: { workspaceId: excelsior.id, name: "Raja Expenses" }
-  });
-  const charchit = await prisma.bankAccount.findFirstOrThrow({
-    where: { workspaceId: excelsior.id, name: "Charchit Expenses" }
-  });
-  const main = await prisma.bankAccount.findFirstOrThrow({
-    where: { workspaceId: excelsior.id, name: "Main Business" }
-  });
-  const ownerPerson = await prisma.person.findFirstOrThrow({
-    where: { workspaceId: excelsior.id, email: "123@123.com" }
-  });
-  const employeePerson = await prisma.person.findFirstOrThrow({
-    where: { workspaceId: excelsior.id, email: "345@345.com" }
-  });
-  const northstar = await prisma.client.create({
-    data: {
-      workspaceId: excelsior.id,
-      name: "Northstar Labs",
-      email: "accounts@northstar.example",
-      abn: "11 222 333 444",
-      billingAddress: "1 Market St, Sydney NSW"
-    }
-  });
-  const bluegum = await prisma.client.create({
-    data: {
-      workspaceId: excelsior.id,
-      name: "Bluegum Systems",
-      email: "finance@bluegum.example",
-      abn: "55 666 777 888",
-      billingAddress: "99 Collins St, Melbourne VIC"
-    }
-  });
+    const viewer = await prisma.user.create({
+      data: {
+        id: "supabase:789@789.com",
+        authProvider: "supabase",
+        authProviderUserId: "789@789.com",
+        name: "Viewer User",
+        email: "789@789.com"
+      }
+    });
 
-  await prisma.expense.createMany({
-    data: [
+    await prisma.membership.createMany({
+      data: [
+        { userId: owner.id, workspaceId: excelsior.id, role: MembershipRole.ADMIN },
+        { userId: owner.id, workspaceId: harbour.id, role: MembershipRole.ADMIN },
+        { userId: accountant.id, workspaceId: excelsior.id, role: MembershipRole.ACCOUNTANT },
+        { userId: multiCompany.id, workspaceId: excelsior.id, role: MembershipRole.EDITOR },
+        { userId: multiCompany.id, workspaceId: harbour.id, role: MembershipRole.ACCOUNTANT },
+        { userId: viewer.id, workspaceId: harbour.id, role: MembershipRole.VIEWER }
+      ]
+    });
+
+    const software = await prisma.category.findFirstOrThrow({
+      where: { workspaceId: excelsior.id, name: "Software" }
+    });
+    const internet = await prisma.category.findFirstOrThrow({
+      where: { workspaceId: excelsior.id, name: "Internet" }
+    });
+    const bankFees = await prisma.category.findFirstOrThrow({
+      where: { workspaceId: excelsior.id, name: "Bank fees" }
+    });
+    const raja = await prisma.bankAccount.findFirstOrThrow({
+      where: { workspaceId: excelsior.id, name: "Raja Expenses" }
+    });
+    const charchit = await prisma.bankAccount.findFirstOrThrow({
+      where: { workspaceId: excelsior.id, name: "Charchit Expenses" }
+    });
+    const main = await prisma.bankAccount.findFirstOrThrow({
+      where: { workspaceId: excelsior.id, name: "Main Business" }
+    });
+    const ownerPerson = await prisma.person.findFirstOrThrow({
+      where: { workspaceId: excelsior.id, email: "123@123.com" }
+    });
+    const employeePerson = await prisma.person.findFirstOrThrow({
+      where: { workspaceId: excelsior.id, email: "345@345.com" }
+    });
+    const northstar = await prisma.client.create({
+      data: {
+        workspaceId: excelsior.id,
+        name: "Northstar Labs",
+        email: "accounts@northstar.example",
+        abn: "11 222 333 444",
+        billingAddress: "1 Market St, Sydney NSW"
+      }
+    });
+    const bluegum = await prisma.client.create({
+      data: {
+        workspaceId: excelsior.id,
+        name: "Bluegum Systems",
+        email: "finance@bluegum.example",
+        abn: "55 666 777 888",
+        billingAddress: "99 Collins St, Melbourne VIC"
+      }
+    });
+
+    await prisma.expense.createMany({
+      data: [
       {
         workspaceId: excelsior.id,
         date: new Date("2025-05-14T00:00:00.000Z"),
@@ -286,8 +302,8 @@ export async function seedDatabase() {
     ]
   });
 
-  await prisma.invoice.createMany({
-    data: [
+    await prisma.invoice.createMany({
+      data: [
       {
         workspaceId: excelsior.id,
         clientId: northstar.id,
@@ -331,8 +347,8 @@ export async function seedDatabase() {
     ]
   });
 
-  await prisma.payRun.createMany({
-    data: [
+    await prisma.payRun.createMany({
+      data: [
       {
         workspaceId: excelsior.id,
         personId: employeePerson.id,
@@ -380,5 +396,8 @@ export async function seedDatabase() {
         overrideReason: "Draft pay run pending review"
       }
     ]
-  });
+    });
+  }
+
+  await seedWorkbookWorkspace(owner.id);
 }
