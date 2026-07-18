@@ -12,8 +12,6 @@ const NAV_ITEMS = [
   { href: "/income", label: "Income" },
   { href: "/expenses", label: "Expenses" },
   { href: "/payroll", label: "Payroll Lite", badge: "MVP" },
-  { href: "/bas", label: "BAS" },
-  { href: "/ca-pack", label: "CA Pack" },
   { href: "/admin/setup", label: "Admin" },
   { href: "/admin/users", label: "Users" },
 ];
@@ -48,30 +46,29 @@ export function Sidebar({ currentRole, userName, memberships, selectedWorkspaceI
         </div>
       </div>
 
-      {memberships.length > 1 && (
-        <form action={selectWorkspaceAction} className="mb-4">
-          <label className="mb-2 block text-[11px] uppercase tracking-[0.16em] text-[#94a3b8]">Company</label>
-          <select
-            name="workspaceId"
-            defaultValue={selectedWorkspaceId}
-            className="w-full rounded-md border border-[#334155] bg-[#0f172a] px-3 py-2 text-sm text-white"
-            onChange={(event) => {
-              startTransition(() => {
-                event.currentTarget.form?.requestSubmit();
-              });
-            }}
-          >
-            {memberships.map((membership) => (
-              <option key={membership.workspaceId} value={membership.workspaceId}>
-                {membership.workspace.name}
-              </option>
-            ))}
-          </select>
-          <button type="submit" className="sr-only" disabled={isPending}>
-            Switch company
-          </button>
-        </form>
-      )}
+      <form action={selectWorkspaceAction} className="mb-4">
+        <label className="mb-2 block text-[11px] uppercase tracking-[0.16em] text-[#94a3b8]">Company</label>
+        <input type="hidden" name="quarterId" value={quarterId ?? ""} />
+        <select
+          name="workspaceId"
+          defaultValue={selectedWorkspaceId}
+          className="w-full rounded-md border border-[#334155] bg-[#0f172a] px-3 py-2 text-sm text-white"
+          onChange={(event) => {
+            startTransition(() => {
+              event.currentTarget.form?.requestSubmit();
+            });
+          }}
+        >
+          {memberships.map((membership) => (
+            <option key={membership.workspaceId} value={membership.workspaceId}>
+              {membership.workspace.name}
+            </option>
+          ))}
+        </select>
+        <button type="submit" className="sr-only" disabled={isPending}>
+          Switch company
+        </button>
+      </form>
 
       <nav className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:flex lg:flex-1 lg:flex-col lg:gap-0.5">
         {NAV_ITEMS.map(({ href, label, badge }) => {

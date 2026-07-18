@@ -559,9 +559,6 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Se
                   <h2 className="text-base font-semibold text-zinc-900">Add expense</h2>
                   <p className="text-sm text-zinc-500">Keep the entry form short. Use advanced fields only when the GST treatment needs manual override.</p>
                 </div>
-                <Chip color="accent" variant="soft" size="sm">
-                  KAN-3
-                </Chip>
               </div>
 
               {canCreateExpense ? (

@@ -105,6 +105,24 @@ Set `NEXT_PUBLIC_SITE_URL` in Vercel Production to the canonical app URL. Previe
 
 Do not reuse production auth/database env vars in Preview. Keep real secrets in Vercel and Supabase only, not in git.
 
+### Local dev login bypass
+
+For local development, you can skip the Google login screen and boot directly into the seeded sample workspace by setting:
+
+```bash
+CLEARLEDGER_DEV_AUTO_LOGIN="true"
+```
+
+If the flag is omitted, development defaults to auto-login. Set it to `false` only if you want to force the login screen locally.
+
+Optional overrides:
+
+- `CLEARLEDGER_DEV_EMAIL`
+- `CLEARLEDGER_DEV_NAME`
+- `CLEARLEDGER_DEV_WORKSPACE_ID`
+
+This bypass only activates when `NODE_ENV=development`. Production and preview environments still require normal login.
+
 For Prisma, the canonical env names are `DATABASE_URL` and `DIRECT_URL`. `POSTGRES_PRISMA_URL` and `POSTGRES_URL_NON_POOLING` are accepted as compatibility aliases at runtime.
 
 GitHub Actions handles validation:

@@ -6,10 +6,11 @@ import {
 } from "@/modules/auth/service";
 import { clearPendingGoogleAuth, getPendingGoogleAuth } from "@/modules/auth/google";
 import { getAuthProvider } from "@/modules/auth/provider";
+import { resolveRequestOrigin } from "@/modules/shared/appOrigin";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const appOrigin = url.origin;
+  const appOrigin = resolveRequestOrigin({ headers: request.headers });
   const error = url.searchParams.get("error");
   if (error) {
     return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(error)}`, appOrigin));

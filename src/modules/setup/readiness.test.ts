@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getOnboardingReadiness, getSetupReadiness } from "./readiness";
+import { getOnboardingReadiness, getSetupJourney, getSetupReadiness } from "./readiness";
 
 describe("getSetupReadiness", () => {
   it("reports setup complete when essentials exist", () => {
@@ -14,7 +14,8 @@ describe("getSetupReadiness", () => {
       basFrequency: "QUARTERLY",
       financialYearStartMonth: 7,
       bankAccounts: [{ active: true }],
-      categories: [{ active: true }]
+      categories: [{ active: true }],
+      people: [{ active: false }]
     });
 
     expect(readiness.complete).toBe(true);
@@ -33,7 +34,8 @@ describe("getSetupReadiness", () => {
       basFrequency: "QUARTERLY",
       financialYearStartMonth: 7,
       bankAccounts: [],
-      categories: []
+      categories: [],
+      people: []
     });
 
     expect(readiness.complete).toBe(false);
@@ -55,7 +57,8 @@ describe("getOnboardingReadiness", () => {
       basFrequency: null,
       financialYearStartMonth: null,
       bankAccounts: [],
-      categories: []
+      categories: [],
+      people: []
     });
 
     expect(readiness.complete).toBe(false);
@@ -70,5 +73,30 @@ describe("getOnboardingReadiness", () => {
         "Financial year start month is required."
       ])
     );
+  });
+});
+
+describe("getSetupJourney", () => {
+  it("describes required and optional setup sections", () => {
+    const journey = getSetupJourney({
+      name: "Excelsior Consulting",
+      legalName: "Excelsior Business Manager Pty Ltd",
+      abn: "51824753556",
+      address: "Sydney NSW",
+      contactEmail: "123@123.com",
+      gstRegistered: true,
+      gstAccountingBasis: "ACCRUAL",
+      basFrequency: "QUARTERLY",
+      financialYearStartMonth: 7,
+      bankAccounts: [{ active: true }],
+      categories: [{ active: true }],
+      people: [{ active: false }]
+    });
+
+    expect(journey.requiredTotalCount).toBe(3);
+    expect(journey.requiredCompleteCount).toBe(3);
+    expect(journey.optionalTotalCount).toBe(1);
+    expect(journey.optionalCompleteCount).toBe(0);
+    expect(journey.sections.find((section) => section.id === "people")?.required).toBe(false);
   });
 });

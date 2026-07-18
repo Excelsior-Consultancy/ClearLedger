@@ -16,3 +16,4 @@ next-env.d.ts
 .env.production
 scripts/setup-production-workspace.ts
 tsconfig.tsbuildinfo
+/docs/implementation-plan.md

@@ -1,8 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
-import { Chip } from "@heroui/react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 type QuarterOption = {
   id?: string;
@@ -55,6 +54,7 @@ export function ReportingPeriodSwitcher({
   className
 }: ReportingPeriodSwitcherProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const groupedYears = useMemo(() => buildFinancialYears(quarters), [quarters]);
   const selectedQuarter = quarters.find((quarter) => quarter.id === selectedQuarterId) ?? quarters[0];
@@ -66,7 +66,7 @@ export function ReportingPeriodSwitcher({
 
   function navigateToQuarter(quarterId: string) {
     const params = new URLSearchParams(searchParams.toString());
-    window.location.assign(buildHref(pathname, params, quarterId));
+    router.push(buildHref(pathname, params, quarterId));
   }
 
   return (
@@ -114,11 +114,6 @@ export function ReportingPeriodSwitcher({
           </select>
         </div>
 
-        <div className="sm:ml-auto">
-          <Chip color={selectedQuarter?.locked ? "success" : "warning"} variant="soft" size="sm">
-            {selectedQuarter?.label ?? "Quarter"}
-          </Chip>
-        </div>
       </div>
     </div>
   );

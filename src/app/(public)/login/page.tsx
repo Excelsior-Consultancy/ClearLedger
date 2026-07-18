@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { beginGoogleAuthAction } from "@/app/auth/actions";
+import { getLocalDevAuthBootstrap } from "@/modules/auth/dev-mode";
 import { Button, Card, CardContent } from "@heroui/react";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -12,6 +14,17 @@ export default async function LoginPage({ searchParams }: { searchParams?: Searc
   const params = searchParams ? await searchParams : {};
   const error = single(params.error);
   const invite = single(params.invite);
+  const manual = single(params.manual);
+  const localDevBootstrap = getLocalDevAuthBootstrap();
+
+  if (localDevBootstrap && !invite && !manual) {
+    const searchParams = new URLSearchParams({
+      email: localDevBootstrap.email,
+      name: localDevBootstrap.name,
+      workspaceId: localDevBootstrap.workspaceId
+    });
+    redirect(`/api/dev-auth?${searchParams.toString()}`);
+  }
 
   return (
     <div className="min-h-screen grid place-items-center bg-[radial-gradient(circle_at_top,_#1f2937,_#0f172a_55%,_#020617)] px-4 py-10">
@@ -38,7 +51,7 @@ export default async function LoginPage({ searchParams }: { searchParams?: Searc
 
           <div className="flex items-center justify-between text-sm">
             <Link href="/signup" className="text-blue-700 hover:underline">Create first company</Link>
-            <span className="text-zinc-500">Google only for now</span>
+            <span className="text-zinc-500">{localDevBootstrap ? "Local auto-login enabled" : "Google only for now"}</span>
           </div>
         </CardContent>
       </Card>

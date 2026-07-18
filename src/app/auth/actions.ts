@@ -18,13 +18,15 @@ import {
   normalizeEmail
 } from "@/modules/auth/service";
 import { prisma } from "@/modules/db/prisma";
+import { withQuarterQuery } from "@/modules/quarters/navigation";
 import {
   GOOGLE_PENDING_INVITE_COOKIE,
   clearPendingGoogleAuth,
   pendingGoogleAuthCookieOptions
 } from "@/modules/auth/google";
 import { getAuthProvider } from "@/modules/auth/provider";
-import { resolveAppOrigin } from "@/modules/shared/appOrigin";
+import { isLocalDevAutoLoginEnabled } from "@/modules/auth/dev-mode";
+import { resolveRequestOrigin } from "@/modules/shared/appOrigin";
 
 function text(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -39,18 +41,7 @@ function roleFromString(value: string) {
 
 async function getRequestOrigin() {
   const headerStore = await headers();
-  const origin = headerStore.get("origin");
-  if (origin) {
-    return origin;
-  }
-
-  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
-  const protocol = headerStore.get("x-forwarded-proto") ?? (process.env.NODE_ENV === "production" ? "https" : "http");
-  if (host) {
-    return `${protocol}://${host}`;
-  }
-
-  return resolveAppOrigin();
+  return resolveRequestOrigin({ headers: headerStore });
 }
 
 export async function beginGoogleAuthAction(formData: FormData) {
@@ -128,7 +119,7 @@ export async function signOutAction() {
   store.delete("clearledger_dev_identity");
   store.delete("clearledger_workspace");
   await clearPendingGoogleAuth(store);
-  redirect("/login");
+  redirect(isLocalDevAutoLoginEnabled() ? "/login?manual=1" : "/login");
 }
 
 export async function selectWorkspaceAction(formData: FormData) {
@@ -138,6 +129,7 @@ export async function selectWorkspaceAction(formData: FormData) {
   }
 
   const workspaceId = text(formData, "workspaceId");
+  const quarterId = text(formData, "quarterId") || null;
   if (!workspaceId || !context.memberships.some((membership) => membership.workspaceId === workspaceId)) {
     redirect("/");
   }
@@ -148,7 +140,7 @@ export async function selectWorkspaceAction(formData: FormData) {
   revalidatePath("/income");
   revalidatePath("/admin/setup");
   revalidatePath("/admin/users");
-  redirect("/");
+  redirect(withQuarterQuery("/", quarterId));
 }
 
 export async function createInviteAction(formData: FormData) {

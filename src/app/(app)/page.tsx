@@ -1,21 +1,19 @@
-import { addReviewCommentAction } from "@/app/auth/actions";
-import { canComment, getRoleLabel, getWorkspaceAccess, listReviewComments } from "@/modules/auth/service";
+import Link from "next/link";
+import { Button, Card, CardContent, Chip } from "@heroui/react";
+import { getRoleLabel, getWorkspaceAccess } from "@/modules/auth/service";
 import { buildBasReport } from "@/modules/bas/report";
 import { buildDashboardIssues } from "@/modules/dashboard/summary";
 import { getExpenseWorkspace } from "@/modules/expenses/service";
 import { buildCaPackReadiness } from "@/modules/exports/caPack";
 import { getInvoiceWorkspace } from "@/modules/income/invoiceRecords";
 import { getPayrollWorkspace } from "@/modules/payroll/service";
-import { enrichPayRun } from "@/modules/payroll/summary";
 import { summarizePayroll } from "@/modules/payroll/summary";
 import { getWorkspaceQuarterContext } from "@/modules/quarters/service";
 import { ReportingPeriodSwitcher } from "@/components/ReportingPeriodSwitcher";
 import { withQuarterQuery } from "@/modules/quarters/navigation";
 import { getPrimaryWorkspaceSetup } from "@/modules/setup/service";
 import { formatMoney } from "@/modules/shared/money";
-import type { StatusSeverity } from "@/modules/shared/types";
-import { Button, Card, CardContent, Chip } from "@heroui/react";
-import Link from "next/link";
+import type { StatusSeverity, Workspace } from "@/modules/shared/types";
 import { toBasFilingBasis } from "@/modules/company/profile";
 
 export const dynamic = "force-dynamic";
@@ -33,138 +31,123 @@ function severityColor(severity: StatusSeverity): "danger" | "warning" | "succes
   return "accent";
 }
 
-function KpiCard({ title, value, chip }: { title: string; value: string; chip?: React.ReactNode }) {
-  return (
-    <Card>
-      <CardContent className="p-4">
-        <p className="text-xs text-zinc-500 mb-1">{title}</p>
-        <p className="text-xl font-bold text-zinc-900">{value}</p>
-        {chip && <div className="mt-2">{chip}</div>}
-      </CardContent>
-    </Card>
-  );
+function summaryTone(count: number): "danger" | "warning" | "success" {
+  if (count > 0) return "warning";
+  return "success";
 }
 
-function SectionHeader({ title }: { title: string }) {
-  return <h2 className="text-base font-semibold text-zinc-800 mb-3">{title}</h2>;
+function statusTone(value: "blocked" | "draft" | "final" | "ready" | "not_ready" | "complete" | "incomplete") {
+  if (value === "blocked" || value === "incomplete" || value === "not_ready") return "danger";
+  if (value === "draft" || value === "ready") return "warning";
+  return "success";
 }
 
-function BASSourceCard({
-  title,
-  total,
-  records
+function StatCard({
+  label,
+  value,
+  note,
+  tone = "success"
 }: {
-  title: string;
-  total: number;
-  records: Array<{
-    sourceKind: string;
-    sourceId: string;
-    label: string;
-    date: string;
-    amountCents: number;
-    detail?: string;
-  }>;
+  label: string;
+  value: string;
+  note?: string;
+  tone?: "danger" | "warning" | "success";
 }) {
   return (
     <Card>
       <CardContent className="p-4">
-        <div className="flex items-center justify-between gap-3 mb-3">
-          <div>
-            <p className="text-sm font-medium text-zinc-700">{title}</p>
-            <p className="text-xs text-zinc-500">
-              {formatMoney(total)} across {records.length} source records
-            </p>
-          </div>
-        </div>
-        <div className="space-y-2">
-          {records.slice(0, 4).map((record) => (
-            <div key={record.sourceId} className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm text-zinc-800">{record.label}</p>
-                <p className="text-sm font-medium text-zinc-900">{formatMoney(record.amountCents)}</p>
-              </div>
-              <div className="mt-1 flex items-center justify-between gap-3 text-[11px] text-zinc-500">
-                <span>{record.date}</span>
-                {record.detail && <span>{record.detail}</span>}
-              </div>
-            </div>
-          ))}
-          {!records.length && <p className="text-sm text-zinc-500">No linked source records yet.</p>}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function BASFilingCard({
-  filing
-}: {
-  filing: {
-    basis: "cash" | "accrual" | "not_configured";
-    lines: Array<{
-      code: string;
-      label: string;
-      amountCents: number;
-      sourceGroup: string;
-    }>;
-    readyToFile: boolean;
-    notes: string[];
-  };
-}) {
-  return (
-    <Card className="mt-4 border border-dashed border-zinc-300 bg-zinc-50/70">
-      <CardContent className="p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <div>
-            <p className="text-sm font-medium text-zinc-700">ATO filing summary</p>
-            <p className="text-xs text-zinc-500">Current BAS labels and filing basis status</p>
-          </div>
-          <Chip color={filing.readyToFile ? "success" : "warning"} variant="soft" size="sm">
-            {filing.readyToFile ? "Ready to file" : "Not filing-ready"}
-          </Chip>
-        </div>
-        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-          {filing.lines.map((line) => (
-            <div key={line.code} className="rounded-lg border border-zinc-200 bg-white px-3 py-2">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-xs font-semibold tracking-wide text-zinc-500">{line.code}</p>
-                <p className="text-sm font-semibold text-zinc-900">{formatMoney(line.amountCents)}</p>
-              </div>
-              <p className="mt-1 text-sm text-zinc-800">{line.label}</p>
-              <p className="mt-1 text-[11px] text-zinc-500">From {line.sourceGroup}</p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-zinc-600">
-          <Chip color="default" variant="soft" size="sm">
-            Basis: {filing.basis === "cash" ? "Cash" : filing.basis === "accrual" ? "Accrual" : "Not configured"}
-          </Chip>
-          {filing.notes.map((note) => (
-            <span key={note} className="rounded-full border border-zinc-200 bg-white px-2 py-1">
+        <p className="text-[11px] uppercase tracking-[0.14em] text-zinc-400">{label}</p>
+        <p className="mt-1 text-xl font-semibold text-zinc-900">{value}</p>
+        {note && (
+          <div className="mt-2">
+            <Chip color={tone} variant="soft" size="sm">
               {note}
-            </span>
-          ))}
-        </div>
+            </Chip>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
+}
+
+function formatBasis(value: string | null) {
+  if (value === "cash") return "Cash";
+  if (value === "accrual") return "Accrual";
+  return "Not set";
+}
+
+function formatStateLabel(value: "blocked" | "draft" | "final") {
+  if (value === "blocked") return "Blocked";
+  if (value === "final") return "Final";
+  return "Draft";
+}
+
+function buildPrimaryAction(input: {
+  issues: Array<{ severity: "blocker" | "warning" | "info"; href: string; ctaLabel: string; label: string; detail: string }>;
+  setupComplete: boolean;
+  quarterLocked: boolean;
+  quarterId: string;
+}) {
+  if (!input.setupComplete) {
+    return {
+      title: "Finish company setup",
+      description: "The company profile still has blockers, so BAS and CA Pack work should wait.",
+      href: withQuarterQuery("/admin/setup", input.quarterId),
+      ctaLabel: "Open setup"
+    };
+  }
+
+  const blocker = input.issues.find((issue) => issue.severity === "blocker");
+  if (blocker) {
+    return {
+      title: blocker.label,
+      description: blocker.detail,
+      href: blocker.href,
+      ctaLabel: blocker.ctaLabel
+    };
+  }
+
+  const warning = input.issues.find((issue) => issue.severity === "warning");
+  if (warning) {
+    return {
+      title: warning.label,
+      description: warning.detail,
+      href: warning.href,
+      ctaLabel: warning.ctaLabel
+    };
+  }
+
+  if (!input.quarterLocked) {
+    return {
+      title: "Lock the quarter when ready",
+      description: "No blockers remain. Locking the quarter creates the reporting snapshot used by BAS and CA Pack.",
+      href: withQuarterQuery("/admin/setup", input.quarterId),
+      ctaLabel: "Open setup"
+    };
+  }
+
+  return {
+    title: "Quarter is ready",
+    description: "The current quarter is clean and ready for BAS and CA Pack work.",
+    href: withQuarterQuery("/admin/setup", input.quarterId),
+    ctaLabel: "Review setup"
+  };
 }
 
 export default async function Home({ searchParams }: { searchParams?: SearchParams }) {
   const params = (await searchParams) ?? {};
   const quarterId = single(params.quarterId);
+
   const access = await getWorkspaceAccess();
   const setup = await getPrimaryWorkspaceSetup();
   const quarterContext = await getWorkspaceQuarterContext(access.workspaceId, quarterId);
   const selectedQuarterId = quarterContext.selectedQuarterId;
+  const selectedQuarter = quarterContext.selectedQuarter;
   const expenseWorkspace = await getExpenseWorkspace("all", selectedQuarterId);
   const invoiceWorkspace = await getInvoiceWorkspace({}, selectedQuarterId);
   const payrollWorkspace = await getPayrollWorkspace(selectedQuarterId);
-  const comments = await listReviewComments(access.workspaceId, "quarter", expenseWorkspace.quarter.label);
-  const workspaceName = setup.workspace.name || expenseWorkspace.workspaceName;
-  const expenses = expenseWorkspace.expenses;
-  const invoiceRows = invoiceWorkspace.invoices;
-  const payRunsWithValidation = payrollWorkspace.payRuns.map(enrichPayRun);
+  const workspaceName = setup.workspace.name?.trim() || expenseWorkspace.workspaceName;
+
   const incomeSummary = {
     grossIncomeCents: invoiceWorkspace.summary.grossIncomeCents,
     gstCollectedCents: invoiceWorkspace.summary.gstCollectedCents,
@@ -177,7 +160,7 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
   const expenseSummary = expenseWorkspace.summary;
   const basReport = buildBasReport({
     basis: toBasFilingBasis(setup.workspace.gstAccountingBasis),
-    quarter: expenseWorkspace.quarter,
+    quarter: selectedQuarter,
     invoices: invoiceWorkspace.invoices.map((invoice) => ({
       id: invoice.id,
       workspaceId: invoice.workspaceId,
@@ -189,409 +172,388 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
       gstTreatment: invoice.gstTreatment,
       paid: invoice.paymentState === "paid"
     })),
-    expenses,
-    payRuns: payrollWorkspace.payRuns,
+    expenses: expenseWorkspace.expenses,
+    payRuns: payrollWorkspace.payRuns
   });
   const caPack = buildCaPackReadiness({
     bas: basReport,
     income: incomeSummary,
     expenses: expenseSummary,
-    payroll: payrollSummary,
+    payroll: payrollSummary
   });
   const dashboardWorkspace = {
     ...setup.workspace,
     setupComplete: setup.readiness.complete
-  } as any;
+  } as unknown as Workspace;
   const dashboardIssues = buildDashboardIssues({
     workspace: dashboardWorkspace,
     bas: basReport,
     income: incomeSummary,
     expenses: expenseSummary,
     payroll: payrollSummary,
+    quarterId: selectedQuarterId
   });
 
+  const setupReady = setup.readiness.complete;
+  const basReady = setupReady && basReport.filing.readyToFile;
+  const caPackReady = caPack.state === "final";
+  const primaryAction = buildPrimaryAction({
+    issues: dashboardIssues,
+    setupComplete: setupReady,
+    quarterLocked: selectedQuarter.locked,
+    quarterId: selectedQuarterId
+  });
+  const quickActions = dashboardIssues
+    .map((issue) => ({
+      label: issue.ctaLabel,
+      href: issue.href,
+      severity: issue.severity
+    }))
+    .filter((action, index, actions) => actions.findIndex((candidate) => candidate.href === action.href) === index)
+    .filter((action) => action.href !== primaryAction.href)
+    .slice(0, 2);
+  const totalIssues = dashboardIssues.length;
+  const blockerCount = dashboardIssues.filter((issue) => issue.severity === "blocker").length;
+  const warningCount = dashboardIssues.filter((issue) => issue.severity === "warning").length;
+
+  const readinessLabel = basReady
+    ? "Ready for BAS"
+    : setupReady
+      ? "Needs review before BAS"
+      : "Setup blocked";
+  const readinessTone = basReady ? "success" : setupReady ? "warning" : "danger";
+  const quarterSummaryLabel = selectedQuarter.locked ? "Locked quarter" : "Open quarter";
+
   return (
-    <>
-      {/* Top bar */}
-      <header className="sticky top-0 z-10 flex flex-col gap-3 border-b border-zinc-200 bg-white px-4 py-4 sm:flex-row sm:items-center sm:px-6">
-        <select className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 sm:w-auto">
-          <option>{workspaceName}</option>
-        </select>
-        <input
-          className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm sm:ml-auto sm:w-56"
-          placeholder="Search source records"
-          aria-label="Search"
-        />
-        <Chip color="accent" variant="soft" size="sm">{getRoleLabel(access.role)}</Chip>
-      </header>
+    <div className="space-y-6 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <ReportingPeriodSwitcher quarters={quarterContext.quarters} selectedQuarterId={selectedQuarterId} />
 
-      <div className="space-y-8 px-4 py-4 sm:px-6 lg:px-8">
-        <ReportingPeriodSwitcher
-          quarters={quarterContext.quarters}
-          selectedQuarterId={selectedQuarterId}
-          className="mb-2"
-        />
+      <section className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm" data-testid="dashboard-section">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <Chip color="accent" variant="soft" size="sm">
+                Quarter control centre
+              </Chip>
+              <Chip color={selectedQuarter.locked ? "success" : "warning"} variant="soft" size="sm">
+                {quarterSummaryLabel}
+              </Chip>
+              <Chip color={setupReady ? "success" : "danger"} variant="soft" size="sm">
+                {setupReady ? "Setup ready" : "Setup incomplete"}
+              </Chip>
+            </div>
+            <div className="space-y-1">
+              <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Dashboard</h1>
+              <p className="text-sm text-zinc-500">
+                {workspaceName} · {selectedQuarter.label} · {getRoleLabel(access.role)}
+              </p>
+            </div>
+            <p className="max-w-3xl text-sm text-zinc-600">
+              This page stays focused on the current quarter: what is blocked, what needs attention, what to do next,
+              and whether the quarter is ready for BAS and CA Pack work.
+            </p>
+          </div>
 
-        {/* Page header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-zinc-900">Dashboard</h1>
-            <p className="text-sm text-zinc-500 mt-0.5">BAS readiness cockpit for {workspaceName}</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link href={withQuarterQuery("/expenses", selectedQuarterId)}><Button variant="primary" size="sm">Add expense</Button></Link>
-            <Link href="#bas"><Button variant="outline" size="sm">Review BAS</Button></Link>
-            <Link href="#ca-pack"><Button variant="outline" size="sm">Prepare CA Pack</Button></Link>
-          </div>
-        </div>
-
-        {/* KAN-6 Dashboard */}
-        <section id="dashboard" data-testid="dashboard-section">
-          <SectionHeader title="Overview" />
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <KpiCard title="BAS estimate" value={formatMoney(basReport.netGstCents)} />
-            <KpiCard
-              title="Quarter status"
-              value={expenseWorkspace.quarter.locked ? "Locked" : "Draft"}
-              chip={<Chip color={expenseWorkspace.quarter.locked ? "success" : "warning"} variant="soft" size="sm">{expenseWorkspace.quarter.locked ? "final" : "draft"}</Chip>}
-            />
-            <KpiCard
-              title="Ready for CA"
-              value={caPack.state === "blocked" ? "Blocked" : caPack.state === "final" ? "Final" : "Draft"}
-              chip={<Chip color={caPack.state === "blocked" ? "danger" : caPack.state === "final" ? "success" : "warning"} variant="soft" size="sm">{caPack.state}</Chip>}
-            />
-            <KpiCard title="Last updated" value="Today" />
-          </div>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {dashboardIssues.map((issue) => (
-              <Card key={issue.label}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-medium text-zinc-800">{issue.label}</p>
-                    <Chip color={severityColor(issue.severity)} variant="soft" size="sm">{issue.severity}</Chip>
-                  </div>
-                  <p className="text-xs text-zinc-500">→ {issue.destination}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* KAN-8 Admin */}
-        <section id="admin" data-testid="admin-section">
-          <SectionHeader title="Admin / Company setup" />
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.6fr)]">
-            <Card>
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm font-medium text-zinc-700">Company profile</p>
-                  <Chip color={setup.readiness.complete ? "success" : "danger"} variant="soft" size="sm">
-                    {setup.readiness.complete ? "Setup ready" : "Setup incomplete"}
-                  </Chip>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {[["Company name", workspaceName], ["GST basis", setup.workspace.gstAccountingBasis === "accrual" ? "Accrual" : setup.workspace.gstAccountingBasis === "cash" ? "Cash" : "Not set"], ["BAS frequency", setup.workspace.basFrequency ?? "Quarterly"]].map(([label, value]) => (
-                    <div key={label}>
-                      <p className="text-xs text-zinc-400 mb-0.5">{label}</p>
-                      <p className="text-sm text-zinc-800">{value}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-5 flex flex-col gap-3">
-                <div className={`rounded-lg p-3 text-sm ${setup.readiness.complete ? "bg-blue-50 text-blue-800" : "bg-red-50 text-red-800"}`}>
-                  {setup.readiness.complete
-                    ? "Bank accounts, people, and categories are available."
-                    : setup.readiness.blockers.join(" ")}
-                </div>
-                <Link href={withQuarterQuery("/admin/setup", selectedQuarterId)}>
-                  <Button variant="primary" size="sm" className="w-full">Open full setup</Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* KAN-3 Expenses */}
-        <section id="expenses" data-testid="expenses-section">
-          <SectionHeader title="Expenses" />
-          <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <KpiCard title="Total expenses" value={formatMoney(expenseSummary.totalExpensesCents)} />
-            <KpiCard title="GST paid" value={formatMoney(expenseSummary.gstPaidCents)} />
-            <KpiCard title="Missing receipts" value={String(expenseSummary.missingReceipts)} chip={<Chip color="warning" variant="soft" size="sm">Warning only</Chip>} />
-            <KpiCard title="Manual GST overrides" value={String(expenseSummary.manualOverrides)} chip={<Chip color="warning" variant="soft" size="sm">Traceable</Chip>} />
-          </div>
-          <Card>
-            <CardContent className="p-0">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100">
-                <p className="text-sm font-medium text-zinc-700">Source expenses</p>
-                <Chip color="accent" variant="soft" size="sm">{expenses.length} shown</Chip>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-zinc-100">
-                      {["Date", "Supplier", "Category", "Gross", "GST", "Status"].map((h) => (
-                        <th key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-2.5">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-50">
-                    {expenses.map((expense) => {
-                      const hasBlocker = expense.issues.some((i) => i.severity === "blocker");
-                      const hasIssue = expense.issues.length > 0;
-                      return (
-                        <tr key={expense.id} className="hover:bg-zinc-50">
-                          <td className="px-4 py-3 text-zinc-600">{expense.date}</td>
-                          <td className="px-4 py-3 text-zinc-800">{expense.supplier ?? "Not supplied"}</td>
-                          <td className="px-4 py-3 text-zinc-600">{expense.categoryName}</td>
-                          <td className="px-4 py-3 text-zinc-800 font-medium">{formatMoney(expense.grossCents)}</td>
-                          <td className="px-4 py-3 text-zinc-600">{formatMoney(expense.gstCents)}</td>
-                          <td className="px-4 py-3">
-                            {hasBlocker ? <Chip color="danger" variant="soft" size="sm">Blocker</Chip>
-                              : hasIssue ? <Chip color="warning" variant="soft" size="sm">Warning</Chip>
-                              : <Chip color="success" variant="soft" size="sm">Valid</Chip>}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              <div className="px-4 py-3 border-t border-zinc-100">
-                <Link href={withQuarterQuery("/expenses", selectedQuarterId)}><Button variant="outline" size="sm">View all expenses →</Button></Link>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-
-        {/* KAN-2 Income */}
-        <section id="income" data-testid="income-section">
-          <SectionHeader title="Income" />
-          <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <KpiCard title="GST collected" value={formatMoney(incomeSummary.gstCollectedCents)} />
-            <KpiCard title="Paid invoices" value={String(incomeSummary.paidInvoices)} />
-            <KpiCard title="Unpaid invoices" value={String(incomeSummary.unpaidInvoices)} chip={<Chip color="warning" variant="soft" size="sm">Needs attention</Chip>} />
-            <KpiCard title="Draft invoices" value={String(incomeSummary.draftInvoices)} />
-          </div>
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-zinc-100">
-                      {["Invoice #", "Date", "Client", "Gross", "GST", "Status"].map((h) => (
-                        <th key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-2.5">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-50">
-                    {invoiceRows.map((invoice) => (
-                      <tr key={invoice.id} className="hover:bg-zinc-50">
-                        <td className="px-4 py-3 font-mono text-xs text-zinc-600">{invoice.invoiceNumber}</td>
-                        <td className="px-4 py-3 text-zinc-600">{invoice.issueDate}</td>
-                        <td className="px-4 py-3 text-zinc-800">{invoice.clientName}</td>
-                        <td className="px-4 py-3 text-zinc-800 font-medium">{formatMoney(invoice.grossCents)}</td>
-                        <td className="px-4 py-3 text-zinc-600">{formatMoney(invoice.gstCents)}</td>
-                        <td className="px-4 py-3">
-                          <Chip color={invoice.paymentState === "paid" ? "success" : "warning"} variant="soft" size="sm">
-                            {invoice.paymentState === "paid" ? "Paid" : "Unpaid"}
-                          </Chip>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-
-        {/* KAN-4 Payroll Lite */}
-        <section id="payroll-lite" data-testid="payroll-lite-section">
-          <SectionHeader title="Payroll Lite" />
-          <div className="rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800 mb-4">
-            <strong>External lodgement note</strong> — STP lodgement and super clearing/payment remain external in MVP.
-          </div>
-          <div className="flex justify-end mb-3">
-            <Link href={withQuarterQuery("/payroll", selectedQuarterId)}>
-              <Button variant="outline" size="sm">Open payroll workspace</Button>
+          <div className="flex flex-wrap gap-2 lg:justify-end">
+            <Link href={withQuarterQuery("/admin/setup", selectedQuarterId)}>
+              <Button variant="outline" size="sm">
+                Open setup
+              </Button>
+            </Link>
+            <Link href={withQuarterQuery("/expenses", selectedQuarterId)}>
+              <Button variant="outline" size="sm">
+                Open expenses
+              </Button>
+            </Link>
+            <Link href={withQuarterQuery("/income", selectedQuarterId)}>
+              <Button variant="outline" size="sm">
+                Open income
+              </Button>
             </Link>
           </div>
-          <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <KpiCard title="Wages this quarter" value={formatMoney(payrollSummary.wagesCents)} />
-            <KpiCard title="PAYG withholding" value={formatMoney(payrollSummary.paygCents)} />
-            <KpiCard title="Super accrued" value={formatMoney(payrollSummary.superCents)} />
-            <KpiCard title="Draft pay runs" value={String(payrollSummary.draftPayRuns + payrollSummary.readyForReviewPayRuns)} chip={<Chip color="warning" variant="soft" size="sm">Payroll due</Chip>} />
-          </div>
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-zinc-100">
-                      {["Employee", "Pay date", "Gross", "PAYG", "Super", "Status"].map((h) => (
-                        <th key={h} className="text-left text-xs font-semibold text-zinc-400 px-4 py-2.5">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-50">
-                    {payRunsWithValidation.map((payRun) => (
-                      <tr key={payRun.id} className="hover:bg-zinc-50">
-                        <td className="px-4 py-3 text-zinc-800">{payRun.employeeName}</td>
-                        <td className="px-4 py-3 text-zinc-600">{payRun.payDate}</td>
-                        <td className="px-4 py-3 font-medium text-zinc-800">{formatMoney(payRun.calculatedGrossCents)}</td>
-                        <td className="px-4 py-3 text-zinc-600">{formatMoney(payRun.paygCents)}</td>
-                        <td className="px-4 py-3 text-zinc-600">{formatMoney(payRun.superCents)}</td>
-                        <td className="px-4 py-3">
-                          <Chip color={payRun.finalized ? "success" : "warning"} variant="soft" size="sm">
-                            {payRun.status ?? (payRun.finalized ? "Finalized" : "Draft")}
-                          </Chip>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+        </div>
+      </section>
+
+      <div
+        className={`rounded-2xl border px-4 py-3 text-sm ${
+          blockerCount > 0
+            ? "border-red-200 bg-red-50 text-red-900"
+            : warningCount > 0
+              ? "border-amber-200 bg-amber-50 text-amber-900"
+              : "border-emerald-200 bg-emerald-50 text-emerald-900"
+        }`}
+        role="status"
+        data-testid="dashboard-status"
+      >
+        <strong className="mr-2">
+          {blockerCount > 0
+            ? `${blockerCount} blocker${blockerCount === 1 ? "" : "s"} remain`
+            : warningCount > 0
+              ? `${warningCount} warning${warningCount === 1 ? "" : "s"} need review`
+              : "No blockers remain"}
+        </strong>
+        <span>
+          {blockerCount > 0
+            ? "Fix blockers before treating the quarter as BAS or CA Pack ready."
+            : warningCount > 0
+              ? "Warnings are traceable and should be reviewed before locking the quarter."
+              : "The quarter is clean enough to move toward lock and export."}
+        </span>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_360px]">
+        <Card data-testid="dashboard-issues">
+          <CardContent className="p-5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-base font-semibold text-zinc-900">What needs attention</h2>
+                <p className="text-sm text-zinc-500">
+                  Blockers appear first, warnings second. Each item opens an existing workflow.
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </section>
+              <Chip color={totalIssues > 0 ? "warning" : "success"} variant="soft" size="sm">
+                {totalIssues > 0 ? `${totalIssues} issue${totalIssues === 1 ? "" : "s"}` : "No issues"}
+              </Chip>
+            </div>
 
-        {/* KAN-5 BAS */}
-        <section id="bas" data-testid="bas-section">
-          <SectionHeader title="BAS Quarter Reporting" />
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            <KpiCard title="GST collected" value={formatMoney(basReport.gstCollectedCents)} chip={<p className="text-xs text-zinc-400">Income source records</p>} />
-            <KpiCard title="GST paid" value={formatMoney(basReport.gstPaidCents)} chip={<p className="text-xs text-zinc-400">Expense source records</p>} />
-            <KpiCard title="Net GST" value={formatMoney(basReport.netGstCents)} />
-            <KpiCard title="PAYG withholding" value={formatMoney(basReport.paygWithholdingCents)} chip={<p className="text-xs text-zinc-400">Payroll source records</p>} />
-            <KpiCard title="Wages" value={formatMoney(basReport.wagesCents)} />
-            <KpiCard title="Super" value={formatMoney(basReport.superCents)} />
-          </div>
-          <div className="grid gap-3 lg:grid-cols-2 mt-4">
-            <BASSourceCard
-              title="GST collected links"
-              total={basReport.sources.gstCollected.totalCents}
-              records={basReport.sources.gstCollected.records}
-            />
-            <BASSourceCard
-              title="GST paid links"
-              total={basReport.sources.gstPaid.totalCents}
-              records={basReport.sources.gstPaid.records}
-            />
-            <BASSourceCard
-              title="PAYG withholding links"
-              total={basReport.sources.paygWithholding.totalCents}
-              records={basReport.sources.paygWithholding.records}
-            />
-            <BASSourceCard
-              title="Super links"
-              total={basReport.sources.super.totalCents}
-              records={basReport.sources.super.records}
-            />
-          </div>
-          <BASFilingCard filing={basReport.filing} />
-        </section>
-
-        {/* KAN-7 CA Pack */}
-        <section id="ca-pack" data-testid="ca-pack-section">
-          <SectionHeader title="CA Pack Export" />
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,0.9fr)]">
-            <Card>
-              <CardContent className="p-5">
-                <div className={`rounded-lg p-3 text-sm mb-4 ${caPack.state === "blocked" ? "bg-red-50 border border-red-200 text-red-800" : "bg-amber-50 border border-amber-200 text-amber-800"}`}>
-                  <strong>{caPack.state === "blocked" ? "Export blocked" : "Draft export"}</strong>
-                  {" — "}{expenseWorkspace.quarter.locked ? "Quarter is locked." : "Quarter is unlocked. Warnings included in CA Pack notes."}
-                </div>
-                <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                  {caPack.sections.map((section) => (
-                    <div key={section} className="rounded-md bg-zinc-50 border border-zinc-200 px-3 py-2">
-                      <p className="text-xs font-medium text-zinc-600">{section}</p>
-                      <p className="text-xs text-zinc-400">Included</p>
+            <div className="mt-4 space-y-3">
+              {dashboardIssues.length ? (
+                dashboardIssues.map((issue) => (
+                  <div key={issue.label} className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-medium text-zinc-900">{issue.label}</p>
+                          <Chip color={severityColor(issue.severity)} variant="soft" size="sm">
+                            {issue.severity}
+                          </Chip>
+                        </div>
+                        <p className="text-sm text-zinc-600">{issue.detail}</p>
+                        <p className="text-xs text-zinc-400">Opens {issue.destination}</p>
+                      </div>
+                      <Link href={issue.href}>
+                        <Button variant="outline" size="sm">
+                          {issue.ctaLabel}
+                        </Button>
+                      </Link>
                     </div>
-                  ))}
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+                  This quarter has no blockers or warnings. Keep working the current quarter or lock it in setup when
+                  ready.
                 </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-5 flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-zinc-700">Export readiness</p>
-                  <Chip color={caPack.state === "blocked" ? "danger" : "warning"} variant="soft" size="sm">{caPack.state}</Chip>
-                </div>
-                {caPack.warnings.map((warning) => (
-                  <Chip key={warning} color="warning" variant="soft" size="sm">{warning}</Chip>
-                ))}
-                <button
-                  className="w-full rounded-lg bg-zinc-900 text-white text-sm font-medium px-4 py-2 hover:bg-zinc-700 transition-colors"
-                  type="button"
-                >
-                  Download draft Excel
-                </button>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* KAN-9 Comments */}
-        <section id="comments" data-testid="comments-section">
-          <SectionHeader title="Quarter review comments" />
-          <Card>
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between gap-4 mb-4">
+        <Card data-testid="dashboard-next-action">
+          <CardContent className="p-5">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium text-zinc-700">Comments for {expenseWorkspace.quarter.label}</p>
-                  <p className="text-sm text-zinc-500">Accountants and editors can leave notes for quarter review.</p>
+                  <h2 className="text-base font-semibold text-zinc-900">What should I do next</h2>
+                  <p className="text-sm text-zinc-500">One clear action, then two quick shortcuts.</p>
                 </div>
-                <Chip color={canComment(access.role) ? "success" : "default"} variant="soft" size="sm">
-                  {canComment(access.role) ? "Commenting enabled" : "View only"}
+                <Chip color={statusTone(
+                  setupReady ? (selectedQuarter.locked ? "final" : "draft") : "blocked"
+                )} variant="soft" size="sm">
+                  {readinessLabel}
                 </Chip>
               </div>
 
-              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-                <div className="space-y-3">
-                  {comments.length === 0 ? (
-                    <p className="text-sm text-zinc-500">No comments yet.</p>
-                  ) : (
-                    comments.map((comment) => (
-                      <div key={comment.id} className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-zinc-900">{comment.author.name}</p>
-                          <p className="text-xs text-zinc-400">{comment.createdAt.toISOString().slice(0, 10)}</p>
-                        </div>
-                        <p className="mt-2 text-sm text-zinc-700 whitespace-pre-wrap">{comment.body}</p>
-                      </div>
-                    ))
-                  )}
+              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+                <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">Primary action</p>
+                <h3 className="mt-2 text-lg font-semibold text-zinc-900">{primaryAction.title}</h3>
+                <p className="mt-2 text-sm text-zinc-600">{primaryAction.description}</p>
+                <div className="mt-4">
+                  <Link href={primaryAction.href} data-testid="dashboard-primary-action">
+                    <Button variant="primary" size="sm">
+                      {primaryAction.ctaLabel}
+                    </Button>
+                  </Link>
                 </div>
+              </div>
 
-                <div className="rounded-xl border border-zinc-200 bg-white p-4">
-                  <h3 className="text-sm font-semibold text-zinc-800 mb-3">Add comment</h3>
-                  {canComment(access.role) ? (
-                    <form action={addReviewCommentAction} className="space-y-3">
-                      <input type="hidden" name="targetType" value="quarter" />
-                      <input type="hidden" name="targetId" value={expenseWorkspace.quarter.label} />
-                      <textarea
-                        name="body"
-                        rows={5}
-                        placeholder="Leave a note for quarter review..."
-                        className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm resize-none"
-                      />
-                      <Button type="submit" variant="primary" size="sm" className="w-full">
-                        Post comment
-                      </Button>
-                    </form>
+              <div className="space-y-2">
+                <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">Quick shortcuts</p>
+                <div className="flex flex-wrap gap-2">
+                  {quickActions.length ? (
+                    quickActions.map((action) => (
+                      <Link key={action.href} href={action.href}>
+                        <Chip
+                          color={action.severity === "blocker" ? "danger" : "warning"}
+                          variant="soft"
+                          size="sm"
+                        >
+                          {action.label}
+                        </Chip>
+                      </Link>
+                    ))
                   ) : (
-                    <p className="text-sm text-zinc-500">You can view comments, but only accountants and editors can add them.</p>
+                    <>
+                      <Link href={withQuarterQuery("/admin/setup", selectedQuarterId)}>
+                        <Chip color="accent" variant="soft" size="sm">
+                          Open setup
+                        </Chip>
+                      </Link>
+                      <Link href={withQuarterQuery("/expenses", selectedQuarterId)}>
+                        <Chip color="accent" variant="soft" size="sm">
+                          Open expenses
+                        </Chip>
+                      </Link>
+                    </>
                   )}
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </section>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </>
+
+      <Card data-testid="dashboard-readiness">
+        <CardContent className="p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-base font-semibold text-zinc-900">Quarter readiness</h2>
+              <p className="text-sm text-zinc-500">
+                BAS and CA Pack status is derived from invoices, expenses, pay runs, and setup data already in the app.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Chip color={basReady ? "success" : "warning"} variant="soft" size="sm">
+                BAS {basReady ? "ready" : "not ready"}
+              </Chip>
+              <Chip color={caPackReady ? "success" : caPack.state === "blocked" ? "danger" : "warning"} variant="soft" size="sm">
+                CA Pack {formatStateLabel(caPack.state)}
+              </Chip>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <StatCard
+              label="Setup"
+              value={setupReady ? "Complete" : "Incomplete"}
+              note={setupReady ? "Company profile is usable" : "Resolve setup blockers"}
+              tone={setupReady ? "success" : "danger"}
+            />
+            <StatCard
+              label="BAS filing basis"
+              value={formatBasis(setup.workspace.gstAccountingBasis)}
+              note={basReport.filing.readyToFile ? "Source-backed" : "Needs review"}
+              tone={basReport.filing.readyToFile ? "success" : "warning"}
+            />
+            <StatCard
+              label="Quarter state"
+              value={selectedQuarter.locked ? "Locked" : "Open"}
+              note={selectedQuarter.locked ? "Snapshot ready" : "Still editable"}
+              tone={selectedQuarter.locked ? "success" : "warning"}
+            />
+          </div>
+
+          <div className="mt-4 grid gap-3 xl:grid-cols-2">
+            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4" data-testid="bas-section">
+              <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">BAS traceability</p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <div>
+                  <p className="text-sm text-zinc-500">GST collected</p>
+                  <p className="text-base font-semibold text-zinc-900">{formatMoney(basReport.gstCollectedCents)}</p>
+                  <p className="text-xs text-zinc-400">{basReport.sources.gstCollected.records.length} source records</p>
+                </div>
+                <div>
+                  <p className="text-sm text-zinc-500">GST paid</p>
+                  <p className="text-base font-semibold text-zinc-900">{formatMoney(basReport.gstPaidCents)}</p>
+                  <p className="text-xs text-zinc-400">{basReport.sources.gstPaid.records.length} source records</p>
+                </div>
+                <div>
+                  <p className="text-sm text-zinc-500">PAYG withholding</p>
+                  <p className="text-base font-semibold text-zinc-900">{formatMoney(basReport.paygWithholdingCents)}</p>
+                  <p className="text-xs text-zinc-400">{basReport.sources.paygWithholding.records.length} source records</p>
+                </div>
+                <div>
+                  <p className="text-sm text-zinc-500">Wages</p>
+                  <p className="text-base font-semibold text-zinc-900">{formatMoney(basReport.wagesCents)}</p>
+                  <p className="text-xs text-zinc-400">{basReport.sources.wages.records.length} source records</p>
+                </div>
+              </div>
+              <p className="mt-3 text-xs text-zinc-500">
+                BAS numbers are traceable to invoice, expense, and payroll source rows. Super is tracked separately for
+                reporting and does not map to a BAS label.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+              <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">CA Pack readiness</p>
+              <div className="mt-3 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm text-zinc-600">State</span>
+                  <Chip color={caPack.state === "blocked" ? "danger" : caPack.state === "final" ? "success" : "warning"} variant="soft" size="sm">
+                    {formatStateLabel(caPack.state)}
+                  </Chip>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm text-zinc-600">Blockers</span>
+                  <span className="text-sm font-medium text-zinc-900">{caPack.blockers.length}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm text-zinc-600">Warnings</span>
+                  <span className="text-sm font-medium text-zinc-900">{caPack.warnings.length}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm text-zinc-600">Invoice status</span>
+                  <span className="text-sm font-medium text-zinc-900">
+                    {incomeSummary.unpaidInvoices} unpaid
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm text-zinc-600">Expense evidence</span>
+                  <span className="text-sm font-medium text-zinc-900">
+                    {expenseSummary.missingReceipts} missing receipts
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm text-zinc-600">Payroll review</span>
+                  <span className="text-sm font-medium text-zinc-900">
+                    {payrollSummary.draftPayRuns + payrollSummary.readyForReviewPayRuns} runs pending
+                  </span>
+                </div>
+              </div>
+              <p className="mt-3 text-xs text-zinc-500">
+                CA Pack readiness stays grounded in the same source records and quarter state that drive the dashboard.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <section className="grid gap-4 md:grid-cols-4" data-testid="dashboard-metrics">
+        <StatCard
+          label="Income collected"
+          value={formatMoney(incomeSummary.grossIncomeCents)}
+          note={`${incomeSummary.unpaidInvoices} unpaid invoices`}
+          tone={summaryTone(incomeSummary.unpaidInvoices)}
+        />
+        <StatCard
+          label="Expenses captured"
+          value={formatMoney(expenseSummary.totalExpensesCents)}
+          note={`${expenseSummary.missingReceipts} missing receipts`}
+          tone={summaryTone(expenseSummary.missingReceipts)}
+        />
+        <StatCard
+          label="Net GST"
+          value={formatMoney(basReport.netGstCents)}
+          note={basReady ? "Ready to review" : "Needs review"}
+          tone={basReady ? "success" : "warning"}
+        />
+        <StatCard
+          label="Payroll wages"
+          value={formatMoney(payrollSummary.wagesCents)}
+          note={`${payrollSummary.draftPayRuns + payrollSummary.readyForReviewPayRuns} runs pending`}
+          tone={summaryTone(payrollSummary.draftPayRuns + payrollSummary.readyForReviewPayRuns)}
+        />
+      </section>
+    </div>
   );
 }

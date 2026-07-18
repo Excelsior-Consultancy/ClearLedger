@@ -62,6 +62,7 @@ export async function updateCompanySetup(formData: FormData) {
     throw new Error("Only admins can edit company setup.");
   }
   const workspaceId = access.workspaceId;
+  const quarterId = text(formData, "quarterId") || undefined;
   await assertQuarterEditable(workspaceId);
   try {
     await saveWorkspaceProfile(workspaceId, {
@@ -78,13 +79,13 @@ export async function updateCompanySetup(formData: FormData) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to save company profile.";
-    redirect(`/admin/setup?error=${encodeURIComponent(message)}`);
+    redirect(withQuarterQuery(`/admin/setup?error=${encodeURIComponent(message)}`, quarterId));
   }
 
   revalidatePath("/");
   revalidatePath("/admin/setup");
   revalidatePath("/expenses");
-  redirect("/admin/setup?saved=company-profile");
+  redirect(withQuarterQuery("/admin/setup?saved=company-profile", quarterId));
 }
 
 export async function addBankAccount(formData: FormData) {

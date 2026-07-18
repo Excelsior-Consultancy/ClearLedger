@@ -29,7 +29,8 @@ export function getAppModel() {
     bas: basReport,
     income: incomeSummary,
     expenses: expenseSummary,
-    payroll: payrollSummary
+    payroll: payrollSummary,
+    quarterId: currentQuarter.id ?? currentQuarter.startDate
   });
 
   return {

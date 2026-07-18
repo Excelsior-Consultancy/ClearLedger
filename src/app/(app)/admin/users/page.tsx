@@ -16,6 +16,9 @@ import {
 } from "@/app/auth/actions";
 import { Button, Card, CardContent, Chip } from "@heroui/react";
 import { resolveAppOrigin } from "@/modules/shared/appOrigin";
+import { ReportingPeriodSwitcher } from "@/components/ReportingPeriodSwitcher";
+import { getWorkspaceQuarterContext } from "@/modules/quarters/service";
+import { withQuarterQuery } from "@/modules/quarters/navigation";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -48,12 +51,15 @@ const roleOptions: MembershipRole[] = [
 
 export default async function UsersPage({ searchParams }: { searchParams?: SearchParams }) {
   const params = searchParams ? await searchParams : {};
+  const quarterId = single(params.quarterId);
   const inviteLink = single(params.invite);
   const inviteEmail = single(params.email);
   const inviteRole = single(params.role);
   const inviteHref = inviteLink ? new URL(inviteLink, await getRequestOrigin()).toString() : null;
   const access = await getWorkspaceAccess();
   const context = await getAuthContext();
+  const quarterContext = await getWorkspaceQuarterContext(access.workspaceId, quarterId);
+  const selectedQuarterId = quarterContext.selectedQuarterId;
   const memberships = await listWorkspaceUsers(access.workspaceId);
   const invites = await listWorkspaceInvitations(access.workspaceId);
   const canManage = canManageCompany(access.role);
@@ -70,7 +76,7 @@ export default async function UsersPage({ searchParams }: { searchParams?: Searc
                 Only admins can manage company access.
               </p>
             </div>
-            <Link href="/"><Button variant="outline" size="sm">Back to dashboard</Button></Link>
+            <Link href={withQuarterQuery("/", selectedQuarterId)}><Button variant="outline" size="sm">Back to dashboard</Button></Link>
           </CardContent>
         </Card>
       </div>
@@ -79,6 +85,11 @@ export default async function UsersPage({ searchParams }: { searchParams?: Searc
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <ReportingPeriodSwitcher
+        quarters={quarterContext.quarters}
+        selectedQuarterId={selectedQuarterId}
+      />
+
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.18em] text-zinc-400">Company access</p>
@@ -87,7 +98,7 @@ export default async function UsersPage({ searchParams }: { searchParams?: Searc
             Manage who can access this company. Roles are company-level only in the MVP.
           </p>
         </div>
-        <Link href="/"><Button variant="outline" size="sm" className="w-full sm:w-auto">Back to dashboard</Button></Link>
+        <Link href={withQuarterQuery("/", selectedQuarterId)}><Button variant="outline" size="sm" className="w-full sm:w-auto">Back to dashboard</Button></Link>
       </div>
 
       {inviteLink && (

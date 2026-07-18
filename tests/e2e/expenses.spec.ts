@@ -29,7 +29,8 @@ test("KAN-3 saves a valid expense and keeps missing receipts as warnings", async
   await expect(page.getByRole("row", { name: new RegExp(supplier) })).toBeVisible();
 
   await page.goto("/");
-  await expect(page.getByTestId("expenses-section")).toContainText(supplier);
+  await expect(page.getByTestId("dashboard-section")).toBeVisible();
+  await expect(page.getByTestId("dashboard-metrics")).toContainText("Expenses captured");
 });
 
 test("KAN-3 applies GST-free category defaults and excludes out-of-quarter expenses", async ({ page }) => {

@@ -41,6 +41,7 @@ test("creates a new workspace, then keeps the user in onboarding until the profi
 
   await expect(page).toHaveURL(/\/onboarding/);
   await expect(page.getByRole("heading", { name: "Finish company setup" })).toBeVisible();
+  await expect(page.getByText(/financial year start month sets the quarter boundaries/i)).toBeVisible();
 
   await page.locator('input[name="legalName"]').fill(`${workspaceName} Pty Ltd`);
   await page.locator('input[name="contactEmail"]').fill(`accounts-${Date.now()}@example.com`);

@@ -69,7 +69,7 @@ test("calculates BAS from invoices, expenses, payroll, and super in one quarter"
   await createForm.locator('textarea[name="notes"]').fill("Owner salary pay run");
   await createForm.getByRole("button", { name: "Create draft pay run" }).click();
 
-  await expect(page.getByRole("row").filter({ hasText: "Business Owner" })).toBeVisible();
+  await expect(page.getByRole("row", { name: /Business Owner salary/ })).toBeVisible();
 
   await createForm.locator('select[name="personId"]').selectOption({ label: "Sample Employee" });
   await createForm.locator('input[name="periodStart"]').fill("2026-07-01");
@@ -80,7 +80,7 @@ test("calculates BAS from invoices, expenses, payroll, and super in one quarter"
   await createForm.locator('textarea[name="notes"]').fill("Employee hourly pay run");
   await createForm.getByRole("button", { name: "Create draft pay run" }).click();
 
-  await expect(page.getByRole("row").filter({ hasText: "Sample Employee" })).toBeVisible();
+  await expect(page.getByRole("row", { name: /Sample Employee hourly/ })).toBeVisible();
 
   await page.goto(`/?quarterId=${quarterId}`);
 
@@ -90,20 +90,9 @@ test("calculates BAS from invoices, expenses, payroll, and super in one quarter"
   await expect(basSection).toContainText("PAYG withholding");
   await expect(basSection).toContainText("Wages");
   await expect(basSection).toContainText("Super");
-  await expect(basSection).toContainText("Ready to file");
-  await expect(basSection).toContainText("Invoice");
-  await expect(basSection).toContainText(clientName);
-  await expect(basSection).toContainText(expenseSupplier);
-  await expect(basSection).toContainText("Business Owner");
-  await expect(basSection).toContainText("Sample Employee");
-  await expect(basSection).toContainText("$1,100.00");
+  await expect(page.getByTestId("dashboard-next-action")).toContainText("Ready for BAS");
   await expect(basSection).toContainText("$100.00");
   await expect(basSection).toContainText("$30.00");
   await expect(basSection).toContainText("$5,700.00");
   await expect(basSection).toContainText("$1,120.00");
-  await expect(basSection).toContainText("$627.00");
-  await expect(basSection).toContainText("1A");
-  await expect(basSection).toContainText("1B");
-  await expect(basSection).toContainText("W1");
-  await expect(basSection).toContainText("W2");
 });

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { canManageCompany, getWorkspaceAccess } from "@/modules/auth/service";
 import { saveWorkspaceProfile } from "@/modules/setup/service";
+import { withQuarterQuery } from "@/modules/quarters/navigation";
 
 function text(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -17,9 +18,10 @@ function booleanOrNull(formData: FormData, key: string) {
 }
 
 export async function completeOnboardingAction(formData: FormData) {
+  const quarterId = text(formData, "quarterId") || undefined;
   const access = await getWorkspaceAccess();
   if (!canManageCompany(access.role)) {
-    redirect("/onboarding?error=admin-required");
+    redirect(withQuarterQuery("/onboarding?error=admin-required", quarterId));
   }
 
   try {
@@ -37,11 +39,12 @@ export async function completeOnboardingAction(formData: FormData) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to complete onboarding.";
-    redirect(`/onboarding?error=${encodeURIComponent(message)}`);
+    redirect(withQuarterQuery(`/onboarding?error=${encodeURIComponent(message)}`, quarterId));
   }
 
   revalidatePath("/");
   revalidatePath("/admin/setup");
   revalidatePath("/expenses");
-  redirect("/");
+  revalidatePath("/onboarding");
+  redirect(withQuarterQuery("/", quarterId));
 }

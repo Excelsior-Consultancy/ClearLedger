@@ -5,11 +5,13 @@ import {
   findOrCreateAuthUser,
   selectWorkspace
 } from "@/modules/auth/service";
+import { getLocalDevAuthBootstrap } from "@/modules/auth/dev-mode";
 import { writeDevIdentityCookie } from "@/modules/auth/provider";
+import { resolveRequestOrigin } from "@/modules/shared/appOrigin";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const appOrigin = url.origin;
+  const appOrigin = resolveRequestOrigin({ headers: request.headers });
 
   if (process.env.NODE_ENV === "production") {
     return NextResponse.redirect(new URL("/login?error=dev-auth-disabled", appOrigin));
@@ -22,12 +24,13 @@ export async function GET(request: NextRequest) {
     return response;
   }
 
-  const email = url.searchParams.get("email")?.trim().toLowerCase();
+  const localDevBootstrap = getLocalDevAuthBootstrap();
+  const email = url.searchParams.get("email")?.trim().toLowerCase() ?? localDevBootstrap?.email ?? "";
   if (!email) {
     return NextResponse.redirect(new URL("/login?error=missing-email", appOrigin));
   }
 
-  const name = url.searchParams.get("name")?.trim() || email.split("@")[0] || "Google user";
+  const name = url.searchParams.get("name")?.trim() || localDevBootstrap?.name || email.split("@")[0] || "Google user";
   const inviteToken = url.searchParams.get("inviteToken")?.trim() || "";
   const workspaceName = url.searchParams.get("workspaceName")?.trim() || "";
   const abn = url.searchParams.get("abn")?.trim() || "";
@@ -58,7 +61,7 @@ export async function GET(request: NextRequest) {
 
   if (user.memberships.length > 0) {
     const membership =
-      user.memberships.find((item) => item.workspaceId === url.searchParams.get("workspaceId")) ??
+      user.memberships.find((item) => item.workspaceId === url.searchParams.get("workspaceId") || item.workspaceId === localDevBootstrap?.workspaceId) ??
       user.memberships[0];
     await selectWorkspace(membership.workspaceId, response.cookies);
     return response;
