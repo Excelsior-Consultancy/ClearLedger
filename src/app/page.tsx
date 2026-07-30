@@ -66,7 +66,7 @@ export default async function HomePage({ searchParams }: { searchParams?: Search
               Built for Australian BAS
             </span>
             <h1 className="mt-5 text-4xl font-bold leading-tight tracking-tight text-zinc-50 sm:text-5xl">
-              Bookkeeping that keeps you <span className="text-emerald-300">BAS-ready</span>, every quarter.
+              Bookkeeping that keeps you <span className="text-emerald-300">BAS-ready</span> every quarter.
             </h1>
             <p className="mt-5 max-w-md text-base leading-relaxed text-zinc-400">
               Track income and expenses, validate GST as you go, and hand your accountant a finished
