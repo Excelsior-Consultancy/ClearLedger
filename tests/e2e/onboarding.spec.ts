@@ -30,7 +30,7 @@ function generateValidAbn(seed: number) {
 test("creates a new workspace, then keeps the user in onboarding until the profile is complete", async ({ page }) => {
   await loginAsFreshOwner(page);
 
-  await expect(page.getByRole("heading", { name: "Start a workspace" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Create your workspace" })).toBeVisible();
 
   const workspaceName = `Fresh Ledger ${Date.now()}`;
   const abn = generateValidAbn(Date.now() % 1_000_000_000);

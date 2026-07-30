@@ -31,7 +31,12 @@ export default async function LoginPage({ searchParams }: { searchParams?: Searc
       <Card className="w-full max-w-md shadow-2xl border border-white/10 bg-white/95">
         <CardContent className="p-8 space-y-6">
           <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-zinc-500">ClearLedger</p>
+            <Link
+              href="/"
+              className="text-xs uppercase tracking-[0.22em] text-zinc-500 hover:text-zinc-700"
+            >
+              ClearLedger
+            </Link>
             <h1 className="text-3xl font-semibold text-zinc-900 mt-2">Log in</h1>
             <p className="text-sm text-zinc-500 mt-1">Sign in with Google to access your companies.</p>
           </div>
