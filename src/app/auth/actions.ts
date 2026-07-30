@@ -80,7 +80,7 @@ export async function createCompanyAction(formData: FormData) {
     redirect("/login");
   }
   if (context.currentMembership) {
-    redirect("/");
+    redirect("/dashboard");
   }
 
   const companyName = text(formData, "companyName");
@@ -104,7 +104,7 @@ export async function createCompanyAction(formData: FormData) {
     redirect(`/signup?error=${encodeURIComponent(message)}`);
   }
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   redirect("/onboarding");
 }
 
@@ -131,16 +131,16 @@ export async function selectWorkspaceAction(formData: FormData) {
   const workspaceId = text(formData, "workspaceId");
   const quarterId = text(formData, "quarterId") || null;
   if (!workspaceId || !context.memberships.some((membership) => membership.workspaceId === workspaceId)) {
-    redirect("/");
+    redirect("/dashboard");
   }
 
   await selectWorkspace(workspaceId);
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/expenses");
   revalidatePath("/income");
   revalidatePath("/admin/setup");
   revalidatePath("/admin/users");
-  redirect(withQuarterQuery("/", quarterId));
+  redirect(withQuarterQuery("/dashboard", quarterId));
 }
 
 export async function createInviteAction(formData: FormData) {
@@ -180,7 +180,7 @@ export async function acceptInviteAction(formData: FormData) {
 
   const token = text(formData, "token");
   if (!token) {
-    redirect("/?error=missing-invite-token");
+    redirect("/dashboard?error=missing-invite-token");
   }
 
   try {
@@ -190,9 +190,9 @@ export async function acceptInviteAction(formData: FormData) {
     redirect(`/invite/${encodeURIComponent(token)}?error=${encodeURIComponent(message)}`);
   }
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/admin/users");
-  redirect("/");
+  redirect("/dashboard");
 }
 
 export async function updateMembershipRoleAction(formData: FormData) {
@@ -249,6 +249,6 @@ export async function addReviewCommentAction(formData: FormData) {
     body
   });
 
-  revalidatePath("/");
-  redirect("/?saved=comment");
+  revalidatePath("/dashboard");
+  redirect("/dashboard?saved=comment");
 }

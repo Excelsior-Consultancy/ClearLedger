@@ -8,7 +8,7 @@ import { selectWorkspaceAction, signOutAction } from "@/app/auth/actions";
 import { withQuarterQuery } from "@/modules/quarters/navigation";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Dashboard" },
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/income", label: "Income" },
   { href: "/expenses", label: "Expenses" },
   { href: "/payroll", label: "Payroll Lite", badge: "MVP" },
@@ -72,8 +72,7 @@ export function Sidebar({ currentRole, userName, memberships, selectedWorkspaceI
 
       <nav className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:flex lg:flex-1 lg:flex-col lg:gap-0.5">
         {NAV_ITEMS.map(({ href, label, badge }) => {
-          const isActive =
-            pathname === href || (href !== "/" && pathname.startsWith(href));
+          const isActive = pathname === href || pathname.startsWith(href);
           return (
             <Link
               key={href}

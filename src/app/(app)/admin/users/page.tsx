@@ -76,7 +76,7 @@ export default async function UsersPage({ searchParams }: { searchParams?: Searc
                 Only admins can manage company access.
               </p>
             </div>
-            <Link href={withQuarterQuery("/", selectedQuarterId)}><Button variant="outline" size="sm">Back to dashboard</Button></Link>
+            <Link href={withQuarterQuery("/dashboard", selectedQuarterId)}><Button variant="outline" size="sm">Back to dashboard</Button></Link>
           </CardContent>
         </Card>
       </div>
@@ -98,7 +98,7 @@ export default async function UsersPage({ searchParams }: { searchParams?: Searc
             Manage who can access this company. Roles are company-level only in the MVP.
           </p>
         </div>
-        <Link href={withQuarterQuery("/", selectedQuarterId)}><Button variant="outline" size="sm" className="w-full sm:w-auto">Back to dashboard</Button></Link>
+        <Link href={withQuarterQuery("/dashboard", selectedQuarterId)}><Button variant="outline" size="sm" className="w-full sm:w-auto">Back to dashboard</Button></Link>
       </div>
 
       {inviteLink && (

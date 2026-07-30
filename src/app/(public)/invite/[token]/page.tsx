@@ -60,7 +60,7 @@ export default async function InvitePage({ params, searchParams }: { params: Par
               <p className="text-sm text-zinc-600">
                 Ask the company admin to create a new invite for this email address.
               </p>
-              <Link href={auth ? "/" : `/signup?invite=${encodeURIComponent(token)}`}>
+              <Link href={auth ? "/dashboard" : `/signup?invite=${encodeURIComponent(token)}`}>
                 <Button className="w-full" variant="outline">
                   {auth ? "Back to dashboard" : "Continue with Google"}
                 </Button>

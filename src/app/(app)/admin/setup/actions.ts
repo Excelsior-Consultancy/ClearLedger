@@ -82,7 +82,7 @@ export async function updateCompanySetup(formData: FormData) {
     redirect(withQuarterQuery(`/admin/setup?error=${encodeURIComponent(message)}`, quarterId));
   }
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/admin/setup");
   revalidatePath("/expenses");
   redirect(withQuarterQuery("/admin/setup?saved=company-profile", quarterId));
@@ -105,7 +105,7 @@ export async function addBankAccount(formData: FormData) {
   });
 
   revalidatePath("/admin/setup");
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/expenses");
 }
 
@@ -126,7 +126,7 @@ export async function setBankAccountActive(formData: FormData) {
   });
 
   revalidatePath("/admin/setup");
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/expenses");
 }
 
@@ -147,7 +147,7 @@ export async function addCategory(formData: FormData) {
   });
 
   revalidatePath("/admin/setup");
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/expenses");
 }
 
@@ -168,7 +168,7 @@ export async function setCategoryActive(formData: FormData) {
   });
 
   revalidatePath("/admin/setup");
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/expenses");
 }
 
@@ -334,7 +334,7 @@ export async function toggleQuarterLock(formData: FormData) {
   });
 
   revalidatePath("/admin/setup");
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/expenses");
 
   redirect(withQuarterQuery("/admin/setup", quarterId));

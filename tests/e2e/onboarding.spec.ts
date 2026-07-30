@@ -53,11 +53,11 @@ test("creates a new workspace, then keeps the user in onboarding until the profi
   await page.locator('input[name="invoicePrefix"]').fill("FRS");
   await page.getByRole("button", { name: "Save company profile" }).click();
 
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
 
   await page.goto("/onboarding");
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
 });
 
 test("blocks duplicate ABNs and tells the user to join the existing workspace", async ({ page }) => {

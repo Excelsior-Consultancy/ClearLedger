@@ -82,7 +82,7 @@ export async function addPayRun(formData: FormData) {
   });
 
   const quarterId = await getQuarterIdForPayRun(access.workspaceId, result.periodStart);
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/payroll");
   revalidatePath("/bas");
   revalidatePath("/ca-pack");
@@ -104,7 +104,7 @@ export async function finalizePayRun(formData: FormData) {
 
   const quarterId = await getQuarterIdForPayRun(access.workspaceId, payRun.periodStart);
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/payroll");
   revalidatePath("/bas");
   revalidatePath("/ca-pack");
@@ -133,7 +133,7 @@ export async function updatePayRun(formData: FormData) {
 
   const quarterId = await getQuarterIdForPayRun(access.workspaceId, result.periodStart);
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/payroll");
   revalidatePath("/bas");
   revalidatePath("/ca-pack");
@@ -155,7 +155,7 @@ export async function markReadyForReview(formData: FormData) {
 
   const quarterId = await getQuarterIdForPayRun(access.workspaceId, result.periodStart);
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/payroll");
   revalidatePath("/bas");
   revalidatePath("/ca-pack");
@@ -178,7 +178,7 @@ export async function createCorrection(formData: FormData) {
 
   const quarterId = await getQuarterIdForPayRun(access.workspaceId, result.periodStart);
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/payroll");
   revalidatePath("/bas");
   revalidatePath("/ca-pack");
@@ -201,7 +201,7 @@ export async function createReversal(formData: FormData) {
 
   const quarterId = await getQuarterIdForPayRun(access.workspaceId, result.periodStart);
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/payroll");
   revalidatePath("/bas");
   revalidatePath("/ca-pack");
@@ -226,7 +226,7 @@ export async function submitTestPayroll(formData: FormData) {
   });
   const quarterId = payRun ? await getQuarterIdForPayRun(access.workspaceId, payRun.periodStart) : undefined;
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/payroll");
   revalidatePath("/bas");
   revalidatePath("/ca-pack");

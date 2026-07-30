@@ -90,7 +90,7 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Sea
               Manage employees, pay runs, corrections, and non-prod STP prep in one place.
             </p>
           </div>
-          <Link href={withQuarterQuery("/", selectedQuarterId)}>
+          <Link href={withQuarterQuery("/dashboard", selectedQuarterId)}>
             <Button variant="outline" size="sm" className="w-full sm:w-auto">Back to dashboard</Button>
           </Link>
         </div>

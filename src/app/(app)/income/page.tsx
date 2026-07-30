@@ -58,7 +58,7 @@ export default async function IncomePage({ searchParams }: { searchParams?: Sear
             Create invoices, record payment, and keep BAS source records traceable by quarter and FY.
           </p>
         </div>
-        <Link href={withQuarterQuery("/", selectedQuarterId)} className="text-sm text-blue-700 hover:underline">
+        <Link href={withQuarterQuery("/dashboard", selectedQuarterId)} className="text-sm text-blue-700 hover:underline">
           Back to dashboard
         </Link>
       </div>

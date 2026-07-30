@@ -35,12 +35,12 @@ export async function GET(request: NextRequest) {
     }
 
     const user = await findOrCreateAuthUser(identity);
-    const response = NextResponse.redirect(new URL("/", appOrigin));
+    const response = NextResponse.redirect(new URL("/dashboard", appOrigin));
 
     if (pending.inviteToken) {
       await acceptInvitation(pending.inviteToken, user.id, response.cookies);
       await clearPendingGoogleAuth(response.cookies);
-      response.headers.set("location", new URL("/", url).toString());
+      response.headers.set("location", new URL("/dashboard", url).toString());
       return response;
     }
 

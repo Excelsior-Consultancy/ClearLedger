@@ -10,8 +10,8 @@ export async function loginAsOwner(page: Page) {
   await page.goto(
     `/api/dev-auth?email=${encodeURIComponent(E2E_USER.email)}&name=Business%20Owner&workspaceId=excelsior`
   );
-  await page.goto("/");
-  await expect(page).toHaveURL(/\/$/);
+  await page.goto("/dashboard");
+  await expect(page).toHaveURL(/\/dashboard$/);
 }
 
 export async function loginAsFreshOwner(page: Page) {

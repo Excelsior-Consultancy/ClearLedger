@@ -70,7 +70,7 @@ export async function addClient(formData: FormData) {
     }
   });
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/income");
   revalidatePath("/bas");
   revalidatePath("/ca-pack");
@@ -121,7 +121,7 @@ export async function createInvoice(formData: FormData) {
 
   const quarterId = await getQuarterIdForDate(access.workspaceId, issueDate);
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/income");
   revalidatePath("/bas");
   revalidatePath("/ca-pack");
@@ -163,7 +163,7 @@ export async function recordInvoicePayment(formData: FormData) {
 
   const quarterId = await getQuarterIdForDate(access.workspaceId, invoice.issueDate);
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/income");
   revalidatePath("/bas");
   revalidatePath("/ca-pack");

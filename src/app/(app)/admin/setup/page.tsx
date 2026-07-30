@@ -77,7 +77,7 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
               <h1 className="text-2xl font-semibold text-zinc-900 mt-1">Company setup</h1>
               <p className="text-sm text-zinc-500 mt-1">Only admins can edit company setup.</p>
             </div>
-            <Link href={withQuarterQuery("/", quarterId)}>
+            <Link href={withQuarterQuery("/dashboard", quarterId)}>
               <Button variant="outline" size="sm">
                 Back to dashboard
               </Button>
@@ -141,7 +141,7 @@ export default async function SetupPage({ searchParams }: { searchParams?: Searc
                 The financial year start month sets the quarter boundaries used across the app.
               </p>
             </div>
-            <Link href={withQuarterQuery("/", selectedQuarterId)}>
+            <Link href={withQuarterQuery("/dashboard", selectedQuarterId)}>
               <Button variant="outline" size="sm" className="w-full sm:w-auto">
                 Back to dashboard
               </Button>

@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     name,
     emailVerified: true
   });
-  const response = NextResponse.redirect(new URL("/", appOrigin));
+  const response = NextResponse.redirect(new URL("/dashboard", appOrigin));
   await writeDevIdentityCookie(
     {
       provider: "supabase",

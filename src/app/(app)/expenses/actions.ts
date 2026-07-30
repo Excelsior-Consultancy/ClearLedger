@@ -80,7 +80,7 @@ export async function addExpense(formData: FormData) {
     redirect(`/expenses?error=${validationError}`);
   }
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/expenses");
   redirect("/expenses?saved=created");
 }
@@ -108,7 +108,7 @@ export async function editExpense(formData: FormData) {
     redirect(`/expenses/${id}/edit?error=${validationError}`);
   }
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/expenses");
   redirect("/expenses?saved=updated");
 }

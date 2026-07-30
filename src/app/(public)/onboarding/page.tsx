@@ -78,7 +78,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams?: 
   });
 
   if (readiness.complete) {
-    redirect(withQuarterQuery("/", quarterId));
+    redirect(withQuarterQuery("/dashboard", quarterId));
   }
 
   const canEdit = canManageCompany(access.role);

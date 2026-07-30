@@ -42,9 +42,9 @@ export async function completeOnboardingAction(formData: FormData) {
     redirect(withQuarterQuery(`/onboarding?error=${encodeURIComponent(message)}`, quarterId));
   }
 
-  revalidatePath("/");
+  revalidatePath("/dashboard");
   revalidatePath("/admin/setup");
   revalidatePath("/expenses");
   revalidatePath("/onboarding");
-  redirect(withQuarterQuery("/", quarterId));
+  redirect(withQuarterQuery("/dashboard", quarterId));
 }
