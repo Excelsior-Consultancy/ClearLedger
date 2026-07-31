@@ -27,3 +27,21 @@ test("keeps readiness traceable and routes the primary action to a real workflow
   await page.getByTestId("dashboard-primary-action").click();
   await expect(page).toHaveURL(/\/income\?quarterId=2026-04-01/);
 });
+
+test("CA Pack export is reachable and downloadable from the dashboard", async ({ page }) => {
+  await loginAsOwner(page);
+  await page.goto("/");
+
+  const downloadLink = page.getByTestId("ca-pack-download");
+  await expect(downloadLink).toBeVisible();
+
+  const href = await downloadLink.getAttribute("href");
+  expect(href).toContain("/api/exports/ca-pack");
+
+  const response = await page.request.get(href!);
+  expect(response.status()).toBe(200);
+  expect(response.headers()["content-type"]).toBe(
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  );
+  expect(response.headers()["content-disposition"]).toContain(".xlsx");
+});
