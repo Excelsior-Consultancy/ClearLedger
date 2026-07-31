@@ -523,6 +523,21 @@ export default async function Home({ searchParams }: { searchParams?: SearchPara
               <p className="mt-3 text-xs text-zinc-500">
                 CA Pack readiness stays grounded in the same source records and quarter state that drive the dashboard.
               </p>
+              <div className="mt-4">
+                {caPack.state === "blocked" ? (
+                  <span title="Clear the blockers above before exporting the CA Pack." data-testid="ca-pack-download">
+                    <Button variant="primary" size="sm" isDisabled>
+                      Download CA Pack
+                    </Button>
+                  </span>
+                ) : (
+                  <Link href={withQuarterQuery("/api/exports/ca-pack", selectedQuarterId)} data-testid="ca-pack-download">
+                    <Button variant="primary" size="sm">
+                      Download CA Pack
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </CardContent>
